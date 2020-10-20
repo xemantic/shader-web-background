@@ -10,7 +10,7 @@ repositories {
   jcenter()
 }
 
-task("execute", JavaExec::class) {
+task("minify", JavaExec::class) {
   group = "minify"
   main = "com.google.javascript.jscomp.CommandLineRunner"
   args = listOf(
