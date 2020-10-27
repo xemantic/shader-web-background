@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>How to add mouse uniforms?</title>
+  <script type="x-shader/x-fragment" id="image-shader">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform float T;
+    uniform vec2 R;
+    uniform float D;
+    uniform vec2 iMouse;
+
+    #define iTime T
+    #define iResolution R
+    #define iMinDimension D
+
+    const float SPEED = 4.;
+    const float LENGTH = 10.;
+
+    void main() {
+      vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
+      vec2 mouse = (iMouse * 2. - iResolution) / iMinDimension;
+      float dist = distance(st, mouse);
+      float luma = (sin(dist * LENGTH - iTime * SPEED) + 1.) / 2.;
+      gl_FragColor = vec4(vec3(luma), 1.0);
+    }
+  </script>
+  <script src="../shader-web-background.min.js"></script>
+  <script>
+    // start in the center
+    var mouseX = window.innerWidth / 2;
+    var mouseY = window.innerHeight / 2;
+
+    document.addEventListener("mousemove", (event) => {
+       // shader gl_FragCoord coordinates start in the middle of the pixel
+       // so we need to accommodate for that by removing half.
+       // also vertical coordinate needs to be flipped.
+       mouseX = event.offsetX - .5;
+       mouseY = window.innerHeight - event.offsetY - .5;
+    });
+
+    shaderWebBackground.shadeOnLoad({
+      imageShader: "image-shader",
+      uniforms: {
+        "iMouse": (gl, loc) => gl.uniform2f(loc, mouseX, mouseY)
+      }
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>
