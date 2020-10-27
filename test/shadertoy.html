@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>How to wrap Shadertoy code</title>
+  <script type="x-shader/x-fragment" id="shadertoy-example">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform vec2 R;
+    uniform float T;
+
+    #define iResolution R
+    #define iTime T
+
+
+    // paste your shadertoy code here: start
+    void mainImage( out vec4 fragColor, in vec2 fragCoord )
+    {
+      // Normalized pixel coordinates (from 0 to 1)
+      vec2 uv = fragCoord/iResolution.xy;
+
+      // Time varying pixel color
+      vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
+
+      // Output to screen
+      fragColor = vec4(col,1.0);
+    }
+    // paste your shadertoy code here: end
+
+
+    void main() {
+      mainImage(gl_FragColor, gl_FragCoord.xy);
+    }
+  </script>
+  <script src="../shader-web-background.min.js"></script>
+  <script>
+    shaderWebBackground.shadeOnLoad({ imageShader: "shadertoy-example" });
+  </script>
+</head>
+<body>
+</body>
+</html>
