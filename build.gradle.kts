@@ -1,4 +1,4 @@
-val closureCompilerVersion = "v20201006"
+val closureCompilerVersion = "v20201102"
 
 plugins {
   java
@@ -20,7 +20,24 @@ task("compileJs", JavaExec::class) {
       "--js", "src/main/js/*.js",
       "--js_output_file", "dist/shader-web-background.min.js",
       "--create_source_map", "dist/shader-web-background.min.js.map",
-      "--output_wrapper", "const shaderWebBackground={};(function(){%output%})()\n//# sourceMappingURL=shader-web-background.min.js.map"
+      "--language_in", "ECMASCRIPT6",
+      "--language_out", "ECMASCRIPT6",
+      "--output_wrapper", "const shaderWebBackground={};(()=>{%output%})()\n//# sourceMappingURL=shader-web-background.min.js.map",
+      "--jscomp_warning=accessControls",
+      "--jscomp_warning=checkRegExp",
+      "--jscomp_warning=constantProperty",
+      "--jscomp_warning=const",
+      "--jscomp_warning=deprecatedAnnotations",
+      "--jscomp_warning=deprecated",
+      "--jscomp_warning=missingProperties",
+      "--jscomp_warning=missingReturn",
+      "--jscomp_warning=reportUnknownTypes",
+      "--jscomp_warning=strictCheckTypes",
+      "--jscomp_warning=typeInvalidation",
+      "--jscomp_warning=undefinedNames",
+      "--jscomp_warning=unusedLocalVariables",
+      "--jscomp_warning=unusedPrivateMembers",
+      "--jscomp_warning=visibility"
   )
   classpath = sourceSets["main"].runtimeClasspath
 }
