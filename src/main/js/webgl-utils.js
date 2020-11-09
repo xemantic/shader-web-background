@@ -20,8 +20,16 @@ class WebGlStrategy {
    */
   setUpTexture(width, height) {}
 
+  /**
+   * @param {!string} extension
+   * @return {!Object}
+   * @suppress {reportUnknownTypes}
+   */
   getExtension(extension) {
-    return this.check(this.gl.getExtension(extension), extension + " extension is not supported");
+    return this.check(
+      this.gl.getExtension(extension),
+      extension + " extension is not supported"
+    );
   }
 
 }
@@ -30,12 +38,14 @@ class WebGl1Strategy extends WebGlStrategy {
 
   /**
    * @param {!WebGLRenderingContext} gl
-   * @param {!function(T, !string):T} check
+   * @param {!function(?T, !string):!T} check
    * @template T
    */
   constructor(gl, check) {
     super(gl, check);
-    this.ext = this.getExtension("OES_texture_half_float");
+    // TODO make double step checking
+    this.ext = /** @type {OES_texture_half_float} */
+      (this.getExtension("OES_texture_half_float"));
     this.getExtension("OES_texture_half_float_linear");
   }
 
@@ -85,18 +95,19 @@ class GlWrapper {
     this.glErrorFactory = glErrorFactory;
 
     /**
-     * @param {T} condition
+     * @param {?T} condition
      * @param {!string} message
      * @return {!T}
      * @template T
+     * @suppress {reportUnknownTypes}
      */
     const check = (condition, message) => {
       if (!condition) throw glErrorFactory(message);
-      return /** @type {T} */ (condition);
+      return (condition);
     };
 
     const gl = /** @type {!WebGLRenderingContext} */ (check(
-      (canvas.getContext("webgl2", contextAttrs)
+      (canvas.getContext("webgl", contextAttrs)
         || canvas.getContext("webgl", contextAttrs)),
       "webgl context not supported on supplied canvas element: " + canvas
     ));
@@ -112,13 +123,13 @@ class GlWrapper {
     this.context = {
       buffers: {}
     };
-    this.buffers = [];
   }
 
   /**
    * @param {!string} id
    * @param {!number} type
    * @param {!string} source
+   * @return {!WebGLShader}
    */
   loadShader(id, type, source) {
     const gl = this.gl;
@@ -158,6 +169,7 @@ class GlWrapper {
    * @param {!string} vertexAttribute
    * @param {!Uniforms} uniforms
    * @param {!boolean} buffered
+   * @return {!ProgramWrapper}
    */
   wrapProgram(id, program, vertexAttribute, uniforms, buffered) {
     let wrapper;
@@ -190,6 +202,7 @@ class GlWrapper {
     gl.enableVertexAttribArray(vertexAttrLocation);
     gl.vertexAttribPointer(vertexAttrLocation, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.disableVertexAttribArray(vertexAttrLocation);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
@@ -201,7 +214,7 @@ class ProgramWrapper {
    * @param {!WebGLRenderingContext} gl
    * @param {!string} id
    * @param {!WebGLProgram} program
-   * @param {!Object<string, !function(!WebGLRenderingContext, !WebGLUniformLocation, Context=)>} uniforms
+   * @param {!Uniforms} uniforms
    * @param {!string} vertexAttribute
    * @param {!Context} context
    */
@@ -209,6 +222,15 @@ class ProgramWrapper {
     this.gl = gl;
     this.id = id;
     this.program = program;
+
+    /**
+     * @typedef {{
+     *   location: !WebGLUniformLocation,
+     *   setter: !UniformSetter
+     * }}
+     */
+    var UniformEntry;
+    /** @type {!Object<string, !UniformEntry>} */
     this.uniforms = {};
 
     for (const name in uniforms) {
@@ -223,6 +245,7 @@ class ProgramWrapper {
       }
     }
 
+    /** @type {!number} */
     this.vertex = gl.getAttribLocation(program, vertexAttribute);
     this.context = context;
   }
@@ -233,14 +256,23 @@ class ProgramWrapper {
    */
   init(width, height) { }
 
-  // TODO type it
+  /**
+   * @param {!function()} drawer
+   */
   draw(drawer) {
-    this.gl.useProgram(this.program);
+    const gl = this.gl;
+    gl.useProgram(this.program);
     for (const name in this.uniforms) {
       const uniform = this.uniforms[name];
-      uniform.setter(this.gl, uniform.location, this.context);
+      uniform.setter(gl, uniform.location, this.context);
     }
+
     drawer();
+
+    for (let i = 0; i < 4; i++) {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
   }
 
   afterFrame() {}
@@ -272,6 +304,9 @@ class BufferedProgramWrapper extends ProgramWrapper {
     this.buffer.init(width, height);
   }
 
+  /**
+   * @param {!function()} drawer
+   */
   draw(drawer) {
     super.draw(() => this.buffer.draw(drawer));
   }
@@ -292,8 +327,10 @@ class DoubleBuffer {
     this.fbo = gl.createFramebuffer();
     this.gl = gl;
     this.strategy = strategy;
-    this.inTexture = null;
-    this.outTexture = null;
+    /** @type {WebGLTexture} */
+    this.in = null;
+    /** @type {WebGLTexture} */
+    this.out = null;
   }
 
   /**
@@ -303,13 +340,14 @@ class DoubleBuffer {
   init(width, height) {
     const gl = this.gl;
     this.deleteTextures();
-    this.inTexture = this.createTexture(width, height);
-    this.outTexture = this.createTexture(width, height);
+    this.in = this.createTexture(width, height);
+    this.out = this.createTexture(width, height);
   }
 
   /**
    * @param {!number} width
    * @param {!number} height
+   * @return {!WebGLTexture}
    */
   createTexture(width, height) {
     const gl = this.gl;
@@ -324,43 +362,49 @@ class DoubleBuffer {
     return texture;
   }
 
-  draw(call) {
+  /**
+   * @param {!function()} drawer
+   */
+  draw(drawer) {
     const gl = this.gl;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.out);
+
     gl.framebufferTexture2D(
-      gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.outTexture, 0
+      gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.out, 0
     );
 
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.inTexture);
-    //gl.uniform1i("T0", 0); // TODO why it's not screeming?
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
-    call();
+    drawer();
 
+    gl.bindTexture(gl.TEXTURE_2D, null);
     // TODO do we need to inactivete texture?
     gl.framebufferTexture2D(
       gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0
     );
-    gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+//    gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   swapTextures() {
-    const tmp = this.outTexture;
-    this.outTexture = this.inTexture;
-    this.inTexture = tmp;
+    const tmp = this.out;
+    this.out = this.in;
+    this.in = tmp;
   }
 
   deleteTextures() {
-    this.gl.deleteTexture(this.inTexture);
-    this.gl.deleteTexture(this.outTexture);
+    if (this.in) this.gl.deleteTexture(this.in);
+    if (this.out) this.gl.deleteTexture(this.out);
   }
 
   release() {
     const gl = this.gl;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-    // TODO do we nned to bind framebuffer for this?
     this.deleteTextures();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.deleteFramebuffer(this.fbo)

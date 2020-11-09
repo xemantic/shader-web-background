@@ -9,22 +9,29 @@ const shaderWebBackground = {};
 
 /**
  * @typedef {{
- *   textureIn:  !WebGLTexture,
- *   textureOut: !WebGLTexture
+ *   in:  !WebGLTexture,
+ *   out: !WebGLTexture
  * }}
  */
 var Buffer;
 
 /**
  * @typedef {{
- *   buffers: (!Object<string, !Buffer>)
+ *   buffers: !Object<string, !Buffer>
  * }}
  */
 var Context;
 
 /**
  * @typedef {
- *   Object<string, !function(!WebGLRenderingContext, !WebGLUniformLocation, Context=)>
+ *   function(!WebGLRenderingContext, !WebGLUniformLocation, Context=)
+ * }
+ */
+var UniformSetter;
+
+/**
+ * @typedef {
+ *   Object<string, !UniformSetter>
  * }
  */
 var Uniforms;
@@ -48,18 +55,12 @@ var Config;
 /**
  * Indicates misconfiguration.
  */
-shaderWebBackground.ConfigError = class extends Error {
-  /** @param {!string} message */
-  constructor(message) {}
-}
+shaderWebBackground.ConfigError = class extends Error {}
 
 /**
  * Indicates WebGL problems.
  */
-shaderWebBackground.GlError = class extends Error {
-  /** @param {!string} message */
-  constructor(message) {}
-}
+shaderWebBackground.GlError = class extends Error {}
 
 /**
  * Will start shading.
@@ -68,7 +69,7 @@ shaderWebBackground.GlError = class extends Error {
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
-shaderWebBackground.shade = (config) => {}
+shaderWebBackground.shade = function(config) {}
 
 /**
  * Will start shading when the page is loaded.
@@ -77,4 +78,4 @@ shaderWebBackground.shade = (config) => {}
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
-shaderWebBackground.shadeOnLoad = (config) => {}
+shaderWebBackground.shadeOnLoad = function(config) {}

@@ -7,7 +7,7 @@ const
   VERTEX_SHADER = `attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}`;
 
 /**
- * @param {?} condition
+ * @param {*} condition
  * @param {!string} message
  */
 function check(condition, message) {
@@ -15,12 +15,12 @@ function check(condition, message) {
 }
 
 /**
- * @param {?} canvas
+ * @param {*} canvas
  * @return {!HTMLCanvasElement}
  */
 function checkIfCanvas(canvas) {
   check(canvas instanceof HTMLCanvasElement, "config.canvas must be instance of canvas");
-  return canvas;
+  return /** @type {!HTMLCanvasElement} */ (canvas);
 }
 
 /**
@@ -60,6 +60,11 @@ function updateSize(canvas) {
   canvas.height = canvas.clientHeight;
 }
 
+/**
+ * @param {!HTMLCanvasElement} canvas
+ * @param {!Object<string, !string>} sources
+ * @param {!Object<string, !Shader>} shaders
+ */
 function doShade(canvas, sources, shaders) {
 
   const contextAttrs = {
@@ -78,15 +83,20 @@ function doShade(canvas, sources, shaders) {
   let time = 0;
   let minDimension = 0;
 
-  const defaultUniforms = {
+  const defaultUniforms = ({
+    /** @type {!UniformSetter} */
     "R": (gl, loc) => gl.uniform2f(loc, canvas.width, canvas.height),
+    /** @type {!UniformSetter} */
     "T": (gl, loc) => gl.uniform1f(loc, time),
+    /** @type {!UniformSetter} */
     "F": (gl, loc) => gl.uniform1i(loc, frame),
+    /** @type {!UniformSetter} */
     "D": (gl, loc) => gl.uniform1f(loc, minDimension)
-  };
+  });
 
   const sourceIds = Object.keys(sources);
   const imageIndex = sourceIds.length - 1;
+  /** @type {Array<!ProgramWrapper>} */
   const programs = sourceIds.map((id, index) => {
     const program = glWrapper.initProgram(id, VERTEX_SHADER, sources[id]);
     const uniforms = Object.assign(
@@ -112,9 +122,9 @@ function doShade(canvas, sources, shaders) {
       glWrapper.updateViewportSize();
       minDimension = Math.min(canvas.width, canvas.height);
       frame = 0;
-      programs.forEach(program => {
-        program.init(canvas.width, canvas.height);
-      });
+      programs.forEach(program =>
+        program.init(canvas.width, canvas.height)
+      );
     }
 
     programs.forEach(program => {
@@ -129,37 +139,21 @@ function doShade(canvas, sources, shaders) {
   animate();
 };
 
-/** @suppress {checkTypes} */
-shaderWebBackground.ConfigError = class extends Error {
-  /** @param {!string} message */
-  constructor(message) {
-    super(message);
-    this.name = "shaderWebBackground.GlConfigError";
-  }
-};
-
-/** @suppress {checkTypes} */
-shaderWebBackground.GlError = class extends Error {
-  /** @param {!string} message */
-  constructor(message) {
-    super(message);
-    this.name = "shaderWebBackground.GlError";
-  }
-};
-
 /**
  * @param {Config=} config
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
-shaderWebBackground.shade = (config) => {
+function shade(config) {
   config = config || {};
   const canvas = (config.canvas)
     ? checkIfCanvas(config.canvas)
     : newBackgroundCanvas();
 
-  const scripts = document.head.querySelectorAll(
-    "script[type='" + SHADER_SCRIPT_TYPE + "']"
+  const scripts = /** @type {NodeList<HTMLScriptElement>} */ (
+    document.head.querySelectorAll(
+      "script[type='" + SHADER_SCRIPT_TYPE + "']"
+    )
   );
   check(
     scripts.length > 0,
@@ -169,18 +163,25 @@ shaderWebBackground.shade = (config) => {
   scripts.forEach(script =>
     check(script.id, "Each shader <script> needs unique id attribute")
   );
-  const sources = Array.from(scripts).reduce((map, script) => {
+
+  /**
+   * @type {function(!Object<string, !string>, !HTMLScriptElement):
+   *         !Object<string, !string>
+   * }
+   */
+  const reducer = (map, script) => {
     map[script.id] = script.text.trim();
     return map;
-  }, {});
+  }
+
+  /** @type {!Object<string, !string>} */
+  const sources = Array.from(scripts).reduce(reducer, {});
 
   try {
-    doShade(
-      canvas, sources, config.shaders || {}
-    );
-  } catch (e) {
+    doShade(canvas, sources, config.shaders || {});
+  } catch (/** @type {!Error} */ e) {
     if (config.fallback) {
-      console.log(e);
+      console.log("Could not load shaders, adding fallback class to canvas" + e);
       canvas.classList.add(FALLBACK_CLASS);
     } else {
       throw e;
@@ -193,7 +194,30 @@ shaderWebBackground.shade = (config) => {
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
-shaderWebBackground.shadeOnLoad = (config) =>
-  window.addEventListener("load", () => shaderWebBackground.shade(config));
+function shadeOnLoad(config) {
+  window.addEventListener("load", () => shade(config));
+}
 
-// API: end
+/** @suppress {checkTypes} to redefine the type declared in externs */
+shaderWebBackground.ConfigError = class extends Error {
+  /** @param {!string} message */
+  constructor(message) {
+    super(message);
+    this.name = "shaderWebBackground.GlConfigError";
+  }
+};
+
+/** @suppress {checkTypes} to redefine the type declared in externs */
+shaderWebBackground.GlError = class extends Error {
+  /** @param {!string} message */
+  constructor(message) {
+    super(message);
+    this.name = "shaderWebBackground.GlError";
+  }
+};
+
+/** @suppress {missingSourcesWarnings} to redefine the function declared in externs */
+shaderWebBackground.shade = shade;
+
+/** @suppress {missingSourcesWarnings} to redefine the function declared in externs */
+shaderWebBackground.shadeOnLoad = shadeOnLoad;
