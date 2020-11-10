@@ -338,7 +338,6 @@ class DoubleBuffer {
    * @param {!number} height
    */
   init(width, height) {
-    const gl = this.gl;
     this.deleteTextures();
     this.in = this.createTexture(width, height);
     this.out = this.createTexture(width, height);
