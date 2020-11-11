@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Error: no shader id</title>
+  <script type="x-shader/x-fragment">
+    // ...
+  </script>
+  <script src="../../../../dist/shader-web-background.min.js"></script>
+  <script>
+    shaderWebBackground.shadeOnLoad();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>
+      Error: no shader id specified in <code>&lt;script&gt;</code> tag -
+      should trow <code>shaderWebBackground.ConfigError</code>
+    </h1>
+  </header>
+</body>
+</html>
