@@ -40,4 +40,22 @@ task("compileJs", JavaExec::class) {
       "--jscomp_warning=visibility"
   )
   classpath = sourceSets["main"].runtimeClasspath
+
+  val charset = Charsets.UTF_8
+  val libOccurrence =
+      "(?s)const shaderWebBackground.*shader-web-background\\.min\\.js\\.map"
+          .toRegex()
+  val lib = File("dist/shader-web-background.min.js")
+      .readText(charset)
+  fun transformHtml(html: String, lib: String) =
+      html.replaceFirst(libOccurrence, lib)
+  fun updateEmbeddedLib(path: String) = File(path).let { file ->
+    file.writeText(transformHtml(file.readText(charset), lib), charset)
+  }
+
+  doLast {
+    updateEmbeddedLib("index.html")
+    updateEmbeddedLib("src/test/html/minimal-embedded.html")
+  }
+
 }
