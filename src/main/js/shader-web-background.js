@@ -127,9 +127,9 @@ function doShade(canvas, sources, shaders) {
       );
     }
 
-    programs.forEach(program => {
-      program.draw(() => glWrapper.drawQuad(program.vertex));
-    });
+    programs.forEach(program =>
+      program.draw(() => glWrapper.drawQuad(program.vertex))
+    );
 
     frame++;
     programs.forEach(program => program.afterFrame());
@@ -203,7 +203,7 @@ shaderWebBackground.ConfigError = class extends Error {
   /** @param {!string} message */
   constructor(message) {
     super(message);
-    this.name = "shaderWebBackground.GlConfigError";
+    this.name = "shaderWebBackground.ConfigError";
   }
 };
 

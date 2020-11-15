@@ -120,9 +120,7 @@ class GlWrapper {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(QUAD_POSITIONS), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     this.quad = positionBuffer;
-    this.context = {
-      buffers: {}
-    };
+    this.buffers = {};
   }
 
   /**
@@ -172,20 +170,12 @@ class GlWrapper {
    * @return {!ProgramWrapper}
    */
   wrapProgram(id, program, vertexAttribute, uniforms, buffered) {
-    let wrapper;
+    let buffer = null;
     if (buffered) {
-      const buffer = new DoubleBuffer(this.gl, this.strategy);
-      this.context.buffers[id] = buffer;
-      wrapper = new BufferedProgramWrapper(
-        // TODO should buffer be created internally and exposed?
-        this.gl, id, program, uniforms, vertexAttribute, this.context, buffer
-      );
-    } else {
-      wrapper = new ProgramWrapper(
-        this.gl, id, program, uniforms, vertexAttribute, this.context
-      );
+      buffer = new DoubleBuffer(this.gl, this.strategy);
+      this.buffers[id] = buffer;
     }
-    return wrapper;
+    return new ProgramWrapper(this.gl, id, program, vertexAttribute, uniforms, buffer, this.buffers);
   }
 
   updateViewportSize() {
@@ -214,14 +204,17 @@ class ProgramWrapper {
    * @param {!WebGLRenderingContext} gl
    * @param {!string} id
    * @param {!WebGLProgram} program
-   * @param {!Uniforms} uniforms
    * @param {!string} vertexAttribute
-   * @param {!Context} context
+   * @param {!Uniforms} uniforms
+   * @param {?DoubleBuffer} buffer
+   * @param {!Object<string, !DoubleBuffer>} buffers
    */
-  constructor(gl, id, program, uniforms, vertexAttribute, context) {
+  constructor(gl, id, program, vertexAttribute, uniforms, buffer, buffers) {
     this.gl = gl;
     this.id = id;
     this.program = program;
+    /** @type {!number} */ // TODO do I need type here?
+    this.vertex = gl.getAttribLocation(program, vertexAttribute);
 
     /**
      * @typedef {{
@@ -245,16 +238,34 @@ class ProgramWrapper {
       }
     }
 
-    /** @type {!number} */
-    this.vertex = gl.getAttribLocation(program, vertexAttribute);
-    this.context = context;
+    this.buffer = buffer;
+
+    this.textureCount = 0;
+    this.context = {
+      buffers: buffers,
+      texture: (
+        /** @type {!WebGLUniformLocation} */ loc,
+        /** @type {!WebGLTexture|!Buffer} */ texture
+      ) => {
+        const tex = (texture instanceof DoubleBuffer)
+          ? ((texture === this.buffer) ? texture.in : texture.out)
+          : /** @type {!WebGLTexture} */ (texture);
+        gl.activeTexture(gl.TEXTURE0 + this.textureCount);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(loc, this.textureCount++);
+      }
+    };
   }
 
   /**
    * @param {!number} width
    * @param {!number} height
    */
-  init(width, height) { }
+  init(width, height) {
+    if (this.buffer) {
+      this.buffer.init(width, height);
+    }
+  }
 
   /**
    * @param {!function()} drawer
@@ -267,52 +278,23 @@ class ProgramWrapper {
       uniform.setter(gl, uniform.location, this.context);
     }
 
-    drawer();
+    if (this.buffer) {
+      this.buffer.draw(drawer);
+    } else {
+      drawer();
+    }
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < this.textureCount; i++) {
       gl.activeTexture(gl.TEXTURE0 + i);
       gl.bindTexture(gl.TEXTURE_2D, null);
     }
-  }
-
-  afterFrame() {}
-
-}
-
-class BufferedProgramWrapper extends ProgramWrapper {
-
-  /**
-   * @param {!WebGLRenderingContext} gl
-   * @param {!string} id
-   * @param {!WebGLProgram} program
-   * @param {!Uniforms} uniforms
-   * @param {!string} vertexAttribute
-   * @param {!Context} context
-   * @param {!DoubleBuffer} buffer
-   */
-  constructor(gl, id, program, uniforms, vertexAttribute, context, buffer) {
-    super(gl, id, program, uniforms, vertexAttribute, context);
-    this.buffer = buffer;
-  }
-
-  /**
-   * @param {!number} width
-   * @param {!number} height
-   */
-  init(width, height) {
-    super.init(width, height);
-    this.buffer.init(width, height);
-  }
-
-  /**
-   * @param {!function()} drawer
-   */
-  draw(drawer) {
-    super.draw(() => this.buffer.draw(drawer));
+    this.textureCount = 0;
   }
 
   afterFrame() {
-    this.buffer.swapTextures();
+    if (this.buffer) {
+      this.buffer.swapTextures();
+    }
   }
 
 }
@@ -366,28 +348,16 @@ class DoubleBuffer {
    */
   draw(drawer) {
     const gl = this.gl;
-
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.out);
-
     gl.framebufferTexture2D(
       gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.out, 0
     );
 
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
     drawer();
 
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    // TODO do we need to inactivete texture?
     gl.framebufferTexture2D(
       gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0
     );
-
-
-//    gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 

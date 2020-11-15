@@ -8,16 +8,14 @@
 const shaderWebBackground = {};
 
 /**
- * @typedef {{
- *   in:  !WebGLTexture,
- *   out: !WebGLTexture
- * }}
+ * @typedef {Object}
  */
 var Buffer;
 
 /**
  * @typedef {{
- *   buffers: !Object<string, !Buffer>
+ *   buffers: !Object<string, !Buffer>,
+ *   texture: function(!WebGLUniformLocation, (!WebGLTexture|!Buffer))
  * }}
  */
 var Context;
