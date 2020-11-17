@@ -22,7 +22,10 @@ task("compileJs", JavaExec::class) {
       "--create_source_map", "dist/shader-web-background.min.js.map",
       "--language_in", "ECMASCRIPT6",
       "--language_out", "ECMASCRIPT6",
-      "--output_wrapper", "const shaderWebBackground={};(()=>{%output%})()\n//# sourceMappingURL=shader-web-background.min.js.map",
+      "--output_wrapper",
+      "// -- https://xemantic.github.io/shader-web-background/\n" +
+          "const shaderWebBackground={};(()=>{%output%})()\n" +
+          "//# sourceMappingURL=shader-web-background.min.js.map",
       "--jscomp_warning=accessControls",
       "--jscomp_warning=checkRegExp",
       "--jscomp_warning=constantProperty",
@@ -43,7 +46,7 @@ task("compileJs", JavaExec::class) {
 
   val charset = Charsets.UTF_8
   val libOccurrence =
-      "(?s)const shaderWebBackground.*shader-web-background\\.min\\.js\\.map"
+      "(?s)// -- https://xemantic\\.github\\.io/shader-web-background/.*shader-web-background\\.min\\.js\\.map\n"
           .toRegex()
   val lib = File("dist/shader-web-background.min.js")
       .readText(charset)
