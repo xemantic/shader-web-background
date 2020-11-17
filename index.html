@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <title>shader web background</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script>
+    /*
+    @licstart  The following is the entire license notice for the
+    JavaScript code in this page.
+
+    Copyright (C) 2020  Kazimierz Pogoda
+
+    The JavaScript code in this page is free software: you can
+    redistribute it and/or modify it under the terms of the GNU
+    General Public License (GNU GPL) as published by the Free Software
+    Foundation, either version 3 of the License, or (at your option)
+    any later version.  The code is distributed WITHOUT ANY WARRANTY;
+    without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+    As additional permission under GNU GPL version 3 section 7, you
+    may distribute non-source (e.g., minimized or compacted) forms of
+    that code without the copy of the GNU GPL normally required by
+    section 4, provided you include this license notice and a URL
+    through which recipients can access the Corresponding Source.
+
+
+    @licend  The above is the entire license notice
+    for the JavaScript code in this page.
+    */
+  </script>
+  <script type="x-shader/x-fragment" id="feedback">
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+
+    const float SHAPE_FACTOR = .01;
+    const float SHAPE_SIZE = 1.9;
+    const float SHAPE_ANIMATION_SPEED = 2.0;
+    const float SHAPE_PERIOD_FACTOR = 40.0;
+    const float FADE_FACTOR = .995;
+    const float EXPANSION_FACTOR = 1.1;
+    const float SHAPE_HORIZONTAL_OSCILLATION_SPEED = .3;
+    const float SHAPE_VERTICAL_OSCILLATION_SPEED = .2;
+    const float SPECTRUM_SHIFT_SPEED = .2;
+    const float ANGLE_ROTATION_SPEED = .1;
+    const float FOLDING1_COUNT = 3.;
+    const float FOLDING1_BASE = 1.;
+    const float FOLDING1_FACTOR = .1;
+    const float FOLDING1_ROTATION_SPEED = 1.2;
+    const float FOLDING2_COUNT = 7.;
+    const float FOLDING2_BASE = 1.;
+    const float FOLDING2_FACTOR = .15;
+    const float FOLDING2_ROTATION_SPEED = -.9;
+
+    #define iResolution R
+    #define iMinDimension D
+    #define iTime T
+    #define iFrame F
+
+    uniform float T;
+    uniform vec2 R;
+    uniform float D;
+    uniform int F;
+    uniform sampler2D iChannel0;
+    uniform vec2 iMouse;
+
+    vec3 spectrum(float x) {
+      vec3 c = vec3(x - .75, x - .5,	x - .25) * 4.;
+      return max(vec3(1) - c * c, vec3(0));
+    }
+
+    float wave(float x) {
+      return (cos(x) + 1.) * .5;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / iResolution;
+      vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
+      vec2 mouseSt = (iMouse * 2. - iResolution) / iMinDimension;
+      vec2 expansion = st / iResolution * EXPANSION_FACTOR;
+      vec2 shift = vec2(
+        sin(iTime * SHAPE_HORIZONTAL_OSCILLATION_SPEED),
+        cos(iTime * SHAPE_VERTICAL_OSCILLATION_SPEED)
+      );
+      float angle = atan(st.x, st.y) - iTime * ANGLE_ROTATION_SPEED;
+      float dist = length(st - mouseSt - shift);
+      float level = dist
+        + ((cos(angle * FOLDING1_COUNT + iTime * FOLDING1_ROTATION_SPEED) + FOLDING1_BASE) * FOLDING1_FACTOR)
+        + ((cos(angle * FOLDING2_COUNT + iTime * FOLDING2_ROTATION_SPEED) + FOLDING2_BASE) * FOLDING2_FACTOR);
+      vec3 prevColor = texture2D(iChannel0, uv - expansion).rgb;
+      float luma = wave((level * SHAPE_PERIOD_FACTOR) - (iTime * SHAPE_ANIMATION_SPEED));
+      vec3 color = vec3(luma)
+        * SHAPE_FACTOR
+        * spectrum(mod(dist - iTime * SPECTRUM_SHIFT_SPEED, 1.))
+        * step(level, SHAPE_SIZE);
+      gl_FragColor = vec4(prevColor * FADE_FACTOR + color, 1.);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="image">
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+
+    uniform vec2 R;
+    uniform sampler2D iChannel0;
+
+    void main() {
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / R);
+    }
+  </script>
+  <script>
+// -- https://xemantic.github.io/shader-web-background/
+const shaderWebBackground={};(()=>{'use strict';function q(a,c){if(!a)throw new shaderWebBackground.ConfigError(c);}function u(a){q(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");return a}function w(){const a=document.createElement("canvas"),c=a.style;c.width="100vw";c.height="100vh";c.position="fixed";c.top="0";c.left="0";c.zIndex=-9999;document.body.appendChild(a);return a}function x(a){a.width=a.clientWidth;a.height=a.clientHeight}
+function y(a,c,d){const b=new A(a,e=>new shaderWebBackground.GlError(e));let f=0,l=0,m=0;const k={R:(e,h)=>e.uniform2f(h,a.width,a.height),T:(e,h)=>e.uniform1f(h,l),F:(e,h)=>e.uniform1i(h,f),D:(e,h)=>e.uniform1f(h,m)},v=Object.keys(c),H=v.length-1,t=v.map((e,h)=>{{var g=c[e];var n=b.a;var r=B(b,e,n.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");g=B(b,e,n.FRAGMENT_SHADER,g);const p=n.createProgram();n.attachShader(p,r);n.attachShader(p,g);n.linkProgram(p);n=p}r=Object.assign(k,
+d[e]&&d[e].uniforms);g=null;h<H&&(g=new C(b.a,b.c),b.buffers[e]=g);return e=new D(b.a,e,n,r,g,b.buffers)});a.width=0;a.height=0;const z=()=>{l=performance.now()/1E3;if(a.width!==a.clientWidth||a.height!==a.clientHeight)x(a),b.a.viewport(0,0,b.b.width,b.b.height),m=Math.min(a.width,a.height),f=0,t.forEach(e=>{if(e.a){e=e.a;var h=a.width,g=a.height;e.b&&e.c.deleteTexture(e.b);e.a&&e.c.deleteTexture(e.a);e.b=E(e,h,g);e.a=E(e,h,g)}});t.forEach(e=>F(e,()=>{{var h=e.h;const g=b.a;g.bindBuffer(g.ARRAY_BUFFER,
+b.g);g.enableVertexAttribArray(h);g.vertexAttribPointer(h,2,g.FLOAT,!1,0,0);g.drawArrays(g.TRIANGLE_STRIP,0,4);g.disableVertexAttribArray(h);g.bindBuffer(g.ARRAY_BUFFER,null)}}));f++;t.forEach(e=>{if(e.a){{e=e.a;const h=e.a;e.a=e.b;e.b=h}}});requestAnimationFrame(z)};z()}
+function G(a){a=a||{};const c=a.canvas?u(a.canvas):w();var d=document.head.querySelectorAll("script[type='x-shader/x-fragment']");q(0<d.length,'At least one <script type="x-shader/x-fragment"> required in document head');d.forEach(b=>q(b.id,"Each shader <script> needs unique id attribute"));d=Array.from(d).reduce((b,f)=>{b[f.id]=f.text.trim();return b},{});try{y(c,d,a.shaders||{})}catch(b){if(a.fallback)console.log("Could not load shaders, adding fallback class to canvas"+b),c.classList.add("fallback");
+else throw b;}}shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.ConfigError"}};shaderWebBackground.GlError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.GlError"}};shaderWebBackground.shade=G;shaderWebBackground.shadeOnLoad=function(a){window.addEventListener("load",()=>G(a))};const I=[-1,1,1,1,-1,-1,1,-1];function J(a,c){return a.f(a.a.getExtension(c),c+" extension is not supported")}class K{constructor(a,c){this.a=a;this.f=c}b(){}}class L extends K{constructor(a,c){super(a,c);this.c=J(this,"OES_texture_half_float");J(this,"OES_texture_half_float_linear")}b(a,c){const d=this.a;d.texImage2D(d.TEXTURE_2D,0,d.RGBA,a,c,0,d.RGBA,this.c.HALF_FLOAT_OES,null)}}
+class M extends K{constructor(a,c){super(a,c);J(this,"EXT_color_buffer_float")}b(a,c){const d=this.a;d.texImage2D(d.TEXTURE_2D,0,d.RGBA16F,a,c,0,d.RGBA,d.FLOAT,null)}}function B(a,c,d,b){const f=a.a;d=f.createShader(d);f.shaderSource(d,b);f.compileShader(d);if(!f.getShaderParameter(d,f.COMPILE_STATUS)){const l=String(f.getShaderInfoLog(d));f.deleteShader(d);c="Cannot compile shader - "+c+": "+l;console.log(c+"n"+b);throw a.f(c);}return d}
+class A{constructor(a,c){var d={antialias:!1,depth:!1,alpha:!1};this.b=a;this.f=c;var b=(f,l)=>{if(!f)throw c(l);return f};this.a=a=b(a.getContext("webgl",d)||a.getContext("webgl",d),"webgl context not supported on supplied canvas element: "+a);this.c=a instanceof WebGL2RenderingContext?new M(a,b):new L(a,b);b=a.createBuffer();a.bindBuffer(a.ARRAY_BUFFER,b);a.bufferData(a.ARRAY_BUFFER,new Float32Array(I),a.STATIC_DRAW);a.bindBuffer(a.ARRAY_BUFFER,null);this.g=b;this.buffers={}}}
+function F(a,c){const d=a.c;d.useProgram(a.g);for(var b in a.uniforms){var f=a.uniforms[b];f.i(d,f.location,a.f)}a.a?(b=a.a,f=b.c,f.bindFramebuffer(f.FRAMEBUFFER,b.g),f.framebufferTexture2D(f.FRAMEBUFFER,f.COLOR_ATTACHMENT0,f.TEXTURE_2D,b.a,0),c(),f.framebufferTexture2D(f.FRAMEBUFFER,f.COLOR_ATTACHMENT0,f.TEXTURE_2D,null,0),f.bindFramebuffer(f.FRAMEBUFFER,null)):c();for(c=0;c<a.b;c++)d.activeTexture(d.TEXTURE0+c),d.bindTexture(d.TEXTURE_2D,null);a.b=0}
+class D{constructor(a,c,d,b,f,l){this.c=a;this.id=c;this.g=d;this.h=a.getAttribLocation(d,"V");this.uniforms={};for(const m in b)(c=this.c.getUniformLocation(d,m))&&(this.uniforms[m]={location:c,i:b[m]});this.a=f;this.b=0;this.f={buffers:l,texture:(m,k)=>{k=k instanceof C?k===this.a?k.b:k.a:k;a.activeTexture(a.TEXTURE0+this.b);a.bindTexture(a.TEXTURE_2D,k);a.uniform1i(m,this.b++)}}}}
+function E(a,c,d){const b=a.c,f=b.createTexture();b.bindTexture(b.TEXTURE_2D,f);a.f.b(c,d);b.texParameteri(b.TEXTURE_2D,b.TEXTURE_MIN_FILTER,b.LINEAR);b.texParameteri(b.TEXTURE_2D,b.TEXTURE_MAG_FILTER,b.LINEAR);b.texParameteri(b.TEXTURE_2D,b.TEXTURE_WRAP_S,b.CLAMP_TO_EDGE);b.texParameteri(b.TEXTURE_2D,b.TEXTURE_WRAP_T,b.CLAMP_TO_EDGE);b.bindTexture(b.TEXTURE_2D,null);return f}class C{constructor(a,c){this.g=a.createFramebuffer();this.c=a;this.f=c;this.a=this.b=null}};})()
+//# sourceMappingURL=shader-web-background.min.js.map
+  </script>
+  <style>
+    :root {
+      --golden-ratio-width-longer: 61.8vw;
+      --golden-ratio-width-shorter: 38.2vw;
+      --golden-ratio-height-longer: 61.8vh;
+      --golden-ratio-height-shorter: 38.2vh;
+    }
+    html {
+      box-sizing: border-box;
+      background: black;
+      font-size: 2vw;
+      font-family: sans-serif;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    body, h1, h2, h3, h4, h5, h6, p, ol, ul, blockquote {
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, p, ul {
+      margin-top: .618rem;
+      margin-bottom: .618rem;
+    }
+    section {
+      background: rgba(0, 0, 0, .618);
+      padding-top: .618rem;
+      padding-bottom: .618rem;
+    }
+    h2 {
+      font-size: 1.618rem;
+    }
+    header {
+      height: var(--golden-ratio-height-longer);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header h1 {
+      color: rgba(255, 255, 255, .7);
+      font-size: 3rem;
+      text-shadow: 3px 3px #000000;
+    }
+    section, footer {
+      color: white;
+      font-family: sans-serif;
+      margin-bottom: 4rem;
+    }
+    header, section, footer {
+      padding-left: 3vw;
+      padding-right: 3vw;
+    }
+    section h2 {
+      text-align: center;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+      background: rgba(255, 0, 255, .3);
+      transition: color 2s, background 2s;
+    }
+    a:hover {
+      color: black;
+      background: white;
+    }
+    ul {
+      margin-left: 1.1rem;
+    }
+    footer {
+      font-size: .618rem;
+      text-align: center;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // start in the center
+    var mouseX = window.innerWidth / 2;
+    var mouseY = window.innerHeight / 2;
+
+    document.addEventListener("mousemove", (event) => {
+       // shader gl_FragCoord coordinates start in the middle of the pixel
+       // so we need to accommodate for that by removing half.
+       // also vertical coordinate needs to be flipped.
+       mouseX = event.offsetX - .5;
+       mouseY = window.innerHeight - event.offsetY - .5;
+    });
+
+    shaderWebBackground.shadeOnLoad({
+      shaders: {
+        feedback: {
+          uniforms: {
+            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
+            iMouse: (gl, loc) => gl.uniform2f(loc, mouseX, mouseY)
+          }
+        },
+        image: {
+          uniforms: {
+            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+          }
+        }
+      }
+    });
+  </script>
+  <header>
+    <h1>shader web background</h1>
+  </header>
+  <section>
+    <h2>Can I use it?</h2>
+    <p>
+      Definitely, if you are creating websites, either as a designer or developer, the
+      <code>shader web background</code> library is made to boost your projects visually.
+    </p>
+    <p>
+      If you are here, you probably already learned about shaders. If not, this is the technology
+      rendering in real time the background behind this text. This projects makes it easy to
+      launch even quite complex shaders as a background of your website, with a decent performance.
+    </p>
+    <p>
+      The <a href="https://github.com/xemantic/shader-web-background">GitHub repository</a>
+      documentation will guide you.
+    </p>
+  </section>
+  <section id="features">
+    <h2>Features</h2>
+    <ul>
+      <li>
+        <strong>simplicity</strong>: it is just rendering canvas background as fragment shader
+      </li>
+      <li>
+        <strong>speed</strong>: designed to be embedded in HTML and start rendering before
+        other resources are downloaded
+      </li>
+      <li>
+        <strong>extensibility</strong>: add own controls (uniforms) with minimal effort
+      </li>
+      <li>
+        <strong>pixel feedback loops</strong>: preserving movement in time on offscreen buffers
+      </li>
+      <li>
+        <strong>shadertoy support</strong>: including multipass shaders
+      </li>
+      <li>
+        <strong>floating-point textures</strong>: for offscreen buffers
+        (overcoming limitation of glslViewer)
+      </li>
+      <li>
+        <strong>cross browser / cross device</strong>: either with WebGL 1 or 2, it will try to work
+        wherever it's possible
+      </li>
+      <li>
+        <strong>minimal footprint</strong>: transpiled from JavaScript to JavaScript
+        with Closure Compiler
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h2>Why is it so fast?</h2>
+    <p>
+      This website starts in milliseconds because there are no additional resources to be loaded
+      &mdash; no extra code, no images. All the style and artwork is provided in the source code
+      of this HTML page.
+    </p>
+    <p>
+      The shader will run on the GPU, not CPU, and contemporary devices, including our mobiles,
+      already have one. Quite rich visual effects can be achieved with relatively efficient code.
+    </p>
+    <p>
+      Real time interactive shader offers a different perspective on compression &mdash; pure
+      mathematics has order of magnitude (or maybe 2 orders, or maybe 3 ... ?) better compression
+      ratio than JPEG and MPEG.
+    </p>
+  </section>
+  <section>
+    <h2>Tests / Demos / Use Cases</h2>
+    <ul>
+      <li><a href="src/test/html/full.html">Full</a> - using all the capabilities, relays on non-minified JS</li>
+      <li><a href="src/test/html/full.min.html">Full minified</a> - the same code but with minified JS</li>
+      <li><a href="src/test/html/minimal.html">Minimal</a> - very basic shader background</li>
+      <li><a href="src/test/html/shadertoy.html">Shadertoy: default</a> - the simple template of a new shader</li>
+      <li><a href="test/minimal.html">Shadertoy: Raaction Diffusion 2 Pass</a> - the simple template of new shader</li>
+    </ul>
+    <p>
+      Missing your favorite shader? - create pull request and add it to this list. You will see how
+      easy it is.
+    </p>
+  </section>
+  <section>
+    <h2>Projects using <code>shader-web-background</code></h2>
+    <ul>
+      <li><a href="https://xemantic.com/">xemantic</a> (author's website)</li>
+      <li>
+        <a href="https://xemantic.github.io/fuck-the-ai-which-is-abusing-your-reptilian-brain-to-make-you-addicted-to-movies-instead-of-art/">
+          Fuck the AI which is abusing your reptilian brain to make you addicted to movies instead of art
+        </a> - a hybrid of Netflix / game console like interface for building artistic projects focused
+        on visual content.
+      </li>
+      <li><a href="https://industria.illutron.dk/">Industria</a> - a fully immersive seaborn Industrial Revolution
+        experience onboard Illutron boat (Copenhagen)</li>
+    </ul>
+  </section>
+  <section>
+    <h2>License</h2>
+    <p>
+      The <code><nobr>shader-web-background</nobr></code> is released under GPL v 3 license which makes it suitable for Open Source
+      and personal projects. I would like to provide separate commercial license similar to
+      the one offered by flickty.
+    </p>
+  </section>
+  <footer>
+    This project is made by <a href="https://xemantic.com/">Kazik Pogoda</a>, with
+    dedication and &hearts;
+    <br/>
+    I made it because I was missing the proper base for sharing my creative expression in the time of
+    pandemic. <em><a >Esse est percipi</a></em> - to exist is to be perceived. Our generative
+    artworks exist only when there is an audience. Therefore I hope it will be helpful for you
+    as well.
+  </footer>
+</body>
+</html>
