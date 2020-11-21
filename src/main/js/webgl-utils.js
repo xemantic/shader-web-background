@@ -63,7 +63,7 @@ class WebGl1Strategy extends WebGlStrategy {
 class WebGl2Strategy extends WebGlStrategy {
 
   /**
-   * @param {!WebGLRenderingContext} gl
+   * @param {!WebGL2RenderingContext} gl
    * @param {!function(T, !string):T} check
    * @template T
    */
@@ -106,14 +106,20 @@ class GlWrapper {
       return (condition);
     };
 
-    const gl = /** @type {!WebGLRenderingContext} */ (check(
-      (canvas.getContext("webgl", contextAttrs)
-        || canvas.getContext("webgl", contextAttrs)),
+    let gl = /** @type {WebGL2RenderingContext} */ (canvas.getContext("webgl2", contextAttrs));
+    if (gl) {
+      this.strategy = new WebGl2Strategy(gl, check);
+    } else {
+      gl = /** @type {WebGLRenderingContext} */ (canvas.getContext("webgl", contextAttrs));
+      if (gl) {
+        this.strategy = new WebGl1Strategy(gl, check)
+      }
+    }
+    check(
+      gl,
       "webgl context not supported on supplied canvas element: " + canvas
-    ));
-    this.gl = gl;
-    this.strategy = (gl instanceof WebGL2RenderingContext)
-      ? new WebGl2Strategy(gl, check) : new WebGl1Strategy(gl, check);
+    );
+    this.gl = /** @type {!WebGLRenderingContext} */ (gl);
 
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
