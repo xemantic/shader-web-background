@@ -165,7 +165,7 @@
     #endif
     uniform vec2 R;uniform sampler2D T0;void main(){gl_FragColor=texture2D(T0,gl_FragCoord.xy/R);}
   </script>
-  <!--<script>
+  <script>
 // -- https://xemantic.github.io/shader-web-background/
 const shaderWebBackground={};(()=>{'use strict';function q(a,c){if(!a)throw new shaderWebBackground.ConfigError(c);}function t(a){q(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");return a}function u(){const a=document.createElement("canvas"),c=a.style;c.width="100vw";c.height="100vh";c.position="fixed";c.top="0";c.left="0";c.zIndex=-9999;document.body.appendChild(a);return a}
 function v(a,c,e,d){const b=new w(a,g=>new shaderWebBackground.GlError(g)),m=Object.keys(c),l=m.length-1,k=m.map((g,h)=>{{var f=c[g];var n=b.a;var r=y(b,g,n.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");f=y(b,g,n.FRAGMENT_SHADER,f);const p=n.createProgram();n.attachShader(p,r);n.attachShader(p,f);n.linkProgram(p);n=p}r=e[g]&&e[g].uniforms||{};f=null;h<l&&(f=new z(b.a,b.b),b.buffers[g]=f);return g=new A(b.a,g,n,r,f,b.buffers)});a.width=0;a.height=0;const x=()=>{if(a.width!==
@@ -179,10 +179,7 @@ function C(a,c){const e=a.c;e.useProgram(a.g);for(var d in a.uniforms){var b=a.u
 class A{constructor(a,c,e,d,b,m){this.c=a;this.id=c;this.g=e;this.h=a.getAttribLocation(e,"V");this.uniforms={};for(const l in d)(c=this.c.getUniformLocation(e,l))?this.uniforms[l]={location:c,i:d[l]}:console.error("No such uniform: "+l);this.a=b;this.b=0;this.f={buffers:m,texture:(l,k)=>{k=k instanceof z?k===this.a?k.b:k.a:k;a.activeTexture(a.TEXTURE0+this.b);a.bindTexture(a.TEXTURE_2D,k);a.uniform1i(l,this.b++)}}}}
 function B(a,c,e){const d=a.c,b=d.createTexture();d.bindTexture(d.TEXTURE_2D,b);a.f.b(c,e);d.texParameteri(d.TEXTURE_2D,d.TEXTURE_MIN_FILTER,d.LINEAR);d.texParameteri(d.TEXTURE_2D,d.TEXTURE_MAG_FILTER,d.LINEAR);d.texParameteri(d.TEXTURE_2D,d.TEXTURE_WRAP_S,d.CLAMP_TO_EDGE);d.texParameteri(d.TEXTURE_2D,d.TEXTURE_WRAP_T,d.CLAMP_TO_EDGE);d.bindTexture(d.TEXTURE_2D,null);return b}class z{constructor(a,c){this.g=a.createFramebuffer();this.c=a;this.f=c;this.a=this.b=null}};})()
 //# sourceMappingURL=shader-web-background.min.js.map
-  </script>-->
-  <script src="src/main/js/shader-web-background-api.js"></script>
-  <script src="src/main/js/shader-web-background.js"></script>
-  <script src="src/main/js/webgl-utils.js"></script>
+  </script>
   <style>
     :root {
       --golden-ratio-width-longer: 61.8vw;
