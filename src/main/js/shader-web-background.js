@@ -56,7 +56,6 @@ function newBackgroundCanvas() {
   style.top = "0";
   style.left = "0";
   style.zIndex = -9999;
-  document.body.appendChild(canvas);
   return canvas;
 }
 
@@ -200,15 +199,13 @@ function shade(config) {
       throw e;
     }
   }
-}
 
-/**
- * @param {Config=} config
- * @throws {shaderWebBackground.ConfigError}
- * @throws {shaderWebBackground.GlError}
- */
-function shadeOnLoad(config) {
-  window.addEventListener("load", () => shade(config));  // TODO extra parameter?
+  if (!config.canvas) {
+    window.addEventListener("DOMContentLoaded", () => {
+      document.body.appendChild(canvas);
+    });
+  }
+
 }
 
 /** @suppress {checkTypes} to redefine the type declared in externs */
@@ -231,6 +228,3 @@ shaderWebBackground.GlError = class extends Error {
 
 /** @suppress {missingSourcesWarnings} to redefine the function declared in externs */
 shaderWebBackground.shade = shade;
-
-/** @suppress {missingSourcesWarnings} to redefine the function declared in externs */
-shaderWebBackground.shadeOnLoad = shadeOnLoad;

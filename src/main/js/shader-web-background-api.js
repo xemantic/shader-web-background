@@ -89,12 +89,3 @@ shaderWebBackground.GlError = class extends Error {}
  * @throws {shaderWebBackground.GlError}
  */
 shaderWebBackground.shade = function(config) {}
-
-/**
- * Will start shading when the page is loaded.
- *
- * @param {Config=} config
- * @throws {shaderWebBackground.ConfigError}
- * @throws {shaderWebBackground.GlError}
- */
-shaderWebBackground.shadeOnLoad = function(config) {}
