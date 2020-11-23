@@ -25,7 +25,7 @@ const report = (message, color) => {
   div.style.backgroundColor = color;
   div.style.padding = "1.4rem";
   div.textContent = message;
-  document.body.prepend(div);
+  return div;
 }
 
 const reportFailure = (message) => report(message, "red");
@@ -43,22 +43,23 @@ function appendSource() {
 }
 
 function shouldThrow(expectedError, call) {
-  window.addEventListener("DOMContentLoaded", () => {
-
-    appendSource();
-
-    try {
-      call();
-      reportFailure("Error not thrown, expected: [" + expectedError + "]");
-    } catch (e) {
-      if (errorsEqual(expectedError, e)) {
-        reportSuccess("Expected Error thrown: [" + e + "]");
-      } else {
-        reportFailure(
-          "Expected: [" + expectedError + "], but was thrown: [" + e + "]"
-        );
-      }
+  var report;
+  try {
+    call();
+    report = reportFailure("Error not thrown, expected: [" + expectedError + "]");
+  } catch (e) {
+    if (errorsEqual(expectedError, e)) {
+      report = reportSuccess("Expected Error thrown: [" + e + "]");
+    } else {
+      report = reportFailure(
+        "Expected: [" + expectedError + "], but was thrown: [" + e + "]"
+      );
     }
+  }
 
+  window.addEventListener("DOMContentLoaded", () => {
+    document.body.append(report);
+    appendSource();
   });
+
 }
