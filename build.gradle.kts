@@ -1,3 +1,22 @@
+/*
+ * Copyright 2020  Kazimierz Pogoda
+ *
+ * This file is part of shader-web-background.
+ *
+ * shader-web-background is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * shader-web-background is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 val closureCompilerVersion = "v20201102"
 
 plugins {
@@ -20,12 +39,13 @@ task("compileJs", JavaExec::class) {
       "--js", "src/main/js/*.js",
       "--js_output_file", "dist/shader-web-background.min.js",
       "--create_source_map", "dist/shader-web-background.min.js.map",
+      "--source_map_location_mapping", "src/main/js|../src/main/js",
       "--language_in", "ECMASCRIPT6",
       "--language_out", "ECMASCRIPT6",
       "--output_wrapper",
-      "// -- https://xemantic.github.io/shader-web-background/\n" +
-          "const shaderWebBackground={};(()=>{%output%})()\n" +
-          "//# sourceMappingURL=shader-web-background.min.js.map",
+      "// -- https://xemantic.github.io/shader-web-background/\n"
+          + "const shaderWebBackground={};(()=>{%output%})()\n"
+          + "//# sourceMappingURL=shader-web-background.min.js.map",
       "--jscomp_warning=accessControls",
       "--jscomp_warning=checkRegExp",
       "--jscomp_warning=constantProperty",
