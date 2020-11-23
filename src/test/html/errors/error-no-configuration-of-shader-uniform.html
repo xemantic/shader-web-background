@@ -20,12 +20,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script type="x-shader/x-fragment" id="image">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform vec2 iResolution;
+
+    void main() {
+      // we need to use the uniform, otherwise it might get kicked out from compiled shader
+      gl_FragColor = vec4(gl_FragColor.x / iResolution.x);
+    }
+  </script>
   <script src="../../../../dist/shader-web-background.min.js"></script>
   <script src="../../js/test-error.js"></script>
   <script>
     shouldThrow(
-      new shaderWebBackground.ConfigError(
-        "At least one <script type=\"x-shader/x-fragment\"> required in document head"
+      new shaderWebBackground.GlError(
+        "No configuration for uniform \"iResolution\" defined in shader \"image\""
       ),
       () => shaderWebBackground.shade()
     );

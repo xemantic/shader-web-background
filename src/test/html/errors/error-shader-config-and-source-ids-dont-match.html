@@ -20,14 +20,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Error: script id with capital letter -->
+  <script type="x-shader/x-fragment" id="Image">
+  </script>
   <script src="../../../../dist/shader-web-background.min.js"></script>
   <script src="../../js/test-error.js"></script>
   <script>
     shouldThrow(
       new shaderWebBackground.ConfigError(
-        "At least one <script type=\"x-shader/x-fragment\"> required in document head"
+        "No shader source with id: image"
       ),
-      () => shaderWebBackground.shade()
+      () => shaderWebBackground.shade({
+        shaders: {
+          image: {}
+        }
+      })
     );
   </script>
 </head>
