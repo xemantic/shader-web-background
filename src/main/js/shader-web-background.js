@@ -1,3 +1,22 @@
+/*
+ * Copyright 2020  Kazimierz Pogoda
+ *
+ * This file is part of shader-web-background.
+ *
+ * shader-web-background is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * shader-web-background is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 "use strict";
 
 const
@@ -54,18 +73,12 @@ function isResized(canvas) {
 
 /**
  * @param {!HTMLCanvasElement} canvas
- */
-function updateSize(canvas) {
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-}
-
-/**
- * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !string>} sources
  * @param {!Object<string, !Shader>} shaders
+ * @param {function(!number, !number)|undefined} onResize
+ * @param {function()|undefined} onFrameComplete
  */
-function doShade(canvas, sources, shaders) {
+function doShade(canvas, sources, shaders, onResize, onFrameComplete) {
 
   const contextAttrs = {
     antialias: false,
@@ -73,36 +86,19 @@ function doShade(canvas, sources, shaders) {
     alpha: false
   }
 
+  const sourceIds = Object.keys(sources);
+
   const glWrapper = new GlWrapper(
     canvas,
     (message) => new shaderWebBackground.GlError(message),
     contextAttrs
   );
 
-  let frame = 0;
-  let time = 0;
-  let minDimension = 0;
-
-  const defaultUniforms = ({
-    /** @type {!UniformSetter} */
-    "R": (gl, loc) => gl.uniform2f(loc, canvas.width, canvas.height),
-    /** @type {!UniformSetter} */
-    "T": (gl, loc) => gl.uniform1f(loc, time),
-    /** @type {!UniformSetter} */
-    "F": (gl, loc) => gl.uniform1i(loc, frame),
-    /** @type {!UniformSetter} */
-    "D": (gl, loc) => gl.uniform1f(loc, minDimension)
-  });
-
-  const sourceIds = Object.keys(sources);
   const imageIndex = sourceIds.length - 1;
   /** @type {Array<!ProgramWrapper>} */
   const programs = sourceIds.map((id, index) => {
     const program = glWrapper.initProgram(id, VERTEX_SHADER, sources[id]);
-    const uniforms = Object.assign(
-      defaultUniforms,
-      shaders[id] && shaders[id].uniforms
-    );
+    const uniforms = (shaders[id] && shaders[id].uniforms) || {}
     const buffered = (index < imageIndex); // not last
     return glWrapper.wrapProgram(
         id, program, VERTEX_ATTRIBUTE, uniforms, buffered
@@ -115,15 +111,18 @@ function doShade(canvas, sources, shaders) {
 
   const animate = () => {
 
-    time = performance.now() / 1000;
-
     if (isResized(canvas)) {
-      updateSize(canvas);
+      /** @type {!number} */
+      const width = canvas.clientWidth;
+      /** @type {!number} */
+      const height = canvas.clientHeight;
+      canvas.width = width;
+      canvas.height = height;
       glWrapper.updateViewportSize();
-      minDimension = Math.min(canvas.width, canvas.height);
-      frame = 0;
+
+      if (onResize) onResize(width, height);
       programs.forEach(program =>
-        program.init(canvas.width, canvas.height)
+        program.init(width, height)
       );
     }
 
@@ -131,8 +130,9 @@ function doShade(canvas, sources, shaders) {
       program.draw(() => glWrapper.drawQuad(program.vertex))
     );
 
-    frame++;
     programs.forEach(program => program.afterFrame());
+
+    if (onFrameComplete) onFrameComplete();
 
     requestAnimationFrame(animate);
   }
@@ -145,6 +145,7 @@ function doShade(canvas, sources, shaders) {
  * @throws {shaderWebBackground.GlError}
  */
 function shade(config) {
+  // first we need to validate all the configuration
   config = config || {};
   const canvas = (config.canvas)
     ? checkIfCanvas(config.canvas)
@@ -177,8 +178,20 @@ function shade(config) {
   /** @type {!Object<string, !string>} */
   const sources = Array.from(scripts).reduce(reducer, {});
 
+  if (config.shaders) {
+    for (const id in config.shaders) {
+      check(id in sources, "No shader source with id: " + id);
+    }
+  }
+
   try {
-    doShade(canvas, sources, config.shaders || {});
+    doShade(
+      canvas,
+      sources,
+      config.shaders || {},
+      config.onResize,
+      config.onFrameComplete
+    );
   } catch (/** @type {!Error} */ e) {
     if (config.fallback) {
       console.log("Could not load shaders, adding fallback class to canvas" + e);
@@ -195,7 +208,7 @@ function shade(config) {
  * @throws {shaderWebBackground.GlError}
  */
 function shadeOnLoad(config) {
-  window.addEventListener("load", () => shade(config));
+  window.addEventListener("load", () => shade(config));  // TODO extra parameter?
 }
 
 /** @suppress {checkTypes} to redefine the type declared in externs */

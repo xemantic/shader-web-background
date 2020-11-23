@@ -1,3 +1,22 @@
+/*
+ * Copyright 2020  Kazimierz Pogoda
+ *
+ * This file is part of shader-web-background.
+ *
+ * shader-web-background is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * shader-web-background is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 "use strict";
 
 const QUAD_POSITIONS = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
@@ -91,7 +110,7 @@ class GlWrapper {
    * @param {Object<string, ?>=} contextAttrs
    */
   constructor(canvas, glErrorFactory, contextAttrs) {
-    this.can = canvas;
+    this.canvas = canvas;
     this.glErrorFactory = glErrorFactory;
 
     /**
@@ -143,7 +162,7 @@ class GlWrapper {
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       const info = String(gl.getShaderInfoLog(shader));
       gl.deleteShader(shader);
-      const message = "Cannot compile shader - " + id + ": " + info;
+      const message = "Cannot compile shader - " + id + ": " + info.trim();
       console.log(message + "\n" + source);
       throw this.glErrorFactory(message);
     }
@@ -176,16 +195,30 @@ class GlWrapper {
    * @return {!ProgramWrapper}
    */
   wrapProgram(id, program, vertexAttribute, uniforms, buffered) {
+    const gl = this.gl;
+
+    const activeUniforms =
+      /** @type {!number} */ (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS));
+    for (let i = 0; i < activeUniforms; i++) {
+      const uniform = gl.getActiveUniform(program, i);
+      if (!(uniform.name in uniforms)) {
+        throw this.glErrorFactory(
+          "No configuration for uniform \"" + uniform.name + "\" defined in shader \"" + id + "\""
+        );
+      }
+    }
+
     let buffer = null;
     if (buffered) {
-      buffer = new DoubleBuffer(this.gl, this.strategy);
+      buffer = new DoubleBuffer(gl, this.strategy);
       this.buffers[id] = buffer;
     }
-    return new ProgramWrapper(this.gl, id, program, vertexAttribute, uniforms, buffer, this.buffers);
+
+    return new ProgramWrapper(gl, id, program, vertexAttribute, uniforms, buffer, this.buffers);
   }
 
   updateViewportSize() {
-    this.gl.viewport(0, 0, this.can.width, this.can.height);
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**
@@ -233,6 +266,7 @@ class ProgramWrapper {
     this.uniforms = {};
 
     for (const name in uniforms) {
+      // TODO verify if all the uniforms defined
       const location = this.gl.getUniformLocation(program, name);
       if (location) {
         this.uniforms[name] = {
@@ -240,6 +274,7 @@ class ProgramWrapper {
           setter: uniforms[name]
         }
       } else {
+        console.error("No such uniform: " + name);
         // TODO throw exception here
       }
     }
