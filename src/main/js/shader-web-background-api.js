@@ -51,11 +51,11 @@ var UniformSetter;
  *   Object<string, !UniformSetter>
  * }
  */
-var Uniforms;
+var UniformSetters;
 
 /**
  * @typedef {{
- *   uniforms: (Uniforms|undefined)
+ *   uniforms: (UniformSetters|undefined)
  * }}
  */
 var Shader;
@@ -66,7 +66,7 @@ var Shader;
  *   fallback:        (boolean|undefined),
  *   onResize:        (function(!number, !number)|undefined),
  *   onFrameComplete: (function()|undefined),
- *   shaders:         (Object<string, !Shader>|undefined),
+ *   shaders:         (!Object<string, !Shader>),
  * }}
  */
 var Config;
@@ -84,7 +84,7 @@ shaderWebBackground.GlError = class extends Error {}
 /**
  * Will start shading.
  *
- * @param {Config=} config
+ * @param {Config} config
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */

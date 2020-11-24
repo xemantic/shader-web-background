@@ -71,13 +71,48 @@ function isResized(canvas) {
 }
 
 /**
+ * @param {!string} id
+ * @return {!string}
+ */
+const scriptSpec = (id) =>
+  "<script type=\"" + SHADER_SCRIPT_TYPE
+    + "\" id=\"" + id + "\">";
+
+/**
+ * @param {!string} id
+ * @return {!string}
+ */
+function getSource(id) {
+  const element = document.getElementById(id);
+  check(element, "Missing shader source: " + scriptSpec(id));
+  check(
+    (element instanceof HTMLScriptElement)
+      && (element.type === SHADER_SCRIPT_TYPE),
+    "Shader source element of id \"" + id + "\" "
+      + "should be of type: " + scriptSpec(id)
+  );
+  return element.text.trim();
+}
+
+/**
+ * @param {!string} eventType
+ * @param {!function()} call
+ */
+function doOrWaitFor(eventType, call) {
+  if ((document.readyState !== "loading")) {
+    call();
+  } else {
+    window.addEventListener(eventType, call);
+  }
+}
+
+/**
  * @param {!HTMLCanvasElement} canvas
- * @param {!Object<string, !string>} sources
  * @param {!Object<string, !Shader>} shaders
  * @param {function(!number, !number)|undefined} onResize
  * @param {function()|undefined} onFrameComplete
  */
-function doShade(canvas, sources, shaders, onResize, onFrameComplete) {
+function doShade(canvas, shaders, onResize, onFrameComplete) {
 
   const contextAttrs = {
     antialias: false,
@@ -85,24 +120,25 @@ function doShade(canvas, sources, shaders, onResize, onFrameComplete) {
     alpha: false
   }
 
-  const sourceIds = Object.keys(sources);
-
   const glWrapper = new GlWrapper(
     canvas,
     (message) => new shaderWebBackground.GlError(message),
     contextAttrs
   );
 
-  const imageIndex = sourceIds.length - 1;
   /** @type {Array<!ProgramWrapper>} */
-  const programs = sourceIds.map((id, index) => {
-    const program = glWrapper.initProgram(id, VERTEX_SHADER, sources[id]);
-    const uniforms = (shaders[id] && shaders[id].uniforms) || {}
-    const buffered = (index < imageIndex); // not last
-    return glWrapper.wrapProgram(
-        id, program, VERTEX_ATTRIBUTE, uniforms, buffered
-      );
-  });
+  const programs = [];
+  const imageShaderIndex = Object.keys(shaders).length - 1;
+  let index = 0;
+  for (const id in shaders) {
+    programs.push(glWrapper.wrapProgram(
+      id,
+      glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
+      VERTEX_ATTRIBUTE,
+      (shaders[id].uniforms) || {},
+      (index++ < imageShaderIndex) // is buffered?
+    ));
+  }
 
   // will force resize
   canvas.width = 0;
@@ -119,7 +155,9 @@ function doShade(canvas, sources, shaders, onResize, onFrameComplete) {
       canvas.height = height;
       glWrapper.updateViewportSize();
 
-      if (onResize) onResize(width, height);
+      if (onResize) {
+        onResize(width, height);
+      }
       programs.forEach(program =>
         program.init(width, height)
       );
@@ -129,70 +167,45 @@ function doShade(canvas, sources, shaders, onResize, onFrameComplete) {
       program.draw(() => glWrapper.drawQuad(program.vertex))
     );
 
-    programs.forEach(program => program.afterFrame());
+    programs.forEach(program =>
+      program.afterFrame()
+    );
 
-    if (onFrameComplete) onFrameComplete();
+    if (onFrameComplete) {
+      onFrameComplete();
+    }
 
     requestAnimationFrame(animate);
   }
-  animate();
+
+  // we will start animation only when everything is loaded
+  doOrWaitFor("load", () => requestAnimationFrame(animate));
 };
 
 /**
- * @param {Config=} config
+ * @param {Config} config
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
 function shade(config) {
   // first we need to validate all the configuration
-  config = config || {};
+  check(config, "Missing config argument")
+
   const canvas = (config.canvas)
     ? checkIfCanvas(config.canvas)
     : newBackgroundCanvas();
 
-  const scripts = /** @type {NodeList<HTMLScriptElement>} */ (
-    document.head.querySelectorAll(
-      "script[type='" + SHADER_SCRIPT_TYPE + "']"
-    )
-  );
-  check(
-    scripts.length > 0,
-    "At least one <script type=" + '"'
-      + SHADER_SCRIPT_TYPE + '"' + "> required in document head"
-  );
-  scripts.forEach(script =>
-    check(script.id, "Each shader <script> needs unique id attribute")
-  );
-
-  /**
-   * @type {function(!Object<string, !string>, !HTMLScriptElement):
-   *         !Object<string, !string>
-   * }
-   */
-  const reducer = (map, script) => {
-    map[script.id] = script.text.trim();
-    return map;
-  }
-
-  /** @type {!Object<string, !string>} */
-  const sources = Array.from(scripts).reduce(reducer, {});
-
-  if (config.shaders) {
-    for (const id in config.shaders) {
-      check(id in sources, "No shader source with id: " + id);
-    }
-  }
+  check(config.shaders, "No shaders specified in config");
 
   try {
     doShade(
       canvas,
-      sources,
-      config.shaders || {},
+      config.shaders,
       config.onResize,
       config.onFrameComplete
     );
   } catch (/** @type {!Error} */ e) {
-    if (config.fallback) {
+    if (config.fallback && (e instanceof shaderWebBackground.GlError)) {
       console.log("Could not load shaders, adding fallback class to canvas" + e);
       canvas.classList.add(FALLBACK_CLASS);
     } else {
@@ -201,9 +214,7 @@ function shade(config) {
   }
 
   if (!config.canvas) {
-    window.addEventListener("DOMContentLoaded", () => {
-      document.body.appendChild(canvas);
-    });
+    doOrWaitFor("DOMContentLoaded", () => document.body.appendChild(canvas));
   }
 
 }

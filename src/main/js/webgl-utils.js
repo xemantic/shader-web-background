@@ -102,6 +102,14 @@ class WebGl2Strategy extends WebGlStrategy {
 
 }
 
+/**
+ * @typedef {{
+ *   location: !WebGLUniformLocation,
+ *   setter: !UniformSetter
+ * }}
+ */
+var UniformEntry;
+
 class GlWrapper {
 
   /**
@@ -190,20 +198,41 @@ class GlWrapper {
    * @param {!string} id
    * @param {!WebGLProgram} program
    * @param {!string} vertexAttribute
-   * @param {!Uniforms} uniforms
+   * @param {!UniformSetters} uniformSetters
    * @param {!boolean} buffered
    * @return {!ProgramWrapper}
    */
-  wrapProgram(id, program, vertexAttribute, uniforms, buffered) {
+  wrapProgram(id, program, vertexAttribute, uniformSetters, buffered) {
     const gl = this.gl;
+
+    /** @type {!Object<string, !UniformEntry>} */
+    this.uniforms = {};
 
     const activeUniforms =
       /** @type {!number} */ (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS));
     for (let i = 0; i < activeUniforms; i++) {
       const uniform = gl.getActiveUniform(program, i);
-      if (!(uniform.name in uniforms)) {
+      const setter = uniformSetters[uniform.name];
+      if (!setter) {
         throw this.glErrorFactory(
-          "No configuration for uniform \"" + uniform.name + "\" defined in shader \"" + id + "\""
+          "No configuration for uniform \"" + uniform.name
+            + "\" defined in shader \"" + id + "\""
+        );
+      }
+      this.uniforms[uniform.name] = {
+        location: gl.getUniformLocation(program, uniform.name),
+        setter: setter
+      }
+    }
+
+    // Let's check if we have some extra uniforms in the configuration
+    // it's not a critical problem, but failing early might prevent from
+    // some hard to debug issues later.
+    for (const name in uniformSetters) {
+      if (!(name in this.uniforms)) {
+        throw this.glErrorFactory(
+          "No such uniform \"" + name + "\" defined in shader \"" + id
+            + "\" - if unused it might be removed by GLSL compiler"
         );
       }
     }
@@ -214,7 +243,15 @@ class GlWrapper {
       this.buffers[id] = buffer;
     }
 
-    return new ProgramWrapper(gl, id, program, vertexAttribute, uniforms, buffer, this.buffers);
+    return new ProgramWrapper(
+      gl,
+      id,
+      program,
+      gl.getAttribLocation(program, vertexAttribute),
+      this.uniforms,
+      buffer,
+      this.buffers
+    );
   }
 
   updateViewportSize() {
@@ -222,16 +259,15 @@ class GlWrapper {
   }
 
   /**
-   * @param {!number} vertexAttrLocation
+   * @param {!number} vertexAttributeLocation
    */
-  drawQuad(vertexAttrLocation) {
+  drawQuad(vertexAttributeLocation) {
     const gl = this.gl;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
-    // TODO is it the right way to do it?
-    gl.enableVertexAttribArray(vertexAttrLocation);
-    gl.vertexAttribPointer(vertexAttrLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vertexAttributeLocation);
+    gl.vertexAttribPointer(vertexAttributeLocation, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    gl.disableVertexAttribArray(vertexAttrLocation);
+    gl.disableVertexAttribArray(vertexAttributeLocation);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
@@ -243,42 +279,18 @@ class ProgramWrapper {
    * @param {!WebGLRenderingContext} gl
    * @param {!string} id
    * @param {!WebGLProgram} program
-   * @param {!string} vertexAttribute
-   * @param {!Uniforms} uniforms
+   * @param {!number} vertexAttributeLocation
+   * @param {!Object<string, !UniformEntry>} uniforms
    * @param {?DoubleBuffer} buffer
    * @param {!Object<string, !DoubleBuffer>} buffers
    */
-  constructor(gl, id, program, vertexAttribute, uniforms, buffer, buffers) {
+  constructor(gl, id, program, vertexAttributeLocation, uniforms, buffer, buffers) {
     this.gl = gl;
     this.id = id;
     this.program = program;
-    /** @type {!number} */ // TODO do I need type here?
-    this.vertex = gl.getAttribLocation(program, vertexAttribute);
-
-    /**
-     * @typedef {{
-     *   location: !WebGLUniformLocation,
-     *   setter: !UniformSetter
-     * }}
-     */
-    var UniformEntry;
-    /** @type {!Object<string, !UniformEntry>} */
-    this.uniforms = {};
-
-    for (const name in uniforms) {
-      // TODO verify if all the uniforms defined
-      const location = this.gl.getUniformLocation(program, name);
-      if (location) {
-        this.uniforms[name] = {
-          location: location,
-          setter: uniforms[name]
-        }
-      } else {
-        console.error("No such uniform: " + name);
-        // TODO throw exception here
-      }
-    }
-
+    /** @type {!number} */
+    this.vertex = vertexAttributeLocation;
+    this.uniforms = uniforms;
     this.buffer = buffer;
 
     this.textureCount = 0;
