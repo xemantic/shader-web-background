@@ -20,15 +20,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="x-shader/x-fragment">
-    // ...
-  </script>
+  <div type="x-shader/x-fragment" id="image">
+  </div>
   <script src="../../../../dist/shader-web-background.min.js"></script>
   <script src="../../js/test-error.js"></script>
   <script>
     shouldThrow(
       new shaderWebBackground.ConfigError(
-        "Missing shader source: <script type=\"x-shader/x-fragment\" id=\"image\">"
+        "Shader source element of id \"image\" should be of type: <script type=\"x-shader/x-fragment\" id=\"image\">"
       ),
       () => shaderWebBackground.shade({
         shaders: {
@@ -38,5 +37,6 @@
     );
   </script>
 </head>
-<body></body>
+<body>
+</body>
 </html>

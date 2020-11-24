@@ -39,7 +39,11 @@
       new shaderWebBackground.GlError(
         "No configuration for uniform \"iResolution\" defined in shader \"image\""
       ),
-      () => shaderWebBackground.shade()
+      () => shaderWebBackground.shade({
+        shaders: {
+          image: { /* missing uniform config */ }
+        }
+      })
     );
   </script>
 </head>

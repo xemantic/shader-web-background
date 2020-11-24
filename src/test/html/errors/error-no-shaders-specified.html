@@ -20,21 +20,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="x-shader/x-fragment">
-    // ...
-  </script>
   <script src="../../../../dist/shader-web-background.min.js"></script>
   <script src="../../js/test-error.js"></script>
   <script>
     shouldThrow(
       new shaderWebBackground.ConfigError(
-        "Missing shader source: <script type=\"x-shader/x-fragment\" id=\"image\">"
+        "No shaders specified in config"
       ),
-      () => shaderWebBackground.shade({
-        shaders: {
-          image: {}
-        }
-      })
+      () => shaderWebBackground.shade({})
     );
   </script>
 </head>

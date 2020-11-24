@@ -25,9 +25,13 @@
   <script>
     shouldThrow(
       new shaderWebBackground.ConfigError(
-        "At least one <script type=\"x-shader/x-fragment\"> required in document head"
+        "Missing shader source: <script type=\"x-shader/x-fragment\" id=\"image\">"
       ),
-      () => shaderWebBackground.shade()
+      () => shaderWebBackground.shade({
+        shaders: {
+          image: {}
+        }
+      })
     );
   </script>
 </head>

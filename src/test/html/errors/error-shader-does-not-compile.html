@@ -29,7 +29,11 @@
       new shaderWebBackground.GlError(
         "Cannot compile shader - image: ERROR: 1:1: '' : syntax error"
       ),
-      () => shaderWebBackground.shade()
+      () => shaderWebBackground.shade({
+        shaders: {
+          image: {}
+        }
+      })
     );
   </script>
 </head>

@@ -28,7 +28,7 @@
   <script>
     shouldThrow(
       new shaderWebBackground.ConfigError(
-        "No shader source with id: image"
+        "Missing shader source: <script type=\"x-shader/x-fragment\" id=\"image\">"
       ),
       () => shaderWebBackground.shade({
         shaders: {
