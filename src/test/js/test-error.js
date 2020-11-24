@@ -58,8 +58,8 @@ function shouldThrow(expectedError, call) {
   }
 
   window.addEventListener("DOMContentLoaded", () => {
-    document.body.append(report);
     appendSource();
-  });
+    document.body.prepend(report);
+  }, true);
 
 }
