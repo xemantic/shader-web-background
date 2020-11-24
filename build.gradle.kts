@@ -31,21 +31,74 @@ repositories {
   jcenter()
 }
 
+val charset = Charsets.UTF_8
+
+fun getMapJsBackPath(path: String) =
+    path.count { char -> char == '/' }
+        .let { count -> "../".repeat(count) }
+
+fun updateEmbeddedLib(
+    libOccurrence: Regex,
+    code: String,
+    distDir: String,
+    mapJsPath: String,
+    path: String
+) = File(path).let { file ->
+  file.writeText(
+      file.readText(charset)
+          .replaceFirst(
+              libOccurrence,
+              code.replaceFirst(
+                  mapJsPath,
+                  "${getMapJsBackPath(path)}$distDir/$mapJsPath"
+              )
+          )
+      ,
+      charset
+  )
+}
+
+fun updateEmbeddedLibs(
+    libOccurrence: Regex,
+    distDir: String,
+    distJs: String,
+    mapJsPath: String,
+    vararg paths: String
+) = File(distDir, distJs).readText(charset).let { code ->
+  paths.forEach { path ->
+    updateEmbeddedLib(
+        libOccurrence,
+        code,
+        distDir,
+        mapJsPath,
+        path
+    )
+  }
+}
+
+
 task("compileJs", JavaExec::class) {
   group = "js"
   main = "com.google.javascript.jscomp.CommandLineRunner"
+
+  val sourceDir = "src/main/js"
+  val outputDir = "dist"
+  val outputJs = "shader-web-background.min.js"
+  val outputJsMap = "$outputJs.map"
+  val namespace = "shaderWebBackground"
+  val wrapperBegin = "// -- https://xemantic.github.io/shader-web-background/"
+  val wrapperEnd = "//# sourceMappingURL=$outputJsMap"
+
   args = listOf(
       "--compilation_level", "ADVANCED",
-      "--js", "src/main/js/*.js",
-      "--js_output_file", "dist/shader-web-background.min.js",
-      "--create_source_map", "dist/shader-web-background.min.js.map",
-      "--source_map_location_mapping", "src/main/js|../src/main/js",
+      "--js", "$sourceDir/*.js",
+      "--js_output_file", "$outputDir/$outputJs",
+      "--create_source_map", "$outputDir/$outputJs.map",
+      "--source_map_location_mapping", "$sourceDir|../$sourceDir",
       "--language_in", "ECMASCRIPT6",
       "--language_out", "ECMASCRIPT6",
       "--output_wrapper",
-      "// -- https://xemantic.github.io/shader-web-background/\n"
-          + "const shaderWebBackground={};(()=>{%output%})()\n"
-          + "//# sourceMappingURL=shader-web-background.min.js.map",
+      "$wrapperBegin\nconst $namespace={};(()=>{%output%})()\n$wrapperEnd",
       "--jscomp_warning=accessControls",
       "--jscomp_warning=checkRegExp",
       "--jscomp_warning=constantProperty",
@@ -64,21 +117,22 @@ task("compileJs", JavaExec::class) {
   )
   classpath = sourceSets["main"].runtimeClasspath
 
-  val charset = Charsets.UTF_8
-  val libOccurrence =
-      "(?s)// -- https://xemantic\\.github\\.io/shader-web-background/.*shader-web-background\\.min\\.js\\.map\n"
-          .toRegex()
-  val lib = File("dist/shader-web-background.min.js")
-      .readText(charset)
-  fun transformHtml(html: String, lib: String) =
-      html.replaceFirst(libOccurrence, lib)
-  fun updateEmbeddedLib(path: String) = File(path).let { file ->
-    file.writeText(transformHtml(file.readText(charset), lib), charset)
-  }
+  val libOccurrence = (
+      "(?s)"
+          + wrapperBegin.replace(".", "\\.")
+          + ".*"
+          + outputJsMap.replace(".", "\\.") + "\n"
+      ).toRegex()
 
   doLast {
-    updateEmbeddedLib("index.html")
-    updateEmbeddedLib("src/test/html/minimal-embedded.html")
+    updateEmbeddedLibs(
+        libOccurrence,
+        outputDir,
+        outputJs,
+        outputJsMap,
+        "index.html",
+        "src/test/html/minimal-embedded.html"
+    )
   }
 
 }
