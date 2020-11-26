@@ -8,8 +8,6 @@ Project website (demo): https://xemantic.github.io/shader-web-background
 
 ## How to use it in your projects?
 
-Follow these steps:
-
 ### 1. Add library to your website
 
 There are several ways to do it.
@@ -32,7 +30,7 @@ See [src/test/html/minimal-embedded.html](src/test/html/minimal-embedded.html) f
 Just copy the contents of [dist/](dist) folder to your project and add
 this fragment in the `<head>` of your HTML.
 
-```
+```html
 <script src=""/>
 </script>
 ```
@@ -41,7 +39,7 @@ this fragment in the `<head>` of your HTML.
 
 You will need at least one fragment shader defined like this:
 
-```
+```html
 <script type="x-shader/x-fragment" id="image">
   #ifdef GL_ES
   precision highp float;
@@ -70,6 +68,8 @@ shaderWebBackground.shade({
 });
 </script>
 ```
+
+Note: the shader name `image` should match the one defined as shader `id` attribute. 
 
 ### 4. Specify fallback (optional)
 
@@ -103,6 +103,9 @@ shader named `image`. A new static
 `<canvas id="shader-web-background">` element covering the whole viewport
 will be added to the page.
 
+Note: the default canvas element will be attached to document `<body>` only when the
+whole DOM tree is constructed. Also the actual rendering of shader frames will not
+happen until the HTML is fully loaded.
 
 ### Configuring shader uniforms
 
@@ -132,7 +135,7 @@ shaderWebBackground.shade({
 The `(gl, loc) => gl.uniform1f(loc, performance.now() / 1000)` function will
 be invoked before each frame. 
 
-Note: if you will forget to declare a uniform, or make a type, then specific exception
+Note: if you will forget to declare a uniform, or make a typo, then specific exception
 informing you about it will be thrown. See
 [error-no-configuration-of-shader-uniform](src/test/html/errors/error-no-configuration-of-shader-uniform.html)
 and
@@ -193,26 +196,111 @@ called when the shading is started with the `shaderWebBackground.shade(config)` 
 
 #### onFrameComplete
 
+The `onFrameComplete` function is invoked when scheduling of the rendering of the whole
+animation frame is finished. It can be used to increment frame counters, etc. 
+
+
 #### shaders
 
 Many shaders can be defined by name under `shaders` config attribute. All together they
-will establish rendering pipeline processed in sequence. The last of defined shaders will
-render to screen.   
+will establish rendering pipeline processed in sequence called `Multipass` in Shadertoy
+nomenclature. The last of defined shaders will render to screen. The output of previous
+shaders, including feedback loop of the previous frame rendered by the same shader,
+can be easily passed to uniforms, here is an example using Shadertoy naming conventions: 
 
-The `onFrameComplete` function is invoked when scheduling of the rendering of the whole
-animation frame is finished. It can be used to increment frame counters, etc. 
-  
+```javascript
+shaderWebBackground.shade({
+  shaders: {
+    BufferA: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // previous frame of self
+      }
+    },
+    BufferB: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB) // previous frame of self
+      }
+    },
+    Image: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB) // latest output
+      }
+    }
+  }
+});
+```
+
+The `iChannelN` uniforms are defined in GLSL as follows:
+
+```glsl
+uniform sampler2D iChannelN;
+```
+
+The uniform setter function `(gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferX)`
+is the same as the one used for providing other uniforms, but in this case optional
+3rd parameter `ctx` is provided. The `ctx.texture()` call can take either `WebGLTexture`
+instance or the instance of `shader-web-background` internal context from which proper
+input or output texture of a buffer will be selected. The buffers can be
+accessed through `ctx.buffers` object. Names of the attributes in this object will
+match the names of attributes defined in `shaders` config attribute, except for the
+last shader which is not offscreen and cannot be accessed as a texture.
+ 
+#### Uniform setter  
+
+The uniform setter function example:
+
+```
+(
+  gl,     // the WebGLContext instance
+  loc,    // the WebGLUniformLocation instace assigned with this uniform 
+  ctx     // the context object
+) => {}
+```
+
+The `gl` and the `loc` parameters are WebGL specific which allows performing low level
+operation. In most cases it will be very simple uniform setting which can be
+used idiomatically:
+
+```javascript
+(gl, loc) => gl.uniform1f(loc, uniformValue)
+```
+
+See the full specification here:
+https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform
+
+The `loc` `WebGLUniformLocation` instance is provided according to the uniform
+location taken from compiled shader program.
+
+The optional `ctx` parameter represents internal context of the library and will have
+the following structure:
+
+```javascript
+{
+  buffers: {
+    BufferA: buffer_a,
+    // ...
+    BufferN: buffer_n,
+  },
+  texture: (loc, textureOrBuffer) => {}
+}
+```
+
+The `buffer_n` instances are used just as references to be possibly passed to the
+`texture` function. If we are injecting a buffer to the shader of the same buffer,
+the previous texture generated by this shader will be used. Otherwise the most recent
+generated output texture will be used.
+
+Another valid argument type to be passed to the `texture` function is an instance
+of `WebGLTexture`. It can represent for example a frame taken from the webcam input. 
+ 
 
 #### Configuration errors
 
-Several validations are being performed on supplied configuration
-to avoid common problems which are usually hard to debug otherwise.
-The library checks if
-
-* shaders are defined at all
-* shader `<script>` elements have unique `id` attributes
-* shaders specified in configuration have names matching these defined `id`s
-* shaders compile
+Several validations are being performed on supplied configuration to avoid common problems
+which are usually hard to debug otherwise. The
+[src/test/html/errors/](src/test/html/errors) folder contains all the error test cases.
 
 
 ### 3. Adding own uniforms
