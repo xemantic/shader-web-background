@@ -213,19 +213,19 @@ shaderWebBackground.shade({
   shaders: {
     BufferA: {
       uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // previous frame of self
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)  // previous frame of self
       }
     },
     BufferB: {
       uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB) // previous frame of self
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // previous frame of self
       }
     },
     Image: {
       uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA) // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB) // latest output
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // latest output
       }
     }
   }
