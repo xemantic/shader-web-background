@@ -156,15 +156,15 @@ Here is the full example of configuration object:
   onResize: (widht, height) => {}, // the function called on resizing the window
   onFrameComplete: () => {},       // the function called on completing the frame
   shaders: {
-    shader1 {
+    shader1: {
       uniforms: {
         uniform1: (gl, loc, ctx) => {},
         // ...
         uniformN: (gl, loc, ctx) => {}
       }
-    }
+    },
     // ...
-    shaderN {
+    shaderN: {
       uniforms: {
         uniform1: (gl, loc, ctx) => {},
         // ...
