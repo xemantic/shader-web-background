@@ -301,6 +301,9 @@ of `WebGLTexture`. It can represent for example a frame taken from the webcam in
 Several validations are being performed on supplied configuration to avoid common problems
 which are usually hard to debug otherwise. The
 [src/test/html/errors/](src/test/html/errors) folder contains all the error test cases.
+These test cases can be also accessed directly on project GitHub page:
+
+https://xemantic.github.io/shader-web-background/src/test/html/errors/
 
 
 ### 3. Adding own uniforms
@@ -371,35 +374,47 @@ the Shadertoy code looks as follows:
 
 ```html
 <script type="x-shader/x-fragment" id="Image">
-    #ifdef GL_ES
-    precision highp float;
-    #endif
+  #ifdef GL_ES
+  precision highp float;
+  #endif
     
-    uniform vec2 R;
-    uniform float T;
-    uniform int F;
+  uniform vec2  iResolution;
+  uniform float iTime;
     
-    #define iResolution R
-    #define iTime T
-    #define iFrame T
-    
-    
-    // -- Paste your Shadertoy code here:
-    // ...
-    // -- End of Shadertoy code
+  // -- Paste your Shadertoy code here:
+  // ...
+  // -- End of Shadertoy code
     
     
-    void main() {
-        mainImage(gl_FragColor, gl_FragCoord.xy);
-    }
+  void main() {
+    mainImage(gl_FragColor, gl_FragCoord.xy);
+  }
 </script>
 ```
 
-You should put the `<script type="x-shader/x-fragment" id="...">` in the `<head>` of your HTML
-document. The `id` attribute is required but can have any value.
+The `id` attribute of the `<script>` is set to reflect Shadertoy tab called `Image`.
+Most shaders will use at least these 2 uniforms, so we have to provide them as well in the
+configuration:
 
-Also take a look at [src/test/html/shadertoy-default.html](src/test/html/shadertoy-default.html)
+```javascript
+var canvasWidth = 0;
+var canvasHeight = 0;
 
+shaderWebBackground.shade({
+  onResize: (width, height) => {
+    canvasWidth = width;
+    canvasHeight = height;
+  },
+  shaders: {
+    Image: {
+      uniforms: {
+        iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+        iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+      }
+    }
+  }
+});
+```
 
 ### What to do with Shadertoy "Common" tab?
 
@@ -463,17 +478,11 @@ a unique id attribute, which will be used to wire them together.
 ```
 
 The `<shader>` element id's are arbitrary, but you might want to name them after names of
-Shadertoy tabs. They must match the names of properties defined in the parent `shaders` property
-of the configuration object which is supplied to `shaderWebBackground.shadeOnLoad`.
+Shadertoy tabs. They must match the names configured `shaders`.
 
 Shadertoy is binding textures under
 `iChannel`*n* uniforms. In the example above additional specified `uniform sampler2D iChannel0`
-code needs texture uniform binding. The `ctx.texture(loc, texture)` will do the trick.
-In case of creating feedback-loop shader, to avoid reading and writing to the same texture,
-we have to differentiate between `in` texture and `out` texture associated with each offscreen
-buffer. Each 
-
-Usually you want to define the texture uniform 
+code needs texture uniform binding.
 
 ## Tips
 
@@ -493,7 +502,29 @@ and transpile them into minified JavaScript files:
 
  * [dist/shader-web-background.min.js](dist/shader-web-background.min.js)
  * [dist/shader-web-background.min.js.map](dist/shader-web-background.min.js.map)
- 
+
+
+## Contributing
+
+### Code conventions
+
+Originally this project was developed using
+[IntelliJ IDEA](https://www.jetbrains.com/idea/) with
+[google-java-format](https://plugins.jetbrains.com/plugin/8527-google-java-format)
+plugin enabled. The most noticeable element of this style are 2 spaces
+instead of 4 for rendering tabs. 
+
+### Adding your project to the list of project using this library
+
+Either:
+ * fork this repo
+ * open [index.html](index.html) and scroll to `<section id="projects-using-shader-web-background">`
+ * add your project to the list
+ * create pull-request
+
+Or send me a link with description.
+
+
 ## TODO
 
  * fix iOS retina resolution uniforms, like it is done in glslCanvas
