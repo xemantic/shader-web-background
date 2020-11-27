@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright 2020  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Error test cases of shader-web-background</title>
+</head>
+<body>
+<h1>Error test cases of shader-web-background</h1>
+<script>
+  const thisDirInGitHubApi = "https://api.github.com/repos/"
+    + "xemantic/"
+    + "shader-web-background/"
+    + "contents/"
+    + "src/test/html/errors";
+  const ul = document.createElement("ul");
+  document.body.append(ul);
+  fetch(thisDirInGitHubApi)
+    .then(response => response.json())
+    .then(data => {
+      for (const file of data) {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = file.name;
+        link.append(document.createTextNode(file.name));
+        li.append(link);
+        ul.append(li);
+      }
+    });
+</script>
+</body>
+</html>
