@@ -36,10 +36,10 @@
     .then(response => response.json())
     .then(data => {
       for (const file of data) {
-        const li = document.createElement("li");
         const link = document.createElement("a");
         link.href = file.name;
-        link.append(document.createTextNode(file.name));
+        link.append(file.name);
+        const li = document.createElement("li");
         li.append(link);
         ul.append(li);
       }
