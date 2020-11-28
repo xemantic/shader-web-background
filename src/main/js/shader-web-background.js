@@ -112,9 +112,10 @@ function doOrWaitFor(eventType, call) {
  * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !Shader>} shaders
  * @param {function(!number, !number)|undefined} onResize
+ * @param {function()|undefined} onBeforeFrame
  * @param {function()|undefined} onFrameComplete
  */
-function doShade(canvas, shaders, onResize, onFrameComplete) {
+function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
 
   const contextAttrs = {
     antialias: false,
@@ -160,9 +161,14 @@ function doShade(canvas, shaders, onResize, onFrameComplete) {
       if (onResize) {
         onResize(width, height);
       }
+
       programs.forEach(program =>
         program.init(width, height)
       );
+    }
+
+    if (onBeforeFrame) {
+      onBeforeFrame();
     }
 
     programs.forEach(program =>
@@ -204,6 +210,7 @@ function shade(config) {
       canvas,
       config.shaders,
       config.onResize,
+      config.onBeforeFrame,
       config.onFrameComplete
     );
   } catch (/** @type {!Error} */ e) {

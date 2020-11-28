@@ -65,6 +65,7 @@ var Shader;
  *   canvas:          (HTMLCanvasElement|undefined),
  *   fallback:        (boolean|undefined),
  *   onResize:        (function(!number, !number)|undefined),
+ *   onBeforeFrame:   (function()|undefined),
  *   onFrameComplete: (function()|undefined),
  *   shaders:         (!Object<string, !Shader>),
  * }}

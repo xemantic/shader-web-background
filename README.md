@@ -154,6 +154,7 @@ Here is the full example of configuration object:
   canvas:   myCanvas,              // supplied HTMLCanvasElement to use 
   fallback: true,                  // boolean, default: false
   onResize: (widht, height) => {}, // the function called on resizing the window
+  onBeforeFrame: () => {},         // the function called before each frame
   onFrameComplete: () => {},       // the function called on completing the frame
   shaders: {
     shader1: {
@@ -531,3 +532,4 @@ Or send me a link with description.
  * add metadata, like open graph tags, to index.html
  * create project social media graphics
  * create project favicons
+ * provide example with multiple canvases
