@@ -21,6 +21,7 @@
 
 const
   SHADER_SCRIPT_TYPE = "x-shader/x-fragment",
+  CANVAS_ELEMENT_ID = "shader-web-background",
   FALLBACK_CLASS = "fallback",
   VERTEX_ATTRIBUTE = "V",
   VERTEX_SHADER = `attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}`;
@@ -50,6 +51,7 @@ function newBackgroundCanvas() {
     /** @type {!HTMLCanvasElement} */
     (document.createElement("canvas"));
   const style = canvas.style;
+  canvas.id = CANVAS_ELEMENT_ID;
   style.width = "100vw";
   style.height = "100vh";
   style.position = "fixed";
