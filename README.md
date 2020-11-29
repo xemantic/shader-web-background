@@ -1,3 +1,45 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [shader-web-background](#shader-web-background)
+  - [Features](#features)
+  - [How to use it in your projects?](#how-to-use-it-in-your-projects)
+    - [1. Add library to your website](#1-add-library-to-your-website)
+      - [a) Embedded minified library code to the source of your website](#a-embedded-minified-library-code-to-the-source-of-your-website)
+      - [b) Reference the minified library](#b-reference-the-minified-library)
+      - [c) Reference the sources directly](#c-reference-the-sources-directly)
+      - [d) Copy the library into your project](#d-copy-the-library-into-your-project)
+    - [2. Add your fragment shaders](#2-add-your-fragment-shaders)
+    - [3. Start shading](#3-start-shading)
+    - [4. Specify fallback (optional)](#4-specify-fallback-optional)
+  - [How to configure shading?](#how-to-configure-shading)
+    - [Configuring shader uniforms](#configuring-shader-uniforms)
+    - [shader-web-background API](#shader-web-background-api)
+      - [canvas](#canvas)
+      - [fallback](#fallback)
+      - [onResize](#onresize)
+      - [onFrameComplete](#onframecomplete)
+      - [shaders](#shaders)
+      - [Uniform setter](#uniform-setter)
+      - [Configuration errors](#configuration-errors)
+    - [3. Adding own uniforms](#3-adding-own-uniforms)
+  - [Setting uniforms](#setting-uniforms)
+    - [Custom uniforms](#custom-uniforms)
+      - [1. Specify uniform in your shader](#1-specify-uniform-in-your-shader)
+      - [2. Provide uniform value in JavaScript](#2-provide-uniform-value-in-javascript)
+  - [Shadertoy compatibility](#shadertoy-compatibility)
+    - [What to do with Shadertoy "Common" tab?](#what-to-do-with-shadertoy-common-tab)
+    - [How can I handle "Multipass" Shadertoy shaders?](#how-can-i-handle-multipass-shadertoy-shaders)
+  - [Tips](#tips)
+  - [Building](#building)
+  - [Contributing](#contributing)
+    - [Code conventions](#code-conventions)
+    - [Adding your project to the list of project using this library](#adding-your-project-to-the-list-of-project-using-this-library)
+  - [TODO](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # shader-web-background
 Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
 pixel feedback loops on offscreen floating point textures.
