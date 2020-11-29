@@ -46,6 +46,9 @@ pixel feedback loops on offscreen floating point textures.
 
 Project website (demo): https://xemantic.github.io/shader-web-background
 
+<!-- START doctoc -->
+<!-- END doctoc -->
+
 ## Features
 
 ## How to use it in your projects?
