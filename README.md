@@ -1,3 +1,10 @@
+# shader-web-background
+
+Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
+pixel feedback loops on offscreen floating point textures.
+
+Project website (demo): https://xemantic.github.io/shader-web-background
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -39,15 +46,6 @@
   - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# shader-web-background
-Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
-pixel feedback loops on offscreen floating point textures.
-
-Project website (demo): https://xemantic.github.io/shader-web-background
-
-<!-- START doctoc -->
-<!-- END doctoc -->
 
 ## Features
 
