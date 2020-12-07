@@ -105,6 +105,18 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
       );
     }
 
+    // draw circle
+    float drawCircle(
+    in vec2 st,
+    in vec2 center,
+    in float radius,
+    in float edgeSmoothing
+    ) {
+      float dist = length((st - center) / radius);
+      return dist * smoothstep(1., 1. - edgeSmoothing, dist);
+    }
+    // draw circle
+
     // draw blob
     float drawBlob(
       in vec2 st,
