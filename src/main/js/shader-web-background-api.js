@@ -27,6 +27,13 @@
 const shaderWebBackground = {};
 
 /**
+ * @typedef {
+ *   function(!WebGLRenderingContext)
+ * }
+ */
+var TextureInitializer;
+
+/**
  * @typedef {Object}
  */
 var Buffer;
@@ -55,6 +62,7 @@ var UniformSetters;
 
 /**
  * @typedef {{
+ *   texture:  (TextureInitializer|undefined),
  *   uniforms: (UniformSetters|undefined)
  * }}
  */

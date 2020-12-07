@@ -139,7 +139,8 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
       glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
       VERTEX_ATTRIBUTE,
       (shaders[id].uniforms) || {},
-      (index++ < imageShaderIndex) // is buffered?
+      (index++ < imageShaderIndex), // is buffered?
+      shaders[id].texture
     ));
   }
 

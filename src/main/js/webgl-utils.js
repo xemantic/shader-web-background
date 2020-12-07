@@ -200,9 +200,10 @@ class GlWrapper {
    * @param {!string} vertexAttribute
    * @param {!UniformSetters} uniformSetters
    * @param {!boolean} buffered
+   * @param {TextureInitializer|undefined} textureInitializer
    * @return {!ProgramWrapper}
    */
-  wrapProgram(id, program, vertexAttribute, uniformSetters, buffered) {
+  wrapProgram(id, program, vertexAttribute, uniformSetters, buffered, textureInitializer) {
     const gl = this.gl;
 
     /** @type {!Object<string, !UniformEntry>} */
@@ -239,7 +240,7 @@ class GlWrapper {
 
     let buffer = null;
     if (buffered) {
-      buffer = new DoubleBuffer(gl, this.strategy);
+      buffer = new DoubleBuffer(gl, this.strategy, textureInitializer);
       this.buffers[id] = buffer;
     }
 
@@ -356,11 +357,13 @@ class DoubleBuffer {
   /**
    * @param {!WebGLRenderingContext} gl
    * @param {!WebGlStrategy} strategy
+   * @param {TextureInitializer|undefined} textureInitializer
    */
-  constructor(gl, strategy) {
+  constructor(gl, strategy, textureInitializer) {
     this.fbo = gl.createFramebuffer();
     this.gl = gl;
     this.strategy = strategy;
+    this.textureInitializer = textureInitializer;
     /** @type {WebGLTexture} */
     this.in = null;
     /** @type {WebGLTexture} */
@@ -387,10 +390,7 @@ class DoubleBuffer {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     this.strategy.setUpTexture(width, height);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    if (this.textureInitializer) this.textureInitializer(gl);
     gl.bindTexture(gl.TEXTURE_2D, null);
     return texture;
   }
