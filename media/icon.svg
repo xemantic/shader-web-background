@@ -15,7 +15,7 @@
    inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    sodipodi:docname="icon.svg">
   <style
-     id="style833"></style>
+     id="style833" />
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -23,7 +23,7 @@
      pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="18.581796"
      inkscape:cx="4.8794975"
@@ -33,7 +33,7 @@
      inkscape:document-rotation="0"
      showgrid="false"
      units="px"
-     inkscape:pagecheckerboard="false"
+     inkscape:pagecheckerboard="true"
      inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
