@@ -301,8 +301,9 @@ class ProgramWrapper {
         /** @type {!WebGLTexture|!Buffer} */ texture
       ) => {
         const tex = (texture instanceof DoubleBuffer)
-          ? ((texture === this.buffer) ? texture.in : texture.out)
+          ? texture.out
           : /** @type {!WebGLTexture} */ (texture);
+
         gl.activeTexture(gl.TEXTURE0 + this.textureCount);
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.uniform1i(loc, this.textureCount++);
@@ -325,14 +326,18 @@ class ProgramWrapper {
    */
   draw(drawer) {
     const gl = this.gl;
+
     gl.useProgram(this.program);
+
     for (const name in this.uniforms) {
       const uniform = this.uniforms[name];
       uniform.setter(gl, uniform.location, this.context);
     }
 
-    if (this.buffer) {
-      this.buffer.draw(drawer);
+    const buffer = this.buffer;
+    if (buffer) {
+      buffer.swapTextures();
+      buffer.draw(drawer);
     } else {
       drawer();
     }
@@ -342,12 +347,6 @@ class ProgramWrapper {
       gl.bindTexture(gl.TEXTURE_2D, null);
     }
     this.textureCount = 0;
-  }
-
-  afterFrame() {
-    if (this.buffer) {
-      this.buffer.swapTextures();
-    }
   }
 
 }

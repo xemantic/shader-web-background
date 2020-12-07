@@ -175,10 +175,6 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
       program.draw(() => glWrapper.drawQuad(program.vertex))
     );
 
-    programs.forEach(program =>
-      program.afterFrame()
-    );
-
     if (onFrameComplete) {
       onFrameComplete();
     }
