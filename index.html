@@ -323,6 +323,9 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
       color: white;
       background: rgba(255, 0, 255, .3);
       transition: color 2s, background 2s;
+      padding: .31rem .13rem;
+      margin: -.31rem -.13rem;
+      border-radius: .4rem;
     }
     a:hover {
       color: black;
@@ -490,21 +493,22 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
   </header>
   <nav class="scroll-to-intro"><a href="#intro"></a></nav>
   <section id="intro">
-    <a href="#intro"><h2>I want this magic on my website!</h2></a>
+    <h2>I want this magic on my website!</h2>
     <p>
-      And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is here for you.
-      If you are familiar with web development, then you can just
+      And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is
+      here for you. If you are familiar with web development, then you can just
       <a href="https://github.com/xemantic/shader-web-background">use it as a library</a>. But don't
       worry if you don't - <a href="https://xemantic.com/">xemantic can make this magic
       happen for you</a>. Especially if you need some custom shaders and generative artwork for your
       projects.
     </p>
     <p class="tea">
+      If you enjoy interacting with this creature behind, then
       <a href="https://www.buymeacoffee.com/kazik">
-        <img loading="lazy" class="tea" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Arial&outline_colour=000000&coffee_colour=FFDD00"></a>
+        <img loading="lazy" class="tea" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Arial&outline_colour=000000&coffee_colour=FFDD00">
+      </a> or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>.
     </p>
     <p>
-      If you enjoy interacting with this creature behind.
       Video synthesis merged with generative design bring
       <a href="https://en.wikipedia.org/wiki/Synesthesia">synaesthetic</a> pixel&ndash;perfect
       experience and naturally perceived fluidity of mesmerizing interactive motion.
@@ -652,7 +656,17 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
   </section>
   <section>
     <h2>Alternatives</h2>
+    <ul>
+      <li><a href="">glslCanvas</a> by Patrizio </li>
+      <li><a href="">Shadertoy</a> by Patrizio </li>
+      <li><a href="">hydra</a> is a powerhouse also supporting feedback loops, but it is focused
+        more on live coding and performance than web design.
+      </li>
+      <li>three.js
 
+      </li>
+      <li></li>
+    </ul>
   </section>
   <section>
     <h2>License</h2>
@@ -672,9 +686,10 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
     dedication and &hearts;
     <br/>
     I made it because I was missing the proper base for sharing my creative expression in the time of
-    pandemic. <em><a >Esse est percipi</a></em> - to exist is to be perceived. Our generative
-    artworks exist only when there is an audience. Therefore I hope it will be helpful for you
-    as well.
+    pandemic.
+    <em><a href="https://en.wikipedia.org/wiki/George_Berkeley">Esse est percipi</a></em> &mdash;
+    to exist is to be perceived. Our generative artworks exist only when there is an audience
+    experiencing them. Therefore I hope this project will be helpful for you as well.
   </footer>
 </body>
 </html>
