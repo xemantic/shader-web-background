@@ -248,10 +248,6 @@ function B(a,b,e){const c=a.c,d=c.createTexture();c.bindTexture(c.TEXTURE_2D,d);
         }
       },
       onFrameComplete: () => {
-        if (drawCenterY < 0) {
-                console.log("drawCenterY" + drawCenterY);
-
-        }
         drawCenterY *= .99;
       }
     });
