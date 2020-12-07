@@ -1,0 +1,124 @@
+<!--
+  ~ Copyright 2020  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Only feedback shader configured</title>
+  <script type="x-shader/x-fragment" id="feedback">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform vec2      iResolution;
+    uniform float     iMinDimension;
+    uniform sampler2D iChannel0;
+
+    // something slightly less than 1.0
+    uniform float     iFeedbackFadeRate;
+    uniform vec2      iCircleCenter;
+    uniform float     iCircleRadius;
+    uniform float     iCircleEdgeSmoothing;
+
+    void main() {
+      // Normalized coordinates in range 0..1
+      vec2 uv = gl_FragCoord.xy / iResolution;
+      // Normalized coordinates in range -1..1 on minimal axis
+      vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
+      vec3 previousColor = texture2D(iChannel0, uv).rgb;
+      previousColor *= iFeedbackFadeRate;
+      float dist = distance(iCircleCenter, st);
+      float shape = smoothstep(
+        iCircleRadius,
+        iCircleRadius - iCircleEdgeSmoothing,
+        dist
+      );
+      vec3 newColor = vec3(shape);
+      vec3 color = previousColor + newColor;
+      color = clamp(color, 0., 1.);
+      gl_FragColor = vec4(color, 1.0);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="image">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    uniform vec2      iResolution;
+    uniform sampler2D iChannel0;
+
+    void main() {
+      // this simple shader will just copy feedback buffer to screen
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
+    }
+  </script>
+  <script src="../../../dist/shader-web-background.min.js"></script>
+  <script>
+    var canvasWidth  = 0;
+    var canvasHeight = 0;
+    var minDimension = 0;
+    var time = 0;
+    var feedbackFadeRate = .97;
+    var circleCenterX = 0;
+    var circleCenterY = 0;
+    var circleRadius = .5;
+    var circleEdgeSmoothing = .1;
+
+    shaderWebBackground.shade({
+      onResize: (width, height) => {
+        canvasWidth = width;
+        canvasHeight = height;
+        minDimension = Math.min(width, height);
+      },
+      onBeforeFrame: () => {
+        time = performance.now() / 1000;
+        circleCenterX = Math.sin(time);
+        circleCenterY = Math.cos(time);
+      },
+      shaders: {
+        feedback: {
+          uniforms: {
+            iResolution:          (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iMinDimension:        (gl, loc) => gl.uniform1f(loc, minDimension),
+            iChannel0:            (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
+            iFeedbackFadeRate:    (gl, loc) => gl.uniform1f(loc, feedbackFadeRate),
+            iCircleCenter:        (gl, loc) => gl.uniform2f(loc, circleCenterX, circleCenterY),
+            iCircleRadius:        (gl, loc) => gl.uniform1f(loc, circleRadius),
+            iCircleEdgeSmoothing: (gl, loc) => gl.uniform1f(loc, circleEdgeSmoothing)
+          }
+        },
+        image: {
+          uniforms: {
+            iResolution:   (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iChannel0:     (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+          }
+        }
+      }
+    });
+  </script>
+  <link rel="stylesheet" href="demo.css" />
+  <script src="../js/print-self.js"></script>
+</head>
+<body>
+<header><h1><a href="#description">Minimal feedback loop?</a></h1></header>
+<section id="description">
+<p>Simple feedback creates motion blur</p>
+</section>
+</body>
+</html>

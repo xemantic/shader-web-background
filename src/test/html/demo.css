@@ -1,0 +1,60 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  height: 100vh;
+}
+
+header {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, .8);
+  text-shadow: 0px 4px 8px black;
+}
+
+header h1 {
+  font-size: 10rem;
+  animation: 5s ease-out 0s 1 slideInFromLeft;
+  font-weight: normal;
+}
+
+header h1 a {
+  text-decoration: none;
+  color: white;
+}
+
+@keyframes slideFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-200%) scale(.4);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+section {
+  min-height: 61.3vh;
+  background: rgba(0,0,0,.7);
+  color: white;
+}
+
+.shader-web-background.fallback {
+  background: pink;
+  content: "You need WebGL enabled browser supporting floating point texture extensions"
+}
+
+#source {
+  background: rgba(0, 0, 0, .8);
+  color: white;
+}

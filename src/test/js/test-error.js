@@ -32,7 +32,7 @@ const reportFailure = (message) => report(message, "red");
 const reportSuccess = (message) => report(message, "green");
 
 const errorsEqual = (expected, actual) =>
-  ((expected.name == actual.name) && actual.message.startsWith(expected.message));
+  ((expected.name === actual.name) && actual.message.startsWith(expected.message));
 
 function appendSource() {
   const pre = document.createElement("pre");
