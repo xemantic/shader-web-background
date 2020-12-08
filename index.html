@@ -78,8 +78,11 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform float     iBlobEdgeSmoothing;
     uniform float     iBlob1Radius;
     uniform float     iBlob1PowFactor;
+    uniform float     iBlob1ColorPulseSpeed;
     uniform float     iBlob2Radius;
     uniform float     iBlob2PowFactor;
+    uniform float     iBlob2ColorPulseSpeed;
+    uniform float     iBlob2ColorPulseShift;
 
     const float GOLDEN_RATIO = .61803398875;
 
@@ -186,12 +189,12 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         pow(
           drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
           iBlob1PowFactor
-        ) * spectral_zucconi6(mod(iTime * .2, 1.));
+        ) * spectral_zucconi6(mod(iTime * iBlob1ColorPulseSpeed, 1.));
       drawColor +=
         pow(
-          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime + 2.),
+          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime),
           iBlob2PowFactor
-        ) * spectral_zucconi6(mod(iTime * - .2 + .5, 1.));
+        ) * spectral_zucconi6(mod(iTime * iBlob2ColorPulseSpeed + iBlob2ColorPulseShift, 1.));
 
       vec3 color = vec3(0);
       drawColor *= iDrawIntensity;
@@ -279,8 +282,11 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
             iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
             iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iBlob1ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
             iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
             iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iBlob2ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
+            iBlob2ColorPulseShift:     (gl, loc) => gl.uniform1f(loc, .5),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         },
