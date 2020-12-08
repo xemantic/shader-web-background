@@ -274,17 +274,17 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
             iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
             iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
             iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
-            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .9985),
+            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .999),
             iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
             iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
             iDrawCenter:               (gl, loc) => gl.uniform2f(loc, 0, drawCenterY),
-            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .09),
+            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .23),
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
             iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
-            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
             iBlob1ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
             iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
-            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
             iBlob2ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
             iBlob2ColorPulseShift:     (gl, loc) => gl.uniform1f(loc, .5),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
@@ -415,7 +415,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     }
     .logo g {
       fill: #ffffff;
-      opacity: .6;
+      opacity: 1;
     }
     .logo #reds {
       animation: fade-to-red 3s;
@@ -444,15 +444,18 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     }
     @keyframes fade-to-red {
       0%   { fill: #ffffff; }
-      100% { fill: #ff0000; }
+      50%  { fill: #ff0000; }
+      100% { fill: #ffffff; }
     }
     @keyframes fade-to-green {
       0%   { fill: #ffffff; }
-      100% { fill: #00ff00; }
+      50%  { fill: #00ff00; }
+      100% { fill: #ffffff; }
     }
     @keyframes fade-to-blue {
       0%   { fill: #ffffff; }
-      100% { fill: #0000ff; }
+      50%  { fill: #0000ff; }
+      100% { fill: #ffffff; }
     }
   </style>
 </head>
