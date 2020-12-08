@@ -42,18 +42,18 @@
 // -- https://xemantic.github.io/shader-web-background/
 const shaderWebBackground={};(()=>{'use strict';function p(a,b){if(!a)throw new shaderWebBackground.ConfigError(b);}function r(a){p(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");return a}function t(){const a=document.createElement("canvas"),b=a.style;a.id="shader-web-background";b.width="100vw";b.height="100vh";b.position="fixed";b.top="0";b.left="0";b.zIndex=-9999;return a}const u=a=>'<script type="x-shader/x-fragment" id="'+a+'">';
 function v(a){const b=document.getElementById(a);p(b,"Missing shader source: "+u(a));p(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source element of id "'+a+'" should be of type: '+u(a));return b.text.trim()}function w(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
-function x(a,b,d,e,c){const h=new y(a,g=>new shaderWebBackground.GlError(g)),k=[],q=Object.keys(b).length-1;let l=0;for(const g in b)k.push(z(h,g,A(h,g,v(g)),b[g].uniforms||{},l++<q,b[g].texture));a.width=0;a.height=0;const n=()=>{if(a.width!==a.clientWidth||a.height!==a.clientHeight){const g=a.clientWidth,m=a.clientHeight;a.width=g;a.height=m;h.a.viewport(0,0,h.canvas.width,h.canvas.height);d&&d(g,m);k.forEach(f=>{f.b&&(f=f.b,f.b&&f.c.deleteTexture(f.b),f.a&&f.c.deleteTexture(f.a),f.b=B(f,g,m),f.a=
-B(f,g,m))})}e&&e();k.forEach(g=>C(g,()=>{{var m=g.h;const f=h.a;f.bindBuffer(f.ARRAY_BUFFER,h.f);f.enableVertexAttribArray(m);f.vertexAttribPointer(m,2,f.FLOAT,!1,0,0);f.drawArrays(f.TRIANGLE_STRIP,0,4);f.disableVertexAttribArray(m);f.bindBuffer(f.ARRAY_BUFFER,null)}}));c&&c();requestAnimationFrame(n)};w("load",()=>requestAnimationFrame(n))}shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.ConfigError"}};
+function x(a,b,c,e,d){const h=new y(a,g=>new shaderWebBackground.GlError(g)),k=[],q=Object.keys(b).length-1;let l=0;for(const g in b)k.push(z(h,g,A(h,g,v(g)),b[g].uniforms||{},l++<q,b[g].texture));a.width=0;a.height=0;const n=()=>{if(a.width!==a.clientWidth||a.height!==a.clientHeight){const g=a.clientWidth,m=a.clientHeight;a.width=g;a.height=m;h.a.viewport(0,0,h.canvas.width,h.canvas.height);c&&c(g,m);k.forEach(f=>{f.b&&(f=f.b,f.b&&f.c.deleteTexture(f.b),f.a&&f.c.deleteTexture(f.a),f.b=B(f,g,m),f.a=
+B(f,g,m))})}e&&e();k.forEach(g=>C(g,()=>{{var m=g.h;const f=h.a;f.bindBuffer(f.ARRAY_BUFFER,h.f);f.enableVertexAttribArray(m);f.vertexAttribPointer(m,2,f.FLOAT,!1,0,0);f.drawArrays(f.TRIANGLE_STRIP,0,4);f.disableVertexAttribArray(m);f.bindBuffer(f.ARRAY_BUFFER,null)}}));d&&d();requestAnimationFrame(n)};w("load",()=>requestAnimationFrame(n))}shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.ConfigError"}};
 shaderWebBackground.GlError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.GlError"}};
-shaderWebBackground.shade=function(a){p(a,"Missing config argument");const b=a.canvas?r(a.canvas):t();p(a.shaders,"No shaders specified in config");try{x(b,a.shaders,a.onResize,a.onBeforeFrame,a.onFrameComplete)}catch(d){if(a.fallback&&d instanceof shaderWebBackground.GlError)console.log("Could not load shaders, adding fallback class to canvas"+d),b.classList.add("fallback");else throw d;}a.canvas||w("DOMContentLoaded",()=>document.body.appendChild(b))};const D=[-1,1,1,1,-1,-1,1,-1];function E(a,b){return a.f(a.a.getExtension(b),b+" extension is not supported")}class F{constructor(a,b){this.a=a;this.f=b}b(){}}class G extends F{constructor(a,b){super(a,b);this.c=E(this,"OES_texture_half_float");E(this,"OES_texture_half_float_linear")}b(a,b){const d=this.a;d.texImage2D(d.TEXTURE_2D,0,d.RGBA,a,b,0,d.RGBA,this.c.HALF_FLOAT_OES,null)}}
-class H extends F{constructor(a,b){super(a,b);E(this,"EXT_color_buffer_float")}b(a,b){const d=this.a;d.texImage2D(d.TEXTURE_2D,0,d.RGBA16F,a,b,0,d.RGBA,d.FLOAT,null)}}
-function z(a,b,d,e,c,h){const k=a.a;a.uniforms={};const q=k.getProgramParameter(d,k.ACTIVE_UNIFORMS);for(let l=0;l<q;l++){const n=k.getActiveUniform(d,l),g=e[n.name];if(!g)throw a.b('No configuration for uniform "'+n.name+'" defined in shader "'+b+'"');a.uniforms[n.name]={location:k.getUniformLocation(d,n.name),i:g}}for(const l in e)if(!(l in a.uniforms))throw a.b('No such uniform "'+l+'" defined in shader "'+b+'" - if unused it might be removed by GLSL compiler');e=null;c&&(e=new I(k,a.c,h),a.buffers[b]=
-e);return new J(k,b,d,k.getAttribLocation(d,"V"),a.uniforms,e,a.buffers)}function A(a,b,d){const e=a.a,c=K(a,b,e.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");a=K(a,b,e.FRAGMENT_SHADER,d);b=e.createProgram();e.attachShader(b,c);e.attachShader(b,a);e.linkProgram(b);return b}
-function K(a,b,d,e){const c=a.a;d=c.createShader(d);c.shaderSource(d,e);c.compileShader(d);if(!c.getShaderParameter(d,c.COMPILE_STATUS)){const h=String(c.getShaderInfoLog(d));c.deleteShader(d);b="Cannot compile shader - "+b+": "+h.trim();console.log(b+"n"+e);throw a.b(b);}return d}
-class y{constructor(a,b){var d={antialias:!1,depth:!1,alpha:!1};this.canvas=a;this.b=b;const e=(h,k)=>{if(!h)throw b(k);return h};let c=a.getContext("webgl2",d);if(c)this.c=new H(c,e);else if(c=a.getContext("webgl",d))this.c=new G(c,e);e(c,"webgl context not supported on supplied canvas element: "+a);this.a=c;a=c.createBuffer();c.bindBuffer(c.ARRAY_BUFFER,a);c.bufferData(c.ARRAY_BUFFER,new Float32Array(D),c.STATIC_DRAW);c.bindBuffer(c.ARRAY_BUFFER,null);this.f=a;this.buffers={}}}
-function C(a,b){const d=a.f;d.useProgram(a.g);for(var e in a.uniforms){var c=a.uniforms[e];c.i(d,c.location,a.c)}(e=a.b)?(c=e.a,e.a=e.b,e.b=c,c=e.c,c.bindFramebuffer(c.FRAMEBUFFER,e.h),c.framebufferTexture2D(c.FRAMEBUFFER,c.COLOR_ATTACHMENT0,c.TEXTURE_2D,e.a,0),b(),c.framebufferTexture2D(c.FRAMEBUFFER,c.COLOR_ATTACHMENT0,c.TEXTURE_2D,null,0),c.bindFramebuffer(c.FRAMEBUFFER,null)):b();for(b=0;b<a.a;b++)d.activeTexture(d.TEXTURE0+b),d.bindTexture(d.TEXTURE_2D,null);a.a=0}
-class J{constructor(a,b,d,e,c,h,k){this.f=a;this.id=b;this.g=d;this.h=e;this.uniforms=c;this.b=h;this.a=0;this.c={buffers:k,texture:(q,l)=>{l=l instanceof I?l.a:l;a.activeTexture(a.TEXTURE0+this.a);a.bindTexture(a.TEXTURE_2D,l);a.uniform1i(q,this.a++)}}}}function B(a,b,d){const e=a.c,c=e.createTexture();e.bindTexture(e.TEXTURE_2D,c);a.g.b(b,d);a.f&&a.f(e);e.bindTexture(e.TEXTURE_2D,null);return c}
-class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f=d;this.a=this.b=null}};})()
+shaderWebBackground.shade=function(a){p(a,"Missing config argument");const b=a.canvas?r(a.canvas):t();p(a.shaders,"No shaders specified in config");try{x(b,a.shaders,a.onResize,a.onBeforeFrame,a.onFrameComplete)}catch(c){if(a.fallback&&c instanceof shaderWebBackground.GlError)console.log("Could not load shaders, adding fallback class to canvas"+c),b.classList.add("fallback");else throw c;}a.canvas||w("DOMContentLoaded",()=>document.body.appendChild(b))};const D=[-1,1,1,1,-1,-1,1,-1];function E(a,b){return a.f(a.a.getExtension(b),b+" extension is not supported")}class F{constructor(a,b){this.a=a;this.f=b}b(){}}class G extends F{constructor(a,b){super(a,b);this.c=E(this,"OES_texture_half_float");E(this,"OES_texture_half_float_linear")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA,a,b,0,c.RGBA,this.c.HALF_FLOAT_OES,null)}}
+class H extends F{constructor(a,b){super(a,b);E(this,"EXT_color_buffer_float")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.FLOAT,null)}}const I=(a,b)=>a.length>=b?a:" ".repeat(b-a.length)+a;
+function z(a,b,c,e,d,h){const k=a.a;a.uniforms={};const q=k.getProgramParameter(c,k.ACTIVE_UNIFORMS);for(let l=0;l<q;l++){const n=k.getActiveUniform(c,l),g=e[n.name];if(!g)throw a.b('No configuration for uniform "'+n.name+'" defined in shader "'+b+'"');a.uniforms[n.name]={location:k.getUniformLocation(c,n.name),i:g}}for(const l in e)if(!(l in a.uniforms))throw a.b('No such uniform "'+l+'" defined in shader "'+b+'" - if unused it might be removed by GLSL compiler');e=null;d&&(e=new J(k,a.c,h),a.buffers[b]=
+e);return new K(k,b,c,k.getAttribLocation(c,"V"),a.uniforms,e,a.buffers)}function A(a,b,c){const e=a.a,d=L(a,b,e.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");a=L(a,b,e.FRAGMENT_SHADER,c);b=e.createProgram();e.attachShader(b,d);e.attachShader(b,a);e.linkProgram(b);return b}function M(a){a=a.split("\n");const b=a.length.toString().length,c=[];a.forEach((e,d)=>{c.push(I(""+d,b)+":");c.push(e);c.push("\n")});return c.join("")}
+function L(a,b,c,e){const d=a.a;c=d.createShader(c);d.shaderSource(c,e);d.compileShader(c);if(!d.getShaderParameter(c,d.COMPILE_STATUS)){const h=String(d.getShaderInfoLog(c));d.deleteShader(c);b="Cannot compile shader - "+b+": "+h;console.log(b);console.log(M(e));throw a.b(b);}return c}
+class y{constructor(a,b){var c={antialias:!1,depth:!1,alpha:!1};this.canvas=a;this.b=b;const e=(h,k)=>{if(!h)throw b(k);return h};let d=a.getContext("webgl2",c);if(d)this.c=new H(d,e);else if(d=a.getContext("webgl",c))this.c=new G(d,e);e(d,"webgl context not supported on supplied canvas element: "+a);this.a=d;a=d.createBuffer();d.bindBuffer(d.ARRAY_BUFFER,a);d.bufferData(d.ARRAY_BUFFER,new Float32Array(D),d.STATIC_DRAW);d.bindBuffer(d.ARRAY_BUFFER,null);this.f=a;this.buffers={}}}
+function C(a,b){const c=a.f;c.useProgram(a.g);for(var e in a.uniforms){var d=a.uniforms[e];d.i(c,d.location,a.c)}(e=a.b)?(d=e.a,e.a=e.b,e.b=d,d=e.c,d.bindFramebuffer(d.FRAMEBUFFER,e.h),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,e.a,0),b(),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,null,0),d.bindFramebuffer(d.FRAMEBUFFER,null)):b();for(b=0;b<a.a;b++)c.activeTexture(c.TEXTURE0+b),c.bindTexture(c.TEXTURE_2D,null);a.a=0}
+class K{constructor(a,b,c,e,d,h,k){this.f=a;this.id=b;this.g=c;this.h=e;this.uniforms=d;this.b=h;this.a=0;this.c={buffers:k,texture:(q,l)=>{l=l instanceof J?l.a:l;a.activeTexture(a.TEXTURE0+this.a);a.bindTexture(a.TEXTURE_2D,l);a.uniform1i(q,this.a++)}}}}function B(a,b,c){const e=a.c,d=e.createTexture();e.bindTexture(e.TEXTURE_2D,d);a.g.b(b,c);a.f&&a.f(e);e.bindTexture(e.TEXTURE_2D,null);return d}
+class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f=c;this.a=this.b=null}};})()
 //# sourceMappingURL=dist/shader-web-background.min.js.map
   </script>
   <script type="x-shader/x-fragment" id="feedback">
@@ -71,26 +71,44 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform float     iFeedbackZoomRate;
     uniform vec2      iFeedbackShiftVector;
     uniform float     iFeedbackFadeRate;
+    uniform float     iFeedbackColorShiftZoom;
+    uniform float     iFeedbackColorShiftImpact;
     uniform vec2      iDrawCenter;
     uniform float     iDrawIntensity;
-
+    uniform float     iBlobEdgeSmoothing;
+    uniform float     iBlob1Radius;
+    uniform float     iBlob1PowFactor;
+    uniform float     iBlob2Radius;
+    uniform float     iBlob2PowFactor;
 
     const float GOLDEN_RATIO = .61803398875;
-    const float BLOB_EDGE_SMOOTHING = .01;
 
-    // Spectral Colour Scheme By Alan Zucconi www.alanzucconi.com
-    float saturate(float x) {
+    // --- copied from: https://www.shadertoy.com/view/ls2Bz1
+
+    // Spectral Colour Schemes
+    // By Alan Zucconi
+    // Website: www.alanzucconi.com
+    // Twitter: @AlanZucconi
+    // http://www.alanzucconi.com/?p=6703
+
+    float saturate (float x)
+    {
       return min(1.0, max(0.0,x));
     }
-    vec3 saturate (vec3 x) {
+    vec3 saturate (vec3 x)
+    {
       return min(vec3(1.,1.,1.), max(vec3(0.,0.,0.),x));
     }
-    vec3 bump3y(vec3 x, vec3 yoffset) {
+
+    vec3 bump3y (vec3 x, vec3 yoffset)
+    {
       vec3 y = vec3(1.,1.,1.) - x * x;
       y = saturate(y-yoffset);
       return y;
     }
-    vec3 spectral_zucconi6(float x) {
+
+    vec3 spectral_zucconi6 (float x)
+    {
 
       const vec3 c1 = vec3(3.54585104, 2.93225262, 2.41593945);
       const vec3 x1 = vec3(0.69549072, 0.49228336, 0.27699880);
@@ -102,23 +120,17 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
 
       return
       bump3y(c1 * (x - x1), y1) +
-      bump3y(c2 * (x - x2), y2);
+      bump3y(c2 * (x - x2), y2) ;
     }
-    vec3 zucconiPow(float x) {
-      vec3 z = spectral_zucconi6(x);
-      return vec3(
-      pow(z.r, 2.2),
-      pow(z.g, 2.2),
-      pow(z.b, 2.2)
-      );
-    }
+    // --- end of copied from: https://www.shadertoy.com/view/ls2Bz1
+
 
     // draw circle
     float drawCircle(
-    in vec2 st,
-    in vec2 center,
-    in float radius,
-    in float edgeSmoothing
+      in vec2 st,
+      in vec2 center,
+      in float radius,
+      in float edgeSmoothing
     ) {
       float dist = length((st - center) / radius);
       return dist * smoothstep(1., 1. - edgeSmoothing, dist);
@@ -133,16 +145,15 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       in float angle,
       in float phase
     ) {
-      float shape = drawCircle(
+      return drawCircle(
         st,
         center,
         radius
           - sin(angle * 3. - phase * .3) * .07 * radius
           - sin(angle * 5. + phase * .7) * .05 * radius
-          - sin(angle * 7. - phase * .9) * .03 * radius,
-        BLOB_EDGE_SMOOTHING
+        ,
+        iBlobEdgeSmoothing
       );
-      return pow(shape, 20.);
     }
     // draw blob
 
@@ -155,22 +166,32 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       float drawAngle = atan(drawDelta.x, drawDelta.y);
       float drawDist = length(drawDelta);
 
-      vec3 prevColor = texture2D(iChannel0, uv - st * 0.2 * iScreenRatio).rgb;
+      vec2 colorShift = texture2D(
+        iChannel0,
+        uv - st * iFeedbackColorShiftZoom * iScreenRatio
+      ).rg;
 
-      // feedback reading
       vec2 stShift = vec2(0);
       stShift += iFeedbackZoomRate * (st - iFeedbackZoomCenter);
-      stShift += vec2(prevColor.g - .5, prevColor.r - .5) * 0.006;
+      stShift += (colorShift - .5) * iFeedbackColorShiftImpact;
       stShift += iFeedbackShiftVector;
       stShift *= iScreenRatio;
 
-      prevColor = texture2D(iChannel0, uv - stShift).rgb;
+      vec3 prevColor = texture2D(iChannel0, uv - stShift).rgb;
       prevColor *= iFeedbackFadeRate;
 
       vec3 drawColor = vec3(0);
 
-      drawColor += drawBlob(st, iDrawCenter, GOLDEN_RATIO, drawAngle, iTime) * spectral_zucconi6(mod(iTime * .2, 1.));
-      drawColor += drawBlob(st, iDrawCenter, GOLDEN_RATIO - .2, drawAngle, -iTime + 2.) * spectral_zucconi6(mod(iTime * .2 + .5, 1.));
+      drawColor +=
+        pow(
+          drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
+          iBlob1PowFactor
+        ) * spectral_zucconi6(mod(iTime * .2, 1.));
+      drawColor +=
+        pow(
+          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime + 2.),
+          iBlob2PowFactor
+        ) * spectral_zucconi6(mod(iTime * - .2 + .5, 1.));
 
       vec3 color = vec3(0);
       drawColor *= iDrawIntensity;
@@ -189,6 +210,8 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform vec2 R;uniform sampler2D T0;void main(){gl_FragColor=texture2D(T0,gl_FragCoord.xy/R);}
   </script>
   <script>
+    const GOLDEN_RATIO = .61803398875;
+
     var canvasWidth = 0;
     var canvasHeight = 0;
     var minDimension = 1;
@@ -241,17 +264,24 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
           },
           uniforms: {
-            iResolution:          (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-            iMinDimension:        (gl, loc) => gl.uniform1f(loc, minDimension),
-            iTime:                (gl, loc) => gl.uniform1f(loc, time),
-            iScreenRatio:         (gl, loc) => gl.uniform2f(loc, screenRatioX, screenRatioY),
-            iFeedbackZoomCenter:  (gl, loc) => gl.uniform2f(loc, 0, 0),
-            iFeedbackZoomRate:    (gl, loc) => gl.uniform1f(loc, .001),
-            iFeedbackShiftVector: (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
-            iFeedbackFadeRate:    (gl, loc) => gl.uniform1f(loc, .9985),
-            iDrawCenter:          (gl, loc) => gl.uniform2f(loc, 0, drawCenterY),
-            iDrawIntensity:       (gl, loc) => gl.uniform1f(loc, .05),
-            iChannel0:            (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+            iResolution:               (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iMinDimension:             (gl, loc) => gl.uniform1f(loc, minDimension),
+            iTime:                     (gl, loc) => gl.uniform1f(loc, time),
+            iScreenRatio:              (gl, loc) => gl.uniform2f(loc, screenRatioX, screenRatioY),
+            iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
+            iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
+            iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
+            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .9985),
+            iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
+            iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
+            iDrawCenter:               (gl, loc) => gl.uniform2f(loc, 0, drawCenterY),
+            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .09),
+            iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
+            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
+            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
+            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 20.),
+            iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         },
         image: {
@@ -334,7 +364,7 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       transition: color 2s, background 2s;
       padding: .31rem .13rem;
       margin: -.31rem -.13rem;
-      border-radius: .4rem;
+      border-radius: .47rem;
     }
     a:hover {
       color: black;
@@ -367,7 +397,7 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       text-align: center;
     }
     img.tea {
-      height: 2.5rem;
+      height: 1.8rem;
       vertical-align: middle;
     }
     .logo {
@@ -538,12 +568,6 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
   </section>
   <section id="features">
     <h2>Features</h2>
-    <p>
-      I designed and made this library because all the other projects doing similar things have
-      slightly different focus therefore it was not possible to achieve the aesthetics
-      I desire. It is worth mentioning them here because. they brought the inspiration and they
-      might be still more useful for your purposes:
-    </p>
     <ul>
       <li>
         <strong>simplicity</strong>: it is just rendering canvas background as fragment shader
@@ -562,8 +586,7 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         <strong>shadertoy support</strong>: including multipass shaders
       </li>
       <li>
-        <strong>floating-point textures</strong>: for offscreen buffers
-        (overcoming limitation of glslViewer)
+        <strong>floating-point precision</strong>: for offscreen buffers and feedback
       </li>
       <li>
         <strong>cross browser / cross device</strong>: either with WebGL 1 or 2, on Linux, Windows,
@@ -645,8 +668,8 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       </li>
     </ul>
     <p>
-      Missing your favorite shader? - create pull request and add it to this list. You will see how
-      easy it is.
+      Missing your favorite shader? - create pull request and add it to this list. The best way to
+      learn how <em>shader-web-background</em> works.
     </p>
   </section>
   <section id="projects-using-shader-web-background">
@@ -665,6 +688,12 @@ class I{constructor(a,b,d){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
   </section>
   <section>
     <h2>Alternatives</h2>
+    <p>
+      I designed and made this library because all the other projects doing similar things have
+      slightly different focus therefore it was not possible to achieve the aesthetics
+      I desire. It is worth mentioning them here because. they brought the inspiration and they
+      might be still more useful for your purposes:
+    </p>
     <ul>
       <li><a href="">glslCanvas</a> by Patrizio </li>
       <li><a href="">Shadertoy</a> by Patrizio </li>

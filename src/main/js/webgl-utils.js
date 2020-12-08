@@ -110,6 +110,16 @@ class WebGl2Strategy extends WebGlStrategy {
  */
 var UniformEntry;
 
+/**
+ * @param {!string} str
+ * @param {!number} targetLength
+ * @return {!string} padded string
+ */
+const padLineNumber = (str, targetLength) =>
+  (str.length >= targetLength)
+    ? str
+    : " ".repeat(targetLength - str.length) + str;
+
 class GlWrapper {
 
   /**
@@ -157,6 +167,22 @@ class GlWrapper {
   }
 
   /**
+   * @param {!string} source
+   * @return {!string} numbered source
+   */
+  getLineNumberedSource(source) {
+    const lines = source.split("\\n");
+    const maxDigits = lines.length.toString().length;
+    const buffer = [];
+    lines.forEach((line, index) => {
+      buffer.push(padLineNumber("" + index, maxDigits) + ":");
+      buffer.push(line);
+      buffer.push("\\n");
+    });
+    return buffer.join("");
+  }
+
+  /**
    * @param {!string} id
    * @param {!number} type
    * @param {!string} source
@@ -170,8 +196,9 @@ class GlWrapper {
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       const info = String(gl.getShaderInfoLog(shader));
       gl.deleteShader(shader);
-      const message = "Cannot compile shader - " + id + ": " + info.trim();
-      console.log(message + "\n" + source);
+      const message = "Cannot compile shader - " + id + ": " + info;
+      console.log(message);
+      console.log(this.getLineNumberedSource(source));
       throw this.glErrorFactory(message);
     }
     return shader;
