@@ -571,7 +571,4 @@ Or send me a link with description.
 ## TODO
 
  * fix iOS retina resolution uniforms, like it is done in glslCanvas
- * add metadata, like open graph tags, to index.html
- * create project social media graphics
- * create project favicons
  * provide example with multiple canvases
