@@ -398,8 +398,9 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       );
       display: block;
       height: 100%;
-      animation: blink 5s linear 2s infinite;
+      animation: 5s blink linear infinite;
       animation-fill-mode: both;
+      animation-delay: 10s;
     }
     a.tea {
       background: transparent;
@@ -417,28 +418,28 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     .logo {
       height: 100%;
       pointer-events: none;
-      animation: fade-in 19s;
+      animation: fade-in 20s;
       animation-fill-mode: both;
-      animation-delay: 10s;
+      animation-delay: 5s;
     }
     .logo g {
       fill: #ffffff;
       opacity: 1;
     }
     .logo #reds {
-      animation: fade-to-red 3s;
-      animation-fill-mode: forwards;
-      animation-delay: 18s;
-    }
-    .logo #greens {
-      animation: fade-to-green 3s;
-      animation-fill-mode: forwards;
-      animation-delay: 19s;
-    }
-    .logo #blues {
-      animation: fade-to-blue 3s;
+      animation: fade-to-red linear 15s infinite;
       animation-fill-mode: forwards;
       animation-delay: 20s;
+    }
+    .logo #greens {
+      animation: fade-to-green linear 15s infinite;
+      animation-fill-mode: forwards;
+      animation-delay: 21s;
+    }
+    .logo #blues {
+      animation: fade-to-blue linear 15s infinite;
+      animation-fill-mode: forwards;
+      animation-delay: 22s;
     }
     @keyframes blink {
       0%   { opacity: 0; }
@@ -451,19 +452,16 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       100% { opacity: 1; }
     }
     @keyframes fade-to-red {
-      0%   { fill: #ffffff; }
-      50%  { fill: #ff0000; }
-      100% { fill: #ffffff; }
+      0%,20%,100% { fill: #ffffff; }
+      7%,10% { fill: #ff0000; }
     }
     @keyframes fade-to-green {
-      0%   { fill: #ffffff; }
-      50%  { fill: #00ff00; }
-      100% { fill: #ffffff; }
+      0%,20%,100% { fill: #ffffff; }
+      7%,10% { fill: #00ff00; }
     }
     @keyframes fade-to-blue {
-      0%   { fill: #ffffff; }
-      50%  { fill: #0000ff; }
-      100% { fill: #ffffff; }
+      0%,20%,100% { fill: #ffffff; }
+      7%,10% { fill: #0000ff; }
     }
   </style>
 </head>
@@ -552,7 +550,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     <h2>I want this magic on my website!</h2>
     <p>
       And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is
-      here for you.
+      here for you to provide an immersive experience on the web.
     </p>
     <p>
       <a class="tea" href="https://www.buymeacoffee.com/kazik">
@@ -565,8 +563,8 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       If you are familiar with web development, then you can just
       <a href="https://github.com/xemantic/shader-web-background">use <em>shader-web-background</em>
       as a library</a>. But don't worry if you don't &mdash; <a href="https://xemantic.com/">xemantic can
-      make this magic happen for you</a>. Especially if you need some custom shaders and generative
-      artwork for your projects.
+      make this magic happen for you</a> with custom shaders and generative artwork tailored
+      to your needs.
     </p>
     <p>
       Video synthesis merged with generative design bring
