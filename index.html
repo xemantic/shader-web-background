@@ -309,9 +309,6 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     });
   </script>
   <style>
-    *, *:before, *:after {
-      box-sizing: inherit;
-    }
     html {
       box-sizing: border-box;
       background: black;
@@ -320,10 +317,14 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       scroll-behavior: smooth;
       line-height: 2rem;
     }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
     body {
+      color: white;
       overflow-x: hidden;
     }
-    body, h1, h2, h3, h4, h5, h6, p, ol, ul, blockquote {
+    body, h1, h2, p, ul, blockquote {
       margin: 0;
       padding: 0;
     }
@@ -332,18 +333,20 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       margin-bottom: .618rem;
     }
     h2 {
-      margin-top: 1.4rem;
-      margin-bottom: 1.4rem;
+      font-size: 1.5rem;
+      text-align: center;
+      margin-top: 1.618rem;
+      margin-bottom: 1.618rem;
+      line-height: 3.236rem;
     }
     section {
       background: rgba(0, 0, 0, .3);
       margin-top: 0rem;
-      margin-bottom: 2rem;
       padding-top: .618rem;
       padding-bottom: 2rem;
     }
-    h2 {
-      font-size: 1.5rem;
+    section, footer {
+      margin-bottom: 6.472rem;
     }
     header {
       height: 100vh;
@@ -354,20 +357,9 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       align-items: center;
       justify-content: center;
     }
-    section, footer {
-      color: white;
-      font-family: sans-serif;
-      margin-bottom: 4rem;
-    }
     header, section, footer {
-      padding-left:  calc(-20px + 8vw);
-      padding-right: calc(-20px + 8vw);
-    }
-    section {
-      opacity: 1;
-    }
-    section h2 {
-      text-align: center;
+      padding-left:  calc(-20px + 10vw);
+      padding-right: calc(-20px + 10vw);
     }
     a {
       text-decoration: none;
@@ -385,10 +377,14 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     ul {
       margin-left: 1.1rem;
     }
+    li {
+      margin-bottom: .618rem;
+    }
     footer {
-      font-size: .618rem;
+      font-size: .8rem;
       text-align: center;
       font-style: italic;
+      line-height: 1.618rem;
     }
     .scroll-to-intro {
       margin-top: -6vh;
@@ -405,19 +401,25 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       animation: blink 5s linear 2s infinite;
       animation-fill-mode: both;
     }
-    p.tea {
-      text-align: center;
+    a.tea {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      transition: filter 2s;
     }
-    img.tea {
+    a.tea:hover {
+      filter: invert(1);
+    }
+    a.tea > img {
       height: 1.8rem;
       vertical-align: middle;
     }
     .logo {
       height: 100%;
       pointer-events: none;
-      animation: fade-in 9s;
+      animation: fade-in 19s;
       animation-fill-mode: both;
-      // animation-delay: 10s;
+      animation-delay: 10s;
     }
     .logo g {
       fill: #ffffff;
@@ -426,17 +428,17 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     .logo #reds {
       animation: fade-to-red 3s;
       animation-fill-mode: forwards;
-      animation-delay: 8s;
+      animation-delay: 18s;
     }
     .logo #greens {
       animation: fade-to-green 3s;
       animation-fill-mode: forwards;
-      animation-delay: 9s;
+      animation-delay: 19s;
     }
     .logo #blues {
       animation: fade-to-blue 3s;
       animation-fill-mode: forwards;
-      animation-delay: 10s;
+      animation-delay: 20s;
     }
     @keyframes blink {
       0%   { opacity: 0; }
@@ -550,26 +552,32 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     <h2>I want this magic on my website!</h2>
     <p>
       And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is
-      here for you. If you are familiar with web development, then you can just
-      <a href="https://github.com/xemantic/shader-web-background">use it as a library</a>. But don't
-      worry if you don't - <a href="https://xemantic.com/">xemantic can make this magic
-      happen for you</a>. Especially if you need some custom shaders and generative artwork for your
-      projects.
+      here for you.
     </p>
-    <p class="tea">
-      If you enjoy interacting with this creature behind, then
-      <a href="https://www.buymeacoffee.com/kazik">
-        <img loading="lazy" class="tea" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Arial&outline_colour=000000&coffee_colour=FFDD00">
-      </a> or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>.
+    <p>
+      <a class="tea" href="https://www.buymeacoffee.com/kazik">
+        <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF&font_family=Arial">
+      </a>
+      or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>, If you
+      enjoy interacting with this creature behind.
+    </p>
+    <p>
+      If you are familiar with web development, then you can just
+      <a href="https://github.com/xemantic/shader-web-background">use <em>shader-web-background</em>
+      as a library</a>. But don't worry if you don't &mdash; <a href="https://xemantic.com/">xemantic can
+      make this magic happen for you</a>. Especially if you need some custom shaders and generative
+      artwork for your projects.
     </p>
     <p>
       Video synthesis merged with generative design bring
       <a href="https://en.wikipedia.org/wiki/Synesthesia">synaesthetic</a> pixel&ndash;perfect
       experience and naturally perceived fluidity of mesmerizing interactive motion.
-      Evolution of negentropic homeostasis emerges new artificial life forms of light.
+      Evolution of <a href="https://en.wikipedia.org/wiki/Negentropy">negentropic</a>
+      <a href="https://en.wikipedia.org/wiki/Homeostasis">homeostasis</a> emerges new
+      <a href="https://en.wikipedia.org/wiki/Artificial_life">artificial life</a> forms of light.
     </p>
   </section>
-  <section>
+  <section id="what-makes-this-magic">
     <h2>What makes this magic?</h2>
     <p>
       If you are here, you probably already learned about shaders. If not, this is the technology
@@ -604,8 +612,9 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         <strong>floating-point precision</strong>: for offscreen buffers and feedback
       </li>
       <li>
-        <strong>cross browser / cross device</strong>: either with WebGL 1 or 2, on Linux, Windows,
-        Mac, iPhone or Samsung phone. It will use optimal strategy to work wherever it's possible
+        <strong>cross browser / cross device</strong>: on Chrome, Safari, Firefox or Edge, either
+        with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone. It will use optimal
+        strategy to squeeze out what's possible from the browser and the hardware.
       </li>
       <li>
         <strong>minimal footprint</strong>: transpiled from JavaScript to JavaScript
@@ -617,7 +626,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       </li>
     </ul>
   </section>
-  <section>
+  <section id="why-is-it-fast">
     <h2>Why is it fast?</h2>
     <p>
       This website starts in milliseconds because there are no additional resources to be loaded
@@ -634,15 +643,13 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       In contrary to video&ndash;loops, generatively synthesized video signal can be also interactive.
     </p>
   </section>
-  <section>
+  <section id="demo">
     <h2>Demo</h2>
     <p>
       Examples and use cases, including custom shaders prepared for those of you who
-      <a href="https://www.buymeacoffee.com/kazik" class="tea">
-        <img loading="lazy"
-             class="tea"
-             src="https://img.buymeacoffee.com/button-api/?text=Bought me a tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Arial&outline_colour=000000&coffee_colour=FFDD00">
-      </a>
+      <a class="tea" href="https://www.buymeacoffee.com/kazik">
+        <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Bought me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF&font_family=Arial">
+      </a>:
     </p>
     <ul>
       <li>
@@ -706,7 +713,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         pull request</a>, or send a message to <a href="https://xemantic.com">xemantic</a>.
     </p>
   </section>
-  <section>
+  <section id="alternatives">
     <h2>Alternatives</h2>
     <p>
       I designed and made this library because all the other projects doing similar things have
@@ -726,7 +733,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       <li></li>
     </ul>
   </section>
-  <section>
+  <section id="license">
     <h2>License</h2>
     <p>
       The <em><nobr>shader-web-background</nobr></em> is released under GPL v 3 license which makes it suitable for Open Source
@@ -734,9 +741,12 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       the one offered by flickty.
     </p>
     <p>
-      And you can always <a href="https://www.buymeacoffee.com/kazik" class="buy-me-a-coffee">
-      <img loading="lazy" class="tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Arial&outline_colour=000000&coffee_colour=FFDD00"></a>
-      because I don't like coffee.
+      This software is open and free.
+      <a class="tea" href="https://www.buymeacoffee.com/kazik">
+        <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF&font_family=Arial">
+      </a>
+      or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>,
+      if you want to express your support.
     </p>
   </section>
   <footer>
