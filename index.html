@@ -74,6 +74,27 @@ function C(a,b){const c=a.f;c.useProgram(a.g);for(var e in a.uniforms){var d=a.u
 class K{constructor(a,b,c,e,d,h,k){this.f=a;this.id=b;this.g=c;this.h=e;this.uniforms=d;this.b=h;this.a=0;this.c={buffers:k,texture:(q,l)=>{l=l instanceof J?l.a:l;a.activeTexture(a.TEXTURE0+this.a);a.bindTexture(a.TEXTURE_2D,l);a.uniform1i(q,this.a++)}}}}function B(a,b,c){const e=a.c,d=e.createTexture();e.bindTexture(e.TEXTURE_2D,d);a.g.b(b,c);a.f&&a.f(e);e.bindTexture(e.TEXTURE_2D,null);return d}
 class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f=c;this.a=this.b=null}};})()
 //# sourceMappingURL=dist/shader-web-background.min.js.map
+
+
+    // spectral_zucconi6 by Alan Zucconi rewritten from GLSL to JS by Kazik Pogoda
+    // GLSL: https://www.shadertoy.com/view/ls2Bz1
+
+    const ONE_IN_3D = [1, 1, 1];
+    const c1 = [3.54585104, 2.93225262, 2.41593945];
+    const x1 = [0.69549072, 0.49228336, 0.27699880];
+    const y1 = [0.02312639, 0.15225084, 0.52607955];
+    const c2 = [3.90307140, 3.21182957, 3.96587128];
+    const x2 = [0.11748627, 0.86755042, 0.66077860];
+    const y2 = [0.84897130, 0.88445281, 0.73949448];
+    const saturate = (x) => Math.min(Math.max(x, 0), 1);
+    const to3d = (x) => [x, x, x];
+    const add3d = (x, y) => [x[0] + y[0], x[1] + y[1], x[2] + y[2]];
+    const subtract3d = (x, y) => [x[0] - y[0], x[1] - y[1], x[2] - y[2]];
+    const multiply3d = (x, y) => [x[0] * y[0], x[1] * y[1], x[2] * y[2]];
+    const pow23d = (x) => multiply3d(x, x);
+    const saturate3d = (x) => [saturate(x[0]), saturate(x[1]), saturate(x[2])];
+    const bump3y = (x, yoffset) => saturate3d(subtract3d(subtract3d(ONE_IN_3D, pow23d(x)), yoffset));
+    const spectral_zucconi6 = (x) => add3d(bump3y(multiply3d(c1, subtract3d(to3d(x), x1)), y1), bump3y(multiply3d(c2, subtract3d(to3d(x), x2)), y2));
   </script>
   <script type="x-shader/x-fragment" id="feedback">
     #ifdef GL_ES
@@ -97,57 +118,12 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform float     iBlobEdgeSmoothing;
     uniform float     iBlob1Radius;
     uniform float     iBlob1PowFactor;
-    uniform float     iBlob1ColorPulseSpeed;
+    uniform vec3      iBlob1Color;
     uniform float     iBlob2Radius;
     uniform float     iBlob2PowFactor;
-    uniform float     iBlob2ColorPulseSpeed;
-    uniform float     iBlob2ColorPulseShift;
-
-    const float GOLDEN_RATIO = .61803398875;
-
-    // --- copied from: https://www.shadertoy.com/view/ls2Bz1
-
-    // Spectral Colour Schemes
-    // By Alan Zucconi
-    // Website: www.alanzucconi.com
-    // Twitter: @AlanZucconi
-    // http://www.alanzucconi.com/?p=6703
-
-    float saturate (float x)
-    {
-      return min(1.0, max(0.0,x));
-    }
-    vec3 saturate (vec3 x)
-    {
-      return min(vec3(1.,1.,1.), max(vec3(0.,0.,0.),x));
-    }
-
-    vec3 bump3y (vec3 x, vec3 yoffset)
-    {
-      vec3 y = vec3(1.,1.,1.) - x * x;
-      y = saturate(y-yoffset);
-      return y;
-    }
-
-    vec3 spectral_zucconi6 (float x)
-    {
-
-      const vec3 c1 = vec3(3.54585104, 2.93225262, 2.41593945);
-      const vec3 x1 = vec3(0.69549072, 0.49228336, 0.27699880);
-      const vec3 y1 = vec3(0.02312639, 0.15225084, 0.52607955);
-
-      const vec3 c2 = vec3(3.90307140, 3.21182957, 3.96587128);
-      const vec3 x2 = vec3(0.11748627, 0.86755042, 0.66077860);
-      const vec3 y2 = vec3(0.84897130, 0.88445281, 0.73949448);
-
-      return
-      bump3y(c1 * (x - x1), y1) +
-      bump3y(c2 * (x - x2), y2) ;
-    }
-    // --- end of copied from: https://www.shadertoy.com/view/ls2Bz1
+    uniform vec3      iBlob2Color;
 
 
-    // draw circle
     float drawCircle(
       in vec2 st,
       in vec2 center,
@@ -157,9 +133,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       float dist = length((st - center) / radius);
       return dist * smoothstep(1., 1. - edgeSmoothing, dist);
     }
-    // draw circle
 
-    // draw blob
     float drawBlob(
       in vec2 st,
       in vec2 center,
@@ -177,7 +151,6 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         iBlobEdgeSmoothing
       );
     }
-    // draw blob
 
     void main() {
       vec2 uv = gl_FragCoord.xy / iResolution;
@@ -208,12 +181,12 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         pow(
           drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
           iBlob1PowFactor
-        ) * spectral_zucconi6(mod(iTime * iBlob1ColorPulseSpeed, 1.));
+        ) * iBlob1Color;
       drawColor +=
         pow(
           drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime),
           iBlob2PowFactor
-        ) * spectral_zucconi6(mod(iTime * iBlob2ColorPulseSpeed + iBlob2ColorPulseShift, 1.));
+        ) * iBlob2Color;
 
       vec3 color = vec3(0);
       drawColor *= iDrawIntensity;
@@ -232,6 +205,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform vec2 R;uniform sampler2D T0;void main(){gl_FragColor=texture2D(T0,gl_FragCoord.xy/R);}
   </script>
   <script>
+    "use strict";
     const GOLDEN_RATIO = .61803398875;
 
     var canvasWidth = 0;
@@ -244,14 +218,24 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     var time = 0;
     var feedbackShiftVectorX = 0;
     var feedbackShiftVectorY = 0;
+    var feedbackMouseShiftFactor = .003;
     var oldScrollY = 0;
     var drawCenterY = 0;
 
+    const backgroundParallaxScrollingFactor = .5;
+    const blob1ColorPulseSpeed = .07;
+    const blob2ColorPulseSpeed = .07;
+    const blob2ColorPulseShift = .5;
+    const drawCenterShiftDownScale = .99;
+
+    var blob1Color;
+    var blob2Color;
+
     document.addEventListener("mousemove", (event) => {
-       mouseX = event.clientX - .5;
-       mouseY = canvasHeight - event.clientY - .5;
-       stMouseX = (2 * mouseX - canvasWidth) / minDimension
-       stMouseY = (2 * mouseY - canvasHeight) / minDimension
+       const mouseX = event.clientX - .5;
+       const mouseY = canvasHeight - event.clientY - .5;
+       stMouseX = (2 * mouseX - canvasWidth) / minDimension;
+       stMouseY = (2 * mouseY - canvasHeight) / minDimension;
     });
 
     shaderWebBackground.shade({
@@ -269,13 +253,17 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         time = performance.now() / 1000;
         const scrollY = window.scrollY;
         const scrollYDelta = scrollY - oldScrollY;
-        feedbackShiftVectorY = scrollYDelta / canvasHeight * .5;
-        if (scrollYDelta != 0) {
-          drawCenterY += scrollYDelta / canvasHeight * .5; // TODO parametrize
+        if (scrollYDelta === 0) {
+          feedbackShiftVectorY = 0;
+        } else {
+          feedbackShiftVectorY = scrollYDelta / canvasHeight * backgroundParallaxScrollingFactor;
+          drawCenterY += feedbackShiftVectorY;
         }
         oldScrollY = scrollY;
-        feedbackShiftVectorX = stMouseX * 0.003;
-        feedbackShiftVectorY += stMouseY * 0.003;
+        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
+        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
+        blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
       },
       shaders: {
         feedback: {
@@ -301,11 +289,10 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
             iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
             iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
-            iBlob1ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
+            iBlob1Color:               (gl, loc) => gl.uniform3f(loc, blob1Color[0], blob1Color[1], blob1Color[2]),
             iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
             iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
-            iBlob2ColorPulseSpeed:     (gl, loc) => gl.uniform1f(loc, .07),
-            iBlob2ColorPulseShift:     (gl, loc) => gl.uniform1f(loc, .5),
+            iBlob2Color:               (gl, loc) => gl.uniform3f(loc, blob2Color[0], blob2Color[1], blob2Color[2]),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         },
@@ -317,7 +304,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
         }
       },
       onFrameComplete: () => {
-        drawCenterY *= .99;
+        drawCenterY *= drawCenterShiftDownScale;
       }
     });
   </script>
@@ -350,7 +337,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     }
     section {
       background: rgba(0, 0, 0, .3);
-      margin-top: 2rem;
+      margin-top: 0rem;
       margin-bottom: 2rem;
       padding-top: .618rem;
       padding-bottom: 2rem;
@@ -377,7 +364,7 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       padding-right: calc(-20px + 8vw);
     }
     section {
-      opacity: .85;
+      opacity: 1;
     }
     section h2 {
       text-align: center;
@@ -713,6 +700,11 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       <li><a href="https://industria.illutron.dk/">Industria</a> - a fully immersive seaborn Industrial Revolution
         experience onboard Illutron boat (Copenhagen)</li>
     </ul>
+    <p>
+      If you want to add your project to the list, then
+      <a href="https://github.com/xemantic/shader-web-background/edit/main/index.html">create
+        pull request</a>, or send a message to <a href="https://xemantic.com">xemantic</a>.
+    </p>
   </section>
   <section>
     <h2>Alternatives</h2>
