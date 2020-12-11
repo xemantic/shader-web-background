@@ -24,7 +24,14 @@ const
   CANVAS_ELEMENT_ID = "shader-web-background",
   FALLBACK_CLASS = "fallback",
   VERTEX_ATTRIBUTE = "V",
-  VERTEX_SHADER = `attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}`;
+  VERTEX_SHADER = `attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}`,
+  /** @type {TextureInitializer} */
+  DEFAULT_TEXTURE_INITIALIZER = (gl) => {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
 
 /**
  * @param {*} condition
@@ -139,8 +146,9 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
       glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
       VERTEX_ATTRIBUTE,
       (shaders[id].uniforms) || {},
-      (index++ < imageShaderIndex), // is buffered?
-      shaders[id].texture
+      (index++ < imageShaderIndex) // is buffered?
+        ? shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER
+        : null
     ));
   }
 
