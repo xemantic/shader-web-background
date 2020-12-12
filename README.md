@@ -12,10 +12,8 @@ multipass, pixel feedback loops on offscreen floating point textures.
 - [Features](#features)
 - [How to use it in your projects?](#how-to-use-it-in-your-projects)
   - [1. Add library to your website](#1-add-library-to-your-website)
-    - [a) Embedded minified library code to the source of your website](#a-embedded-minified-library-code-to-the-source-of-your-website)
+    - [a) Embedded minified library code in the source of your website](#a-embedded-minified-library-code-in-the-source-of-your-website)
     - [b) Reference the minified library](#b-reference-the-minified-library)
-    - [c) Reference the sources directly](#c-reference-the-sources-directly)
-    - [d) Copy the library into your project](#d-copy-the-library-into-your-project)
   - [2. Add your fragment shaders](#2-add-your-fragment-shaders)
   - [3. Start shading](#3-start-shading)
   - [4. Specify fallback (optional)](#4-specify-fallback-optional)
@@ -42,6 +40,7 @@ multipass, pixel feedback loops on offscreen floating point textures.
 - [Contributing](#contributing)
   - [Code conventions](#code-conventions)
   - [Adding your project to the list of project using this library](#adding-your-project-to-the-list-of-project-using-this-library)
+- [Tools and dependencies](#tools-and-dependencies)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
