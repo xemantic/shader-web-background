@@ -1,18 +1,14 @@
 /*
+  IR_Black-xemantic, slightly modified version of:
   IR_Black style (c) Vasily Mikhailitchenko <vaskas@programica.ru>
 */
 
 .hljs {
-  display: block;
-  overflow-x: auto;
-  padding: 0.5em;
-  background: #000;
   color: #f8f8f8;
 }
 
 .hljs-comment,
-.hljs-quote,
-.hljs-meta {
+.hljs-quote {
   color: #7c7c7c;
 }
 
@@ -70,4 +66,24 @@
 
 .hljs-strong {
   font-weight: bold;
+}
+
+.hljs-built_in {
+  color: #ffb3b3;
+}
+
+.hljs-function {
+  color: #c6c5fe;
+}
+
+.hljs-params {
+  color: #f8f8f8;
+}
+
+.hljs-attr {
+  color: #c6c5fe;
+}
+
+.hljs-meta {
+  color: #ffa31a;
 }

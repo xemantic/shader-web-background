@@ -38,7 +38,7 @@ window.addEventListener("DOMContentLoaded", _ => {
 
   const highlightStyle = document.createElement("link");
   highlightStyle.rel = "stylesheet";
-  highlightStyle.href = "../lib/highlight/styles/ir-black.css";
+  highlightStyle.href = "../lib/highlight/styles/ir-black-xemantic.css";
 
   const highlightScript = document.createElement("script");
   highlightScript.src = "../lib/highlight/highlight.pack.js"
