@@ -1,52 +1,73 @@
-* {
+/*
+ * Copyright 2020  Kazimierz Pogoda
+ *
+ * This file is part of shader-web-background.
+ *
+ * shader-web-background is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * shader-web-background is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+html {
+  box-sizing: border-box;
+  background: black;
+  font-size: calc(10px + .5vw);
+  font-family: sans-serif;
+  scroll-behavior: smooth;
+  line-height: 1.4em;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body, h1, pre {
   margin: 0;
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  height: 100vh;
-}
-
 header {
-  text-align: center;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden; /* in case logo is too big on a small screen */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, .8);
-  text-shadow: 0px 4px 8px black;
 }
 
 header h1 {
-  font-size: 10rem;
-  animation: 5s ease-out 0s 1 slideInFromLeft;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, .8);
+  text-align: center;
+  font-size: calc(50px + 6vw);
   font-weight: normal;
+  word-spacing: 100vw; /* will make sure that each word is in separate line */
+  line-height: .4em;
+  text-shadow: 0px .03em .06em black;
+  animation: fade-in 6s;
+  animation-fill-mode: both;
 }
 
 header h1 a {
   text-decoration: none;
-  color: white;
+  color: rgba(255, 255, 255, .8);
 }
 
-@keyframes slideFromTop {
-  0% {
+@keyframes fade-in {
+  0%   {
     opacity: 0;
-    transform: translateY(-200%) scale(.4);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
-}
-
-section {
-  min-height: 61.3vh;
-  background: rgba(0,0,0,.7);
-  color: white;
 }
 
 .shader-web-background.fallback {
@@ -55,6 +76,6 @@ section {
 }
 
 #source {
-  background: rgba(0, 0, 0, .8);
-  color: white;
+  background: rgba(0, 0, 0, .6);
+  overflow-x: auto;
 }

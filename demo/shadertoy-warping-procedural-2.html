@@ -20,7 +20,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>How to wrap Shadertoy code?</title>
+  <meta charset="utf-8">
+  <title>Shadertoy: Warping - procedural 2 by Inigo Quilez</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
   <script type="x-shader/x-fragment" id="Image">
     #ifdef GL_ES
     precision highp float;
@@ -144,7 +151,6 @@
       mainImage(gl_FragColor, gl_FragCoord.xy);
     }
   </script>
-  <script src="../dist/shader-web-background.min.js"></script>
   <script>
     var canvasWidth = 0;
     var canvasHeight = 0;
@@ -164,12 +170,10 @@
       }
     });
   </script>
-  <link rel="stylesheet" href="demo.css" />
-  <script src="../src/test/js/print-self.js"></script>
 </head>
 <body>
-  <header>
-    <h1><a href="#source">Shadertoy default shader</a></h1>
-  </header>
+<header>
+  <h1><a href="#source">Shadertoy Warping procedural 2 by Inigo Quilez</a></h1>
+</header>
 </body>
 </html>

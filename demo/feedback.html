@@ -20,7 +20,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Only feedback shader configured</title>
+  <meta charset="utf-8">
+  <title>How to create simple feedback loop?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
+  <!--
+    The "feedback" shader will consume own output and render a circle on top.
+   -->
   <script type="x-shader/x-fragment" id="feedback">
     #ifdef GL_ES
     precision highp float;
@@ -30,8 +40,7 @@
     uniform float     iMinDimension;
     uniform sampler2D iChannel0;
 
-    // something slightly less than 1.0
-    uniform float     iFeedbackFadeRate;
+    uniform float     iFeedbackFadeRate; // something slightly less than 1.0
     uniform vec2      iCircleCenter;
     uniform float     iCircleRadius;
     uniform float     iCircleEdgeSmoothing;
@@ -53,33 +62,40 @@
       vec3 color = previousColor + newColor;
       color = clamp(color, 0., 1.);
       gl_FragColor = vec4(color, 1.0);
-      gl_FragColor = vec4(1, 0, 0, 1);
     }
   </script>
+
+  <!--
+    The "image" shader will just copy the "feedback" output to the canvas.
+   -->
   <script type="x-shader/x-fragment" id="image">
     #ifdef GL_ES
     precision highp float;
     #endif
 
-    uniform vec2      iResolution;
+    uniform vec2 iResolution;
     uniform sampler2D iChannel0;
 
-    void main() {
-      // this simple shader will just copy feedback buffer to screen
+    void main(){
       gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
     }
   </script>
-  <script src="../dist/shader-web-background.min.js"></script>
+
+  <!--
+    Now we need to calculate uniforms before each frame, and provide them to the shaders.
+   -->
   <script>
     var canvasWidth  = 0;
     var canvasHeight = 0;
     var minDimension = 0;
     var time = 0;
-    var feedbackFadeRate = .97;
+
     var circleCenterX = 0;
     var circleCenterY = 0;
-    var circleRadius = .5;
-    var circleEdgeSmoothing = .1;
+
+    const feedbackFadeRate = .995;
+    const circleRadius = 1.;
+    const circleEdgeSmoothing = .1;
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
@@ -89,19 +105,19 @@
       },
       onBeforeFrame: () => {
         time = performance.now() / 1000;
-        circleCenterX = Math.sin(time);
-        circleCenterY = Math.cos(time);
+        circleCenterX = Math.sin(time * .3);
+        circleCenterY = Math.cos(time * .5);
       },
       shaders: {
         feedback: {
           uniforms: {
             iResolution:          (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
             iMinDimension:        (gl, loc) => gl.uniform1f(loc, minDimension),
-            iChannel0:            (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
             iFeedbackFadeRate:    (gl, loc) => gl.uniform1f(loc, feedbackFadeRate),
             iCircleCenter:        (gl, loc) => gl.uniform2f(loc, circleCenterX, circleCenterY),
             iCircleRadius:        (gl, loc) => gl.uniform1f(loc, circleRadius),
-            iCircleEdgeSmoothing: (gl, loc) => gl.uniform1f(loc, circleEdgeSmoothing)
+            iCircleEdgeSmoothing: (gl, loc) => gl.uniform1f(loc, circleEdgeSmoothing),
+            iChannel0:            (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         },
         image: {
@@ -113,13 +129,10 @@
       }
     });
   </script>
-  <link rel="stylesheet" href="demo.css" />
-  <script src="../js/print-self.js"></script>
 </head>
 <body>
-<header><h1><a href="#description">Minimal feedback loop?</a></h1></header>
-<section id="description">
-<p>Simple feedback creates motion blur</p>
-</section>
+<header>
+  <h1><a href="#source">How to create simple feedback loop ?</a></h1>
+</header>
 </body>
 </html>
