@@ -1,9 +1,9 @@
 # shader-web-background
 
 Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
-pixel feedback loops on offscreen floating point textures.
+multipass, pixel feedback loops on offscreen floating point textures.
 
-Project website (demo): https://xemantic.github.io/shader-web-background
+**Website:** https://xemantic.github.io/shader-web-background
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -48,33 +48,73 @@ Project website (demo): https://xemantic.github.io/shader-web-background
 
 ## Features
 
+* **simplicity**: it is just rendering canvas background as fragment shader.
+* **speed**: designed to be embedded in HTML and start rendering before other page resources
+  are downloaded.
+* **extensibility**: adding own interaction and controls is trivial.
+* **convenience**: straightforward API, specific errors will inform you about mistakes which are
+  otherwise hard to debug.
+* **minimal footprint**: transpiled from JavaScript to JavaScript with Google Closure Compiler.
+* **pixel feedback loops**: preserving movement in time on offscreen buffers with floating–point precision.
+* **shadertoy support**: including multipass shaders
+* **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
+
 ## How to use it in your projects?
+
+TL;DR:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Minimal shader</title>
+  <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
+  <script type="x-shader/x-fragment" id="image">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    void main() {
+      gl_FragColor = vec4(
+        mod(gl_FragCoord.x / 256., 1.),
+        mod(gl_FragCoord.x + gl_FragCoord.y / 256., 1.),
+        mod(gl_FragCoord.y / 256., 1.),
+        1.
+      );
+    }
+  </script>
+  <script>
+    shaderWebBackground.shade({
+      shaders: {
+        image: {}
+      }
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>
+```
+
+There are several ways of using this library depending on your needs:
 
 ### 1. Add library to your website
 
-There are several ways to do it.
-
-#### a) Embedded minified library code to the source of your website
+#### a) Embedded minified library code in the source of your website
 
 If you want your shaders to start rendering before any other resources are loaded,
 then go for this method. Just take the contents of
 [dist/shader-web-background.min.js](dist/shader-web-background.min.js) file and put it as
 `<script>` in the `<head>` of your HTML file.
 
-See [src/test/html/minimal-embedded.html](src/test/html/minimal-embedded.html) for reference. 
+See [demo/minimal.html](demo/minimal.html) for reference. 
 
 #### b) Reference the minified library
 
-#### c) Reference the sources directly
-
-#### d) Copy the library into your project
-
-Just copy the contents of [dist/](dist) folder to your project and add
-this fragment in the `<head>` of your HTML.
+Add to the `<head>` of your HTML:
 
 ```html
-<script src=""/>
-</script>
+<script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
 ```
 
 ### 2. Add your fragment shaders
@@ -94,9 +134,9 @@ You will need at least one fragment shader defined like this:
 ``` 
 
 Put it in the `<head>` of your HTML. The the `type` should be `x-shader/x-fragment`.
-The `id` attribute is arbitrary, 
- 
-Note: Remember to give unique `id` to each of your shaders if you are
+The `id` attribute is arbitrary. 
+
+:warning: Note: Remember to give unique `id` to each of your shaders if you are
 defining more of them.
 
 ### 3. Start shading
@@ -567,6 +607,12 @@ Either:
 
 Or send me a link with description.
 
+## Tools and dependencies
+
+* gradle as a build system
+* WebGL for OpenGL based rendering
+* Google Closure Compiler for verifying JavaScript and minimizing it
+* highligh.js for presenting code in demo folder
 
 ## TODO
 
