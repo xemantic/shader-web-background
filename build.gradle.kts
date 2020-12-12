@@ -131,7 +131,7 @@ task("compileJs", JavaExec::class) {
         outputJs,
         outputJsMap,
         "index.html",
-        "demo/minimal-embedded.html"
+        "demo/minimal.html"
     )
   }
 
