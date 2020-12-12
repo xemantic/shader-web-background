@@ -1,9 +1,9 @@
 # shader-web-background
 
-Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
-multipass, pixel feedback loops on offscreen floating point textures.
+_Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
+multipass, pixel feedback loops on offscreen floating point textures._
 
-**Website:** https://xemantic.github.io/shader-web-background
+** :fireworks: Website:** https://xemantic.github.io/shader-web-background
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -53,7 +53,8 @@ multipass, pixel feedback loops on offscreen floating point textures.
 * **extensibility**: adding own interaction and controls is trivial.
 * **convenience**: straightforward API, specific errors will inform you about mistakes which are
   otherwise hard to debug.
-* **minimal footprint**: transpiled from JavaScript to JavaScript with Google Closure Compiler.
+* **minimal footprint**: transpiled from JavaScript to JavaScript with
+  [Google Closure Compiler](https://github.com/google/closure-compiler).
 * **pixel feedback loops**: preserving movement in time on offscreen buffers with floating–point precision.
 * **shadertoy support**: including multipass shaders
 * **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
@@ -94,6 +95,11 @@ TL;DR:
 </body>
 </html>
 ```
+
+:information_source: If you are learning better by example, here is the list of demos displayed
+with their highlighted source code:
+
+https://xemantic.github.io/shader-web-background/#demo
 
 There are several ways of using this library depending on your needs:
 
