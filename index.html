@@ -59,20 +59,20 @@
   </script>
   <script>
 // -- https://xemantic.github.io/shader-web-background/
-const shaderWebBackground={};(()=>{'use strict';function p(a,b){if(!a)throw new shaderWebBackground.ConfigError(b);}function r(a){p(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");return a}function t(){const a=document.createElement("canvas"),b=a.style;a.id="shader-web-background";b.width="100vw";b.height="100vh";b.position="fixed";b.top="0";b.left="0";b.zIndex=-9999;return a}const u=a=>'<script type="x-shader/x-fragment" id="'+a+'">';
-function v(a){const b=document.getElementById(a);p(b,"Missing shader source: "+u(a));p(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source element of id "'+a+'" should be of type: '+u(a));return b.text.trim()}function w(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
-function x(a,b,c,e,d){const h=new y(a,g=>new shaderWebBackground.GlError(g)),k=[],q=Object.keys(b).length-1;let l=0;for(const g in b)k.push(z(h,g,A(h,g,v(g)),b[g].uniforms||{},l++<q,b[g].texture));a.width=0;a.height=0;const n=()=>{if(a.width!==a.clientWidth||a.height!==a.clientHeight){const g=a.clientWidth,m=a.clientHeight;a.width=g;a.height=m;h.a.viewport(0,0,h.canvas.width,h.canvas.height);c&&c(g,m);k.forEach(f=>{f.b&&(f=f.b,f.b&&f.c.deleteTexture(f.b),f.a&&f.c.deleteTexture(f.a),f.b=B(f,g,m),f.a=
-B(f,g,m))})}e&&e();k.forEach(g=>C(g,()=>{{var m=g.h;const f=h.a;f.bindBuffer(f.ARRAY_BUFFER,h.f);f.enableVertexAttribArray(m);f.vertexAttribPointer(m,2,f.FLOAT,!1,0,0);f.drawArrays(f.TRIANGLE_STRIP,0,4);f.disableVertexAttribArray(m);f.bindBuffer(f.ARRAY_BUFFER,null)}}));d&&d();requestAnimationFrame(n)};w("load",()=>requestAnimationFrame(n))}shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.ConfigError"}};
+const shaderWebBackground={};(()=>{'use strict';const p=a=>{a.texParameteri(a.TEXTURE_2D,a.TEXTURE_MIN_FILTER,a.LINEAR);a.texParameteri(a.TEXTURE_2D,a.TEXTURE_MAG_FILTER,a.LINEAR);a.texParameteri(a.TEXTURE_2D,a.TEXTURE_WRAP_S,a.CLAMP_TO_EDGE);a.texParameteri(a.TEXTURE_2D,a.TEXTURE_WRAP_T,a.CLAMP_TO_EDGE)};function r(a,b){if(!a)throw new shaderWebBackground.ConfigError(b);}function t(a){r(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");return a}
+function u(){const a=document.createElement("canvas"),b=a.style;a.id="shader-web-background";b.width="100vw";b.height="100vh";b.position="fixed";b.top="0";b.left="0";b.zIndex=-9999;return a}const v=a=>'<script type="x-shader/x-fragment" id="'+a+'">';function w(a){const b=document.getElementById(a);r(b,"Missing shader source: "+v(a));r(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source element of id "'+a+'" should be of type: '+v(a));return b.text.trim()}
+function x(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
+function y(a,b,c,e,d){const g=new z(a,h=>new shaderWebBackground.GlError(h)),m=[],l=Object.keys(b).length-1;let k=0;for(const h in b)m.push(A(g,h,B(g,h,w(h)),b[h].uniforms||{},k++<l?b[h].texture||p:null));a.width=0;a.height=0;const q=()=>{if(a.width!==a.clientWidth||a.height!==a.clientHeight){const h=a.clientWidth,n=a.clientHeight;a.width=h;a.height=n;g.a.viewport(0,0,g.canvas.width,g.canvas.height);c&&c(h,n);m.forEach(f=>{f.b&&(f=f.b,f.b&&f.c.deleteTexture(f.b),f.a&&f.c.deleteTexture(f.a),f.b=C(f,
+h,n),f.a=C(f,h,n))})}e&&e();m.forEach(h=>D(h,()=>{{var n=h.h;const f=g.a;f.bindBuffer(f.ARRAY_BUFFER,g.f);f.enableVertexAttribArray(n);f.vertexAttribPointer(n,2,f.FLOAT,!1,0,0);f.drawArrays(f.TRIANGLE_STRIP,0,4);f.disableVertexAttribArray(n);f.bindBuffer(f.ARRAY_BUFFER,null)}}));d&&d();requestAnimationFrame(q)};x("load",()=>requestAnimationFrame(q))}shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.ConfigError"}};
 shaderWebBackground.GlError=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.GlError"}};
-shaderWebBackground.shade=function(a){p(a,"Missing config argument");const b=a.canvas?r(a.canvas):t();p(a.shaders,"No shaders specified in config");try{x(b,a.shaders,a.onResize,a.onBeforeFrame,a.onFrameComplete)}catch(c){if(a.fallback&&c instanceof shaderWebBackground.GlError)console.log("Could not load shaders, adding fallback class to canvas"+c),b.classList.add("fallback");else throw c;}a.canvas||w("DOMContentLoaded",()=>document.body.appendChild(b))};const D=[-1,1,1,1,-1,-1,1,-1];function E(a,b){return a.f(a.a.getExtension(b),b+" extension is not supported")}class F{constructor(a,b){this.a=a;this.f=b}b(){}}class G extends F{constructor(a,b){super(a,b);this.c=E(this,"OES_texture_half_float");E(this,"OES_texture_half_float_linear")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA,a,b,0,c.RGBA,this.c.HALF_FLOAT_OES,null)}}
-class H extends F{constructor(a,b){super(a,b);E(this,"EXT_color_buffer_float")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.FLOAT,null)}}const I=(a,b)=>a.length>=b?a:" ".repeat(b-a.length)+a;
-function z(a,b,c,e,d,h){const k=a.a;a.uniforms={};const q=k.getProgramParameter(c,k.ACTIVE_UNIFORMS);for(let l=0;l<q;l++){const n=k.getActiveUniform(c,l),g=e[n.name];if(!g)throw a.b('No configuration for uniform "'+n.name+'" defined in shader "'+b+'"');a.uniforms[n.name]={location:k.getUniformLocation(c,n.name),i:g}}for(const l in e)if(!(l in a.uniforms))throw a.b('No such uniform "'+l+'" defined in shader "'+b+'" - if unused it might be removed by GLSL compiler');e=null;d&&(e=new J(k,a.c,h),a.buffers[b]=
-e);return new K(k,b,c,k.getAttribLocation(c,"V"),a.uniforms,e,a.buffers)}function A(a,b,c){const e=a.a,d=L(a,b,e.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");a=L(a,b,e.FRAGMENT_SHADER,c);b=e.createProgram();e.attachShader(b,d);e.attachShader(b,a);e.linkProgram(b);return b}function M(a){a=a.split("\n");const b=a.length.toString().length,c=[];a.forEach((e,d)=>{c.push(I(""+d,b)+":");c.push(e);c.push("\n")});return c.join("")}
-function L(a,b,c,e){const d=a.a;c=d.createShader(c);d.shaderSource(c,e);d.compileShader(c);if(!d.getShaderParameter(c,d.COMPILE_STATUS)){const h=String(d.getShaderInfoLog(c));d.deleteShader(c);b="Cannot compile shader - "+b+": "+h;console.log(b);console.log(M(e));throw a.b(b);}return c}
-class y{constructor(a,b){var c={antialias:!1,depth:!1,alpha:!1};this.canvas=a;this.b=b;const e=(h,k)=>{if(!h)throw b(k);return h};let d=a.getContext("webgl2",c);if(d)this.c=new H(d,e);else if(d=a.getContext("webgl",c))this.c=new G(d,e);e(d,"webgl context not supported on supplied canvas element: "+a);this.a=d;a=d.createBuffer();d.bindBuffer(d.ARRAY_BUFFER,a);d.bufferData(d.ARRAY_BUFFER,new Float32Array(D),d.STATIC_DRAW);d.bindBuffer(d.ARRAY_BUFFER,null);this.f=a;this.buffers={}}}
-function C(a,b){const c=a.f;c.useProgram(a.g);for(var e in a.uniforms){var d=a.uniforms[e];d.i(c,d.location,a.c)}(e=a.b)?(d=e.a,e.a=e.b,e.b=d,d=e.c,d.bindFramebuffer(d.FRAMEBUFFER,e.h),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,e.a,0),b(),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,null,0),d.bindFramebuffer(d.FRAMEBUFFER,null)):b();for(b=0;b<a.a;b++)c.activeTexture(c.TEXTURE0+b),c.bindTexture(c.TEXTURE_2D,null);a.a=0}
-class K{constructor(a,b,c,e,d,h,k){this.f=a;this.id=b;this.g=c;this.h=e;this.uniforms=d;this.b=h;this.a=0;this.c={buffers:k,texture:(q,l)=>{l=l instanceof J?l.a:l;a.activeTexture(a.TEXTURE0+this.a);a.bindTexture(a.TEXTURE_2D,l);a.uniform1i(q,this.a++)}}}}function B(a,b,c){const e=a.c,d=e.createTexture();e.bindTexture(e.TEXTURE_2D,d);a.g.b(b,c);a.f&&a.f(e);e.bindTexture(e.TEXTURE_2D,null);return d}
-class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f=c;this.a=this.b=null}};})()
+shaderWebBackground.shade=function(a){r(a,"Missing config argument");const b=a.canvas?t(a.canvas):u();r(a.shaders,"No shaders specified in config");try{y(b,a.shaders,a.onResize,a.onBeforeFrame,a.onFrameComplete)}catch(c){if(a.fallback&&c instanceof shaderWebBackground.GlError)console.log("Could not load shaders, adding fallback class to canvas"+c),b.classList.add("fallback");else throw c;}a.canvas||x("DOMContentLoaded",()=>document.body.appendChild(b))};const E=[-1,1,1,1,-1,-1,1,-1];function F(a,b){return a.f(a.a.getExtension(b),b+" extension is not supported")}class G{constructor(a,b){this.a=a;this.f=b}b(){}}class H extends G{constructor(a,b){super(a,b);this.c=F(this,"OES_texture_half_float");F(this,"OES_texture_half_float_linear")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA,a,b,0,c.RGBA,this.c.HALF_FLOAT_OES,null)}}
+class I extends G{constructor(a,b){super(a,b);F(this,"EXT_color_buffer_float")}b(a,b){const c=this.a;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.FLOAT,null)}}const J=(a,b)=>a.length>=b?a:" ".repeat(b-a.length)+a;
+function A(a,b,c,e,d){const g=a.a;a.uniforms={};const m=g.getProgramParameter(c,g.ACTIVE_UNIFORMS);for(let l=0;l<m;l++){const k=g.getActiveUniform(c,l),q=e[k.name];if(!q)throw a.b('No configuration for uniform "'+k.name+'" defined in shader "'+b+'"');a.uniforms[k.name]={location:g.getUniformLocation(c,k.name),i:q}}for(const l in e)if(!(l in a.uniforms))throw a.b('No such uniform "'+l+'" defined in shader "'+b+'" - if unused it might be removed by GLSL compiler');e=null;d&&(e=new K(g,a.c,d),a.buffers[b]=
+e);return new L(g,b,c,g.getAttribLocation(c,"V"),a.uniforms,e,a.buffers)}function B(a,b,c){const e=a.a,d=M(a,b,e.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");a=M(a,b,e.FRAGMENT_SHADER,c);b=e.createProgram();e.attachShader(b,d);e.attachShader(b,a);e.linkProgram(b);return b}function N(a){a=a.split("\n");const b=a.length.toString().length,c=[];a.forEach((e,d)=>{c.push(J(""+d,b)+":");c.push(e);c.push("\n")});return c.join("")}
+function M(a,b,c,e){const d=a.a;c=d.createShader(c);d.shaderSource(c,e);d.compileShader(c);if(!d.getShaderParameter(c,d.COMPILE_STATUS)){const g=String(d.getShaderInfoLog(c));d.deleteShader(c);b="Cannot compile shader - "+b+": "+g;console.log(b);console.log(N(e));throw a.b(b);}return c}
+class z{constructor(a,b){var c={antialias:!1,depth:!1,alpha:!1};this.canvas=a;this.b=b;const e=(g,m)=>{if(!g)throw b(m);return g};let d=a.getContext("webgl2",c);if(d)this.c=new I(d,e);else if(d=a.getContext("webgl",c))this.c=new H(d,e);e(d,"webgl context not supported on supplied canvas element: "+a);this.a=d;a=d.createBuffer();d.bindBuffer(d.ARRAY_BUFFER,a);d.bufferData(d.ARRAY_BUFFER,new Float32Array(E),d.STATIC_DRAW);d.bindBuffer(d.ARRAY_BUFFER,null);this.f=a;this.buffers={}}}
+function D(a,b){const c=a.f;c.useProgram(a.g);for(var e in a.uniforms){var d=a.uniforms[e];d.i(c,d.location,a.c)}(e=a.b)?(d=e.a,e.a=e.b,e.b=d,d=e.c,d.bindFramebuffer(d.FRAMEBUFFER,e.g),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,e.a,0),b(),d.framebufferTexture2D(d.FRAMEBUFFER,d.COLOR_ATTACHMENT0,d.TEXTURE_2D,null,0),d.bindFramebuffer(d.FRAMEBUFFER,null)):b();for(b=0;b<a.a;b++)c.activeTexture(c.TEXTURE0+b),c.bindTexture(c.TEXTURE_2D,null);a.a=0}
+class L{constructor(a,b,c,e,d,g,m){this.f=a;this.id=b;this.g=c;this.h=e;this.uniforms=d;this.b=g;this.a=0;this.c={buffers:m,texture:(l,k)=>{k=k instanceof K?k.a:k;a.activeTexture(a.TEXTURE0+this.a);a.bindTexture(a.TEXTURE_2D,k);a.uniform1i(l,this.a++)}}}}function C(a,b,c){const e=a.c,d=e.createTexture();e.bindTexture(e.TEXTURE_2D,d);a.f.b(b,c);a.h(e);e.bindTexture(e.TEXTURE_2D,null);return d}class K{constructor(a,b,c){this.g=a.createFramebuffer();this.c=a;this.f=b;this.h=c;this.a=this.b=null}};})()
 //# sourceMappingURL=dist/shader-web-background.min.js.map
 
 
@@ -122,7 +122,6 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     uniform float     iBlob2Radius;
     uniform float     iBlob2PowFactor;
     uniform vec3      iBlob2Color;
-
 
     float drawCircle(
       in vec2 st,
@@ -312,10 +311,10 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     html {
       box-sizing: border-box;
       background: black;
-      font-size: calc(16px + 1.5vw);
+      font-size: calc(16px + .5vw);
       font-family: sans-serif;
       scroll-behavior: smooth;
-      line-height: 2rem;
+      line-height: 2rem; /* TODO this should be em */
     }
     *, *:before, *:after {
       box-sizing: inherit;
@@ -441,6 +440,10 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       animation-fill-mode: forwards;
       animation-delay: 22s;
     }
+    .fallback {
+      background: url("media/fallback.jpg");
+      background-size: cover;
+    }
     @keyframes blink {
       0%   { opacity: 0; }
       50%  { opacity: 0; }
@@ -556,20 +559,21 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       <a class="tea" href="https://www.buymeacoffee.com/kazik">
         <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF&font_family=Arial">
       </a>
-      or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>, If you
+      or
+      <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>, If you
       enjoy interacting with this creature behind.
     </p>
     <p>
       If you are familiar with web development, then you can just
       <a href="https://github.com/xemantic/shader-web-background">use <em>shader-web-background</em>
-      as a library</a>. But don't worry if you don't &mdash; <a href="https://xemantic.com/">xemantic can
+      as a library</a>. Otherwise don't worry &mdash; <a href="https://xemantic.com/">xemantic can
       make this magic happen for you</a> with custom shaders and generative artwork tailored
       to your needs.
     </p>
     <p>
-      Video synthesis merged with generative design bring
+      Interactive video synthesis merged with generative design bring
       <a href="https://en.wikipedia.org/wiki/Synesthesia">synaesthetic</a> pixel&ndash;perfect
-      experience and naturally perceived fluidity of mesmerizing interactive motion.
+      experience and naturally perceived fluidity of mesmerizing motion.
       Evolution of <a href="https://en.wikipedia.org/wiki/Negentropy">negentropic</a>
       <a href="https://en.wikipedia.org/wiki/Homeostasis">homeostasis</a> emerges new
       <a href="https://en.wikipedia.org/wiki/Artificial_life">artificial life</a> forms of light.
@@ -578,49 +582,50 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
   <section id="what-makes-this-magic">
     <h2>What makes this magic?</h2>
     <p>
-      If you are here, you probably already learned about shaders. If not, this is the technology
-      rendering in real time the background behind this text. This projects makes it easy to
-      launch even quite complex shaders as browser elements.
+      If you are here, probably you have already learned about
+      <a href="https://en.wikipedia.org/wiki/Shader">shaders</a>.
+      This is the technology rendering in real time the background behind this text.
+      The <em>shader-web-background</em> makes it easy to include complex interactive shaders as a part of your
+      web design.
     </p>
     <p>
-      The <a href="https://github.com/xemantic/shader-web-background">GitHub repository</a>
-      documentation will guide you.
+      The documentation
+      on <a href="https://github.com/xemantic/shader-web-background">project's GitHub repository</a>
+       will guide you.
     </p>
   </section>
   <section id="features">
     <h2>Features</h2>
     <ul>
       <li>
-        <strong>simplicity</strong>: it is just rendering canvas background as fragment shader
+        <strong>simplicity</strong>: it is just rendering canvas background as fragment shader.
       </li>
       <li>
         <strong>speed</strong>: designed to be embedded in HTML and start rendering before
-        other page resources are downloaded
+        other page resources are downloaded.
       </li>
       <li>
-        <strong>extensibility</strong>: adding own interaction and controls is trivial
+        <strong>extensibility</strong>: adding own interaction and controls is trivial.
+      </li>
+      <li>
+        <strong>convenience</strong>: straightforward API, specific errors will inform you about
+        mistakes which are otherwise hard to debug.
+      </li>
+      <li>
+        <strong>minimal footprint</strong>: transpiled from JavaScript to JavaScript
+        with <a href="https://github.com/google/closure-compiler">Google Closure Compiler</a>.
       </li>
       <li>
         <strong>pixel feedback loops</strong>: preserving movement in time on offscreen buffers
+        with floating&ndash;point precision.
       </li>
       <li>
         <strong>shadertoy support</strong>: including multipass shaders
       </li>
       <li>
-        <strong>floating-point precision</strong>: for offscreen buffers and feedback
-      </li>
-      <li>
         <strong>cross browser / cross device</strong>: on Chrome, Safari, Firefox or Edge, either
-        with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone. It will use optimal
-        strategy to squeeze out what's possible from the browser and the hardware.
-      </li>
-      <li>
-        <strong>minimal footprint</strong>: transpiled from JavaScript to JavaScript
-        with Closure Compiler
-      </li>
-      <li>
-        <strong>convenience</strong>: straightforward API, specific errors will inform you about
-        mistakes which are otherwise hard to debug.
+        with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone &mdash; it will use
+        optimal strategy to squeeze out what's possible from the browser and the hardware.
       </li>
     </ul>
   </section>
@@ -632,8 +637,11 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       of this HTML page.
     </p>
     <p>
-      The shader will run on the GPU, not CPU, and contemporary devices, including our mobiles,
-      already have one. Quite rich visual effects can be achieved with relatively efficient code.
+      The shader will run on the
+      <a href="https://en.wikipedia.org/wiki/Graphics_processing_unit">GPU</a>,
+      not <a href="https://en.wikipedia.org/wiki/Central_processing_unit">CPU</a>, and contemporary
+      devices, including our mobiles, already have one. Surprisingly rich visual effects can be
+      achieved with very efficient code.
     </p>
     <p>
       Real time interactive shader offers a different perspective on compression &mdash; pure
@@ -651,40 +659,32 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
     </p>
     <ul>
       <li>
-        <a href="demo/full.html">Demo</a> &mdash; the same effect as on this page, showing
-        the potential of the whole library, relays on non-minified JS therefore it is used during
-        development.
+        <a href="demo/demo.html">demo</a> &mdash; the same effect as on this page, showing
+        the potential of the whole library, relays directly on the JS sources, therefore it is
+        used during development.
       </li>
       <li>
-        <a href="demo/full.min.html">Demo minified</a> &mdash; will use minified version
-        of the library to test against the code which will be used in the wild.
+        <a href="demo/minimal.html">minimal</a> &mdash; very basic shader background
+        without any uniforms. It is using embedded minimized version of the library instead.
       </li>
       <li>
-        <a href="demo/minimal.html">Minimal</a> &mdash; very basic shader background
-        without any uniforms.
+        <a href="demo/feedback.html">feedback</a> &mdash; simple feedback loop example.
       </li>
       <li>
-        <a href="demo/minimal-embedded.html">Minimal embedded</a> &mdash; the same as Minimal but
-        with embedded library for faster page loading.
+        <a href="demo/mouse.html">mouse</a> &mdash; simple example with mouse input.
       </li>
       <li>
-        <a href="demo/feedback.html">Feedback</a> &mdash; simple feedback loop example.
+        <a href="demo/shadertoy-default.html">shadertoy-default</a> &mdash; the template Shadertoy
+        shader showing how to include the upstream code.
       </li>
       <li>
-        <a href="demo/mouse.html">Mouse</a> &mdash; simple example with mouse input.
+        <a href="demo/shadertoy-warping-procedural-2.html">shadertoy-warping-procedural-2</a> &mdash;
+        beautiful work by the co-author of Shadertoy
+        <a href="https://www.iquilezles.org/">Inigo Quilez</a>.
       </li>
       <li>
-        <a href="demo/shadertoy-default.html">Shadertoy: default</a> &mdash; the template Shadertoy
-        shader.
-      </li>
-      <li>
-        <a href="src/test/html/shadertoy-reaction-diffusion-2-pass.html">Shadertoy: Reaction
-          Diffusion 2 Pass &mdash; multipass example</a>
-      </li>
-      <li>
-        <a href="src/test/html/shadertoy-wolfenstein3d.html">Shadertoy: Wolfenstein 3D</a>
-        &mdash; more complex shader recreating the aesthetics of the cult early 3D video
-        game.
+        <a href="demo/shadertoy-reaction-diffusion-2-pass.html">shadertoy-reaction-diffusion-2-pass</a>
+        &mdash; multipass example.
       </li>
     </ul>
     <p>
@@ -720,15 +720,12 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       might be still more useful for your purposes:
     </p>
     <ul>
-      <li><a href="">glslCanvas</a> by Patrizio </li>
+      <li><a href="https://github.com/patriciogonzalezvivo/glslCanvas">glslCanvas</a> by Patrizio </li>
       <li><a href="">Shadertoy</a> by Patrizio </li>
       <li><a href="">hydra</a> is a powerhouse also supporting feedback loops, but it is focused
         more on live coding and performance than web design.
       </li>
-      <li>three.js
-
-      </li>
-      <li></li>
+      <li><a href="https://threejs.org/">three.js</a></li>
     </ul>
   </section>
   <section id="license">
@@ -743,7 +740,8 @@ class J{constructor(a,b,c){this.h=a.createFramebuffer();this.c=a;this.g=b;this.f
       <a class="tea" href="https://www.buymeacoffee.com/kazik">
         <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF&font_family=Arial">
       </a>
-      or <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>,
+      (I don't like coffee) or
+      <a href="https://github.com/sponsors/xemantic/">sponsor xemantic on GitHub</a>,
       if you want to express your support.
     </p>
   </section>
