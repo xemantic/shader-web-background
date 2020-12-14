@@ -1,0 +1,284 @@
+<!--
+  ~ Copyright 2020  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>shader web background demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <!--
+   In your code use rather the latest library distribution, or embed the code. See the instructions:
+
+   https://github.com/xemantic/shader-web-background#how-to-use-it-in-your-projects
+
+   In the demo, the sources are referenced directly, because changes in the library are tested
+   using this HTML, since the demo is using all the features of the library.
+   -->
+  <script src="../src/main/js/shader-web-background-api.js"></script>
+  <script src="../src/main/js/webgl-utils.js"></script>
+  <script src="../src/main/js/shader-web-background.js"></script>
+  <script>
+    // spectral_zucconi6 by Alan Zucconi rewritten from GLSL to JS by Kazik Pogoda
+    // GLSL: https://www.shadertoy.com/view/ls2Bz1
+
+    const ONE_IN_3D = [1, 1, 1];
+    const c1 = [3.54585104, 2.93225262, 2.41593945];
+    const x1 = [0.69549072, 0.49228336, 0.27699880];
+    const y1 = [0.02312639, 0.15225084, 0.52607955];
+    const c2 = [3.90307140, 3.21182957, 3.96587128];
+    const x2 = [0.11748627, 0.86755042, 0.66077860];
+    const y2 = [0.84897130, 0.88445281, 0.73949448];
+    const saturate = (x) => Math.min(Math.max(x, 0), 1);
+    const to3d = (x) => [x, x, x];
+    const add3d = (x, y) => [x[0] + y[0], x[1] + y[1], x[2] + y[2]];
+    const subtract3d = (x, y) => [x[0] - y[0], x[1] - y[1], x[2] - y[2]];
+    const multiply3d = (x, y) => [x[0] * y[0], x[1] * y[1], x[2] * y[2]];
+    const pow23d = (x) => multiply3d(x, x);
+    const saturate3d = (x) => [saturate(x[0]), saturate(x[1]), saturate(x[2])];
+    const bump3y = (x, yoffset) => saturate3d(subtract3d(subtract3d(ONE_IN_3D, pow23d(x)), yoffset));
+    const spectral_zucconi6 = (x) => add3d(bump3y(multiply3d(c1, subtract3d(to3d(x), x1)), y1), bump3y(multiply3d(c2, subtract3d(to3d(x), x2)), y2));
+  </script>
+  <script type="x-shader/x-fragment" id="feedback">
+    precision highp float;
+
+    uniform vec2      iResolution;
+    uniform float     iMinDimension;
+    uniform float     iTime;
+    uniform sampler2D iChannel0;
+    uniform vec2      iScreenRatio;
+    uniform vec2      iMouse;
+    uniform vec2      iFeedbackZoomCenter;
+    uniform float     iFeedbackZoomRate;
+    uniform vec2      iFeedbackShiftVector;
+    uniform float     iFeedbackFadeRate;
+    uniform float     iFeedbackColorShiftZoom;
+    uniform float     iFeedbackColorShiftImpact;
+    uniform vec2      iDrawCenter;
+    uniform float     iDrawIntensity;
+    uniform float     iBlobEdgeSmoothing;
+    uniform float     iBlob1Radius;
+    uniform float     iBlob1PowFactor;
+    uniform vec3      iBlob1Color;
+    uniform float     iBlob2Radius;
+    uniform float     iBlob2PowFactor;
+    uniform vec3      iBlob2Color;
+
+    float drawCircle(
+      in vec2 st,
+      in vec2 center,
+      in float radius,
+      in float edgeSmoothing
+    ) {
+      float dist = length((st - center) / radius);
+      return dist * smoothstep(1., 1. - edgeSmoothing, dist);
+    }
+
+    float drawBlob(
+      in vec2 st,
+      in vec2 center,
+      in float radius,
+      in float angle,
+      in float phase
+    ) {
+      return drawCircle(
+        st,
+        center,
+        radius
+          - sin(angle * 3. - phase * .3) * .07 * radius
+          - sin(angle * 5. + phase * .7) * .05 * radius
+        ,
+        iBlobEdgeSmoothing
+      );
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / iResolution;
+      vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
+      vec2 mouseSt = (iMouse * 2. - iResolution) / iMinDimension;
+
+      vec2  drawDelta = st - iDrawCenter;
+      float drawAngle = atan(drawDelta.x, drawDelta.y);
+      float drawDist = length(drawDelta);
+
+      vec2 colorShift = texture2D(
+        iChannel0,
+        uv - st * iFeedbackColorShiftZoom * iScreenRatio
+      ).rg;
+
+      vec2 stShift = vec2(0);
+      stShift += iFeedbackZoomRate * (st - iFeedbackZoomCenter);
+      stShift += (colorShift - .5) * iFeedbackColorShiftImpact;
+      stShift += iFeedbackShiftVector;
+      stShift *= iScreenRatio;
+
+      vec3 prevColor = texture2D(iChannel0, uv - stShift).rgb;
+      prevColor *= iFeedbackFadeRate;
+
+      vec3 drawColor = vec3(0);
+
+      drawColor +=
+        pow(
+          drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
+          iBlob1PowFactor
+        ) * iBlob1Color;
+      drawColor +=
+        pow(
+          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime),
+          iBlob2PowFactor
+        ) * iBlob2Color;
+
+      vec3 color = vec3(0);
+      drawColor *= iDrawIntensity;
+      prevColor *= iFeedbackFadeRate;
+      color += prevColor;
+      color += drawColor;
+
+      color = clamp(color, 0., 1.);
+      gl_FragColor = vec4(color, 1.);
+    }
+  </script>
+
+  <!--
+    The "image" shader will just copy the "feedback" output to the canvas.
+   -->
+  <script type="x-shader/x-fragment" id="image">
+    precision highp float;
+
+    uniform vec2 iResolution;
+    uniform sampler2D iChannel0;
+
+    void main(){
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
+    }
+  </script>
+  <script>
+    "use strict";
+    const GOLDEN_RATIO = .61803398875;
+
+    var canvasWidth = 0;
+    var canvasHeight = 0;
+    var minDimension = 1;
+    var stMouseX = 0;
+    var stMouseY = 0;
+    var screenRatioX = .5;
+    var screenRatioY = .5;
+    var time = 0;
+    var feedbackShiftVectorX = 0;
+    var feedbackShiftVectorY = 0;
+    var feedbackMouseShiftFactor = .003;
+    var oldScrollY = 0;
+    var drawCenterY = 0;
+
+    const backgroundParallaxScrollingFactor = .5;
+    const blob1ColorPulseSpeed = .07;
+    const blob2ColorPulseSpeed = .07;
+    const blob2ColorPulseShift = .5;
+    const drawCenterShiftDownScale = .99;
+
+    var blob1Color;
+    var blob2Color;
+
+    document.addEventListener("mousemove", (event) => {
+       const mouseX = event.clientX - .5;
+       const mouseY = canvasHeight - event.clientY - .5;
+       stMouseX = (2 * mouseX - canvasWidth) / minDimension;
+       stMouseY = (2 * mouseY - canvasHeight) / minDimension;
+    });
+
+    shaderWebBackground.shade({
+      onResize: (width, height) => {
+        minDimension = Math.min(width, height);
+        canvasWidth = width;
+        canvasHeight = height;
+        if (width >= height) {
+          screenRatioX = height / width * .5;
+        } else {
+          screenRatioY = width / height * .5;
+        }
+      },
+      onBeforeFrame: () => {
+        time = performance.now() / 1000;
+        const scrollY = window.scrollY;
+        const scrollYDelta = scrollY - oldScrollY;
+        if (scrollYDelta === 0) {
+          feedbackShiftVectorY = 0;
+        } else {
+          feedbackShiftVectorY = scrollYDelta / canvasHeight * backgroundParallaxScrollingFactor;
+          drawCenterY += feedbackShiftVectorY;
+        }
+        oldScrollY = scrollY;
+        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
+        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
+        blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
+      },
+      shaders: {
+        feedback: {
+          texture: (gl) => {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+          },
+          uniforms: {
+            iResolution:               (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iMinDimension:             (gl, loc) => gl.uniform1f(loc, minDimension),
+            iTime:                     (gl, loc) => gl.uniform1f(loc, time),
+            iScreenRatio:              (gl, loc) => gl.uniform2f(loc, screenRatioX, screenRatioY),
+            iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
+            iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
+            iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
+            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .999),
+            iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
+            iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
+            iDrawCenter:               (gl, loc) => gl.uniform2f(loc, 0, drawCenterY),
+            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .23),
+            iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
+            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
+            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
+            iBlob1Color:               (gl, loc) => gl.uniform3f(loc, blob1Color[0], blob1Color[1], blob1Color[2]),
+            iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
+            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
+            iBlob2Color:               (gl, loc) => gl.uniform3f(loc, blob2Color[0], blob2Color[1], blob2Color[2]),
+            iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+          }
+        },
+        image: {
+          uniforms: {
+            iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+          }
+        }
+      },
+      onFrameComplete: () => {
+        drawCenterY *= drawCenterShiftDownScale;
+      }
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1><a href="#source">shader web background demo</a></h1>
+  </header>
+</body>
+</html>
