@@ -19,7 +19,7 @@
 
 "use strict";
 
-window.addEventListener("DOMContentLoaded", _ => {
+window.addEventListener("DOMContentLoaded", () => {
   const pre = document.createElement("pre");
   pre.id = "source";
   pre.classList.add("language-html");
@@ -46,7 +46,7 @@ window.addEventListener("DOMContentLoaded", _ => {
   document.head.append(highlightStyle);
   document.head.append(highlightScript);
 
-  highlightScript.onload = _ => {
+  highlightScript.onload = () => {
     hljs.highlightBlock(pre);
   }
 
