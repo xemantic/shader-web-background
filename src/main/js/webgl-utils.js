@@ -171,13 +171,13 @@ class GlWrapper {
    * @return {!string} numbered source
    */
   getLineNumberedSource(source) {
-    const lines = source.split("\\n");
+    const lines = source.split(/\r?\n/);
     const maxDigits = lines.length.toString().length;
     const buffer = [];
     lines.forEach((line, index) => {
-      buffer.push(padLineNumber("" + index, maxDigits) + ":");
+      buffer.push(padLineNumber("" + (index + 1), maxDigits) + ":");
       buffer.push(line);
-      buffer.push("\\n");
+      buffer.push("\n");
     });
     return buffer.join("");
   }
