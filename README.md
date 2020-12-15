@@ -18,6 +18,7 @@ multipass, pixel feedback loops on offscreen floating point textures._
   - [3. Start shading](#3-start-shading)
   - [4. Specify fallback (optional)](#4-specify-fallback-optional)
 - [How to configure shading?](#how-to-configure-shading)
+  - [fallback style](#fallback-style)
   - [Configuring shader uniforms](#configuring-shader-uniforms)
   - [shader-web-background API](#shader-web-background-api)
     - [canvas](#canvas)
