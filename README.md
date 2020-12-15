@@ -35,6 +35,7 @@ multipass, pixel feedback loops on offscreen floating point textures._
     - [2. Provide uniform value in JavaScript](#2-provide-uniform-value-in-javascript)
 - [Shadertoy compatibility](#shadertoy-compatibility)
   - [What to do with Shadertoy "Common" tab?](#what-to-do-with-shadertoy-common-tab)
+  - [What to do with texture function?](#what-to-do-with-texture-function)
   - [How can I handle "Multipass" Shadertoy shaders?](#how-can-i-handle-multipass-shadertoy-shaders)
 - [Tips](#tips)
 - [Building](#building)
