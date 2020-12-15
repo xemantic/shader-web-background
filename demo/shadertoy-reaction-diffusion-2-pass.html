@@ -267,13 +267,11 @@
       mainImage(gl_FragColor, gl_FragCoord.xy);
     }
   </script>
-  <script src="../src/main/js/shader-web-background-api.js"></script>
-  <script src="../src/main/js/shader-web-background.js"></script>
-  <script src="../src/main/js/webgl-utils.js"></script>
   <script>
-    var canvasWidth = 0;
-    var canvasHeight = 0;
-    var frame = 0;
+    var canvasWidth;
+    var canvasHeight;
+    var frame;
+    var time;
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
@@ -281,14 +279,14 @@
         canvasHeight = height;
         frame = 0;
       },
-      onFrameComplete: () => {
-        frame++;
+      onBeforeFrame: () => {
+        time = performance.now() / 1000;
       },
       shaders: {
         BufferA: {
           uniforms: {
             iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-            iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+            iTime:       (gl, loc) => gl.uniform1f(loc, time),
             iFrame:      (gl, loc) => gl.uniform1i(loc, frame),
             iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
           }
@@ -296,11 +294,14 @@
         Image: {
           uniforms: {
             iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-            iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+            iTime:       (gl, loc) => gl.uniform1f(loc, time),
             iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
           }
         }
-      }
+      },
+      onFrameComplete: () => {
+        frame++;
+      },
     });
   </script>
 </head>
