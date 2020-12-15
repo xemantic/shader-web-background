@@ -59,9 +59,7 @@
     const spectral_zucconi6 = (x) => add3d(bump3y(multiply3d(c1, subtract3d(to3d(x), x1)), y1), bump3y(multiply3d(c2, subtract3d(to3d(x), x2)), y2));
   </script>
   <script type="x-shader/x-fragment" id="feedback">
-    #ifdef GL_ES
     precision highp float;
-    #endif
 
     uniform vec2      iResolution;
     uniform float     iMinDimension;
@@ -84,6 +82,14 @@
     uniform float     iBlob2Radius;
     uniform float     iBlob2PowFactor;
     uniform vec3      iBlob2Color;
+
+    /*
+      Normally it would be provided by texture parameters, but on iOS the texture REPEAT works only
+      for textures which size is the power of 2.
+     */
+    vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
+      return texture2D(channel, mod(uv, 1.));
+    }
 
     float drawCircle(
       in vec2 st,
@@ -122,7 +128,7 @@
       float drawAngle = atan(drawDelta.x, drawDelta.y);
       float drawDist = length(drawDelta);
 
-      vec2 colorShift = texture2D(
+      vec2 colorShift = repeatedTexture(
         iChannel0,
         uv - st * iFeedbackColorShiftZoom * iScreenRatio
       ).rg;
@@ -133,7 +139,7 @@
       stShift += iFeedbackShiftVector;
       stShift *= iScreenRatio;
 
-      vec3 prevColor = texture2D(iChannel0, uv - stShift).rgb;
+      vec3 prevColor = repeatedTexture(iChannel0, uv - stShift).rgb;
       prevColor *= iFeedbackFadeRate;
 
       vec3 drawColor = vec3(0);
@@ -164,9 +170,7 @@
     The "image" shader will just copy the "feedback" output to the canvas.
    -->
   <script type="x-shader/x-fragment" id="image">
-    #ifdef GL_ES
     precision highp float;
-    #endif
 
     uniform vec2 iResolution;
     uniform sampler2D iChannel0;
@@ -238,12 +242,6 @@
       },
       shaders: {
         feedback: {
-          texture: (gl) => {
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-          },
           uniforms: {
             iResolution:               (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
             iMinDimension:             (gl, loc) => gl.uniform1f(loc, minDimension),
