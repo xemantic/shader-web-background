@@ -17,14 +17,14 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-val closureCompilerVersion = "v20201102"
+val closureCompilerVersion = "v20201207"
 
 plugins {
-  java
+  kotlin("jvm") version "1.4.21"
 }
 
 dependencies {
-  runtimeOnly("com.google.javascript:closure-compiler:$closureCompilerVersion")
+  implementation("com.google.javascript:closure-compiler:$closureCompilerVersion")
 }
 
 repositories {
@@ -76,10 +76,16 @@ fun updateEmbeddedLibs(
   }
 }
 
+task("closureCompilerHelp", JavaExec::class) {
+  group = "js"
+  main = "com.google.javascript.jscomp.CommandLineRunner"
+  args = listOf("--help")
+  classpath = sourceSets["main"].runtimeClasspath
+}
 
 task("compileJs", JavaExec::class) {
   group = "js"
-  main = "com.google.javascript.jscomp.CommandLineRunner"
+  main = "com.xemantic.web.shader.background.ShaderWebBackgroundClosureCompilerKt"
 
   val sourceDir = "src/main/js"
   val outputDir = "dist"
@@ -90,30 +96,34 @@ task("compileJs", JavaExec::class) {
   val wrapperEnd = "//# sourceMappingURL=$outputJsMap"
 
   args = listOf(
-      "--compilation_level", "ADVANCED",
-      "--js", "$sourceDir/*.js",
-      "--js_output_file", "$outputDir/$outputJs",
-      "--create_source_map", "$outputDir/$outputJs.map",
-      "--source_map_location_mapping", "$sourceDir|../$sourceDir",
-      "--language_in", "ECMASCRIPT6",
-      "--language_out", "ECMASCRIPT6",
-      "--output_wrapper",
-      "$wrapperBegin\nconst $namespace={};(()=>{%output%})()\n$wrapperEnd",
-      "--jscomp_warning=accessControls",
-      "--jscomp_warning=checkRegExp",
-      "--jscomp_warning=constantProperty",
-      "--jscomp_warning=const",
-      "--jscomp_warning=deprecatedAnnotations",
-      "--jscomp_warning=deprecated",
-      "--jscomp_warning=missingProperties",
-      "--jscomp_warning=missingReturn",
-      "--jscomp_warning=reportUnknownTypes",
-      "--jscomp_warning=strictCheckTypes",
-      "--jscomp_warning=typeInvalidation",
-      "--jscomp_warning=undefinedNames",
-      "--jscomp_warning=unusedLocalVariables",
-      "--jscomp_warning=unusedPrivateMembers",
-      "--jscomp_warning=visibility"
+    "--compilation_level", "ADVANCED",
+    "--js", "$sourceDir/*.js",
+    "--js_output_file", "$outputDir/$outputJs",
+    "--create_source_map", "$outputDir/$outputJs.map",
+    "--source_map_location_mapping", "$sourceDir|../$sourceDir",
+    "--language_in", "ECMASCRIPT6",
+    "--language_out", "ECMASCRIPT6",
+    "--output_wrapper",
+    "$wrapperBegin\nconst $namespace={};(()=>{%output%})()\n$wrapperEnd",
+    "--assume_function_wrapper=true",
+    "--jscomp_warning=accessControls",
+    "--jscomp_warning=checkRegExp",
+    "--jscomp_warning=constantProperty",
+    "--jscomp_warning=const",
+    "--jscomp_warning=deprecatedAnnotations",
+    "--jscomp_warning=deprecated",
+    "--jscomp_warning=missingProperties",
+    "--jscomp_warning=missingReturn",
+    "--jscomp_warning=reportUnknownTypes",
+    "--jscomp_warning=strictCheckTypes",
+    "--jscomp_warning=typeInvalidation",
+    "--jscomp_warning=undefinedNames",
+    "--jscomp_warning=unusedLocalVariables",
+    "--jscomp_warning=unusedPrivateMembers",
+    "--jscomp_warning=visibility",
+    "--process_closure_primitives=false",
+    "--rewrite_polyfills=false",
+    "--inject_libraries=false"
   )
   classpath = sourceSets["main"].runtimeClasspath
 
