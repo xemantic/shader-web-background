@@ -140,8 +140,8 @@ task("compileJs", JavaExec::class) {
         outputDir,
         outputJs,
         outputJsMap,
-        "index.html",
-        "demo/minimal.html"
+        "docs/index.html",
+        "docs/demo/minimal.html"
     )
   }
 

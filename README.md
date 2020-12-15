@@ -117,7 +117,7 @@ See also this example, you can use it as a template:
 
 https://xemantic.github.io/shader-web-background/demo/minimal.html
 
-See [demo/minimal.html](demo/minimal.html) for reference. 
+See [minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html) for reference. 
 
 
 #### b) Reference the minified library
