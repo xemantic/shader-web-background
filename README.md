@@ -3,7 +3,7 @@
 _Displays GLSL fragment shaders as a website background. Supports WebGL 1 and 2, Shadertoy shaders,
 multipass, pixel feedback loops on offscreen floating point textures._
 
-** :fireworks: Website:** https://xemantic.github.io/shader-web-background
+**:fireworks:Website:**  https://xemantic.github.io/shader-web-background
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -70,9 +70,7 @@ TL;DR:
   <title>Minimal shader</title>
   <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
   <script type="x-shader/x-fragment" id="image">
-    #ifdef GL_ES
     precision highp float;
-    #endif
 
     void main() {
       gl_FragColor = vec4(
@@ -96,12 +94,13 @@ TL;DR:
 </html>
 ```
 
-:information_source: If you are learning better by example, here is the list of demos displayed
+:information_source: If you prefer to learn by example, here is the list of demos displayed
 with their highlighted source code:
 
 https://xemantic.github.io/shader-web-background/#demo
 
 There are several ways of using this library depending on your needs:
+
 
 ### 1. Add library to your website
 
@@ -112,11 +111,16 @@ then go for this method. Just take the contents of
 [dist/shader-web-background.min.js](dist/shader-web-background.min.js) file and put it as
 `<script>` in the `<head>` of your HTML file.
 
+See also this example, you can use it as a template:
+
+https://xemantic.github.io/shader-web-background/demo/minimal.html
+
 See [demo/minimal.html](demo/minimal.html) for reference. 
+
 
 #### b) Reference the minified library
 
-Add to the `<head>` of your HTML:
+Add this `script` to the `<head>` of your HTML:
 
 ```html
 <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
@@ -128,9 +132,7 @@ You will need at least one fragment shader defined like this:
 
 ```html
 <script type="x-shader/x-fragment" id="image">
-  #ifdef GL_ES
   precision highp float;
-  #endif
 
   void main() {
     // ...
@@ -156,7 +158,8 @@ shaderWebBackground.shade({
 </script>
 ```
 
-Note: the shader name `image` should match the one defined as shader `id` attribute. 
+:warning: Note: the shader name `image` should match the one defined as
+shader `id` attribute. 
 
 ### 4. Specify fallback (optional)
 
@@ -190,9 +193,11 @@ shader named `image`. A new static
 `<canvas id="shader-web-background">` element covering the whole viewport
 will be added to the page.
 
-Note: the default canvas element will be attached to document `<body>` only when the
+:warning: Note: the default canvas element will be attached to document `<body>` only when the
 whole DOM tree is constructed. Also the actual rendering of shader frames will not
 happen until the HTML is fully loaded.
+
+### fallback style
 
 ### Configuring shader uniforms
 
@@ -462,9 +467,7 @@ the Shadertoy code looks as follows:
 
 ```html
 <script type="x-shader/x-fragment" id="Image">
-  #ifdef GL_ES
   precision highp float;
-  #endif
     
   uniform vec2  iResolution;
   uniform float iTime;
@@ -523,18 +526,14 @@ a unique id attribute, which will be used to wire them together.
 <head>
   <title>Multipass Shadertoy shader</title>
   <script type="x-shader/x-fragment" id="BufferA">
-    #ifdef GL_ES
     precision highp float;
-    #endif
     
     uniform sampler2D iChannel0;
 
     // ... the code of BufferA tab with the uniforms and wrapping as above
   </script>
   <script type="x-shader/x-fragment" id="Image">
-    #ifdef GL_ES
     precision highp float;
-    #endif
     
     uniform sampler2D iChannel0;
 
