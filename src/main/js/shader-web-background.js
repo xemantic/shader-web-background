@@ -121,6 +121,7 @@ function doOrWaitFor(eventType, call) {
  * @param {function(!number, !number)|undefined} onResize
  * @param {function()|undefined} onBeforeFrame
  * @param {function()|undefined} onFrameComplete
+ * @return {Player}
  */
 function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
 
@@ -152,29 +153,39 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
     ));
   }
 
-  // will force resize
-  canvas.width = 0;
-  canvas.height = 0;
+  const player = {
+    width: 0,
+    height: 0,
+    maybeResize: () => {
+      if ((player.width !== canvas.clientWidth)
+        || (player.height !== canvas.clientHeight)
+      ) {
+        player.resize();
+      }
+    },
+    resize: () => {
+      const pixelRatio = window.devicePixelRatio || 1;
+      const pixelWidth = Math.floor(canvas.clientWidth * pixelRatio);
+      const pixelHeight = Math.floor(canvas.clientHeight * pixelRatio);
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
+      glWrapper.updateViewportSize();
+      player.width = canvas.clientWidth;
+      player.height = canvas.clientHeight;
+
+      programs.forEach(program =>
+        program.init(pixelWidth, pixelHeight)
+      );
+
+      if (onResize) {
+        onResize(pixelWidth, pixelHeight);
+      }
+    }
+  }
 
   const animate = () => {
 
-    if (isResized(canvas)) {
-      /** @type {!number} */
-      const width = canvas.clientWidth;
-      /** @type {!number} */
-      const height = canvas.clientHeight;
-      canvas.width = width;
-      canvas.height = height;
-      glWrapper.updateViewportSize();
-
-      if (onResize) {
-        onResize(width, height);
-      }
-
-      programs.forEach(program =>
-        program.init(width, height)
-      );
-    }
+    player.maybeResize();
 
     if (onBeforeFrame) {
       onBeforeFrame();
@@ -193,6 +204,7 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
 
   // we will start animation only when everything is loaded
   doOrWaitFor("load", () => requestAnimationFrame(animate));
+  return player;
 };
 
 /**
@@ -211,7 +223,10 @@ function shade(config) {
   check(config.shaders, "No shaders specified in config");
 
   try {
-    doShade(
+    if (!config.canvas) {
+      doOrWaitFor("DOMContentLoaded", () => document.body.appendChild(canvas));
+    }
+    return doShade(
       canvas,
       config.shaders,
       config.onResize,
@@ -226,11 +241,6 @@ function shade(config) {
       throw e;
     }
   }
-
-  if (!config.canvas) {
-    doOrWaitFor("DOMContentLoaded", () => document.body.appendChild(canvas));
-  }
-
 }
 
 /** @suppress {checkTypes} to redefine the type declared in externs */

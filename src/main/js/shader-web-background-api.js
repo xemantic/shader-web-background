@@ -74,11 +74,17 @@ var Shader;
  *   fallback:        (boolean|undefined),
  *   onResize:        (function(!number, !number)|undefined),
  *   onBeforeFrame:   (function()|undefined),
- *   onFrameComplete: (function()|undefined),
  *   shaders:         (!Object<string, !Shader>),
+ *   onFrameComplete: (function()|undefined),
  * }}
  */
 var Config;
+
+/**
+ * To be extended in the future.
+ * @typedef {Object}
+ */
+var Player;
 
 /**
  * Indicates misconfiguration.
