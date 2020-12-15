@@ -619,8 +619,8 @@ $ ./gradlew compileJs
 It will trigger Google Closure Compiler which will check sources using type information
 and transpile them into minified JavaScript files:
 
- * [dist/shader-web-background.min.js](docs/dist/shader-web-background.min.js)
- * [dist/shader-web-background.min.js.map](docs/dist/shader-web-background.min.js.map)
+ * [dist/shader-web-background.min.js](dist/shader-web-background.min.js)
+ * [dist/shader-web-background.min.js.map](dist/shader-web-background.min.js.map)
 
 
 ## Contributing
@@ -637,7 +637,7 @@ instead of 4 for rendering tabs.
 
 Either:
  * fork this repo
- * open [index.html](docs/index.html) and scroll to `<section id="projects-using-shader-web-background">`
+ * open [index.html](index.html) and scroll to `<section id="projects-using-shader-web-background">`
  * add your project to the list
  * create pull-request
 
