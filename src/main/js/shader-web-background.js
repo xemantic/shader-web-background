@@ -100,7 +100,7 @@ function getSource(id) {
     "Shader source element of id \"" + id + "\" "
       + "should be of type: " + scriptSpec(id)
   );
-  return element.text.trim();
+  return element.text;
 }
 
 /**
