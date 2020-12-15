@@ -489,19 +489,23 @@ Most shaders will use at least these 2 uniforms, so we have to provide them as w
 configuration:
 
 ```javascript
-var canvasWidth = 0;
-var canvasHeight = 0;
+var canvasWidth;
+var canvasHeight;
+var time;
 
 shaderWebBackground.shade({
   onResize: (width, height) => {
     canvasWidth = width;
     canvasHeight = height;
   },
+  onBeforeFrame: () => {
+    time = performance.now() / 1000;
+  },
   shaders: {
     Image: {
       uniforms: {
         iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-        iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+        iTime:       (gl, loc) => gl.uniform1f(loc, time),
       }
     }
   }
@@ -513,13 +517,37 @@ shaderWebBackground.shade({
 There is no automated solution for that. You will have to copy the `Common` part of the shader
 multiple times, possibly just above the other Shadertoy code.
 
+### What to do with texture function?
+
+Something like:
+
+```glsl
+#define texture texture2D
+```
+
+Should do the trick. If the texture is supposed to be repeated, then something like this
+might be more suitable:
+
+```glsl
+vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
+  return texture2D(channel, mod(uv, 1.));
+}
+```
+
+Note: we cannot set the texture repeatable itself due to iOS compatibility issues.
+
 
 ### How can I handle "Multipass" Shadertoy shaders?
 
-You can define multitude `<script type="x-shader/x-fragment" id="...">` tags in the head of your HTML document. They will
-be processed in sequence. Each of them, except for the last one, will render to offscreen
-frame buffer. Each of these shader **script** elements needs to have
-a unique id attribute, which will be used to wire them together.
+You can name your shaders according to Shadertoy buffer names:
+
+* `BufferA`
+* `BufferB`
+* `BufferC`
+* `BufferD`
+* `Image`
+
+And then wire them together:
 
 ```html
 <!DOCTYPE html>
@@ -544,7 +572,7 @@ a unique id attribute, which will be used to wire them together.
     // ... your prefer method of loading shader-web-background as described above
   </script>
   <script>
-    shaderWebBackground.shadeOnLoad({
+    shaderWebBackground.shade({
       shaders: {
         BufferA: {
           uniforms: {
@@ -606,7 +634,7 @@ instead of 4 for rendering tabs.
 
 Either:
  * fork this repo
- * open [index.html](index.html) and scroll to `<section id="projects-using-shader-web-background">`
+ * open [index.html](docs/index.html) and scroll to `<section id="projects-using-shader-web-background">`
  * add your project to the list
  * create pull-request
 
