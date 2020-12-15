@@ -110,8 +110,10 @@ There are several ways of using this library depending on your needs:
 
 If you want your shaders to start rendering before any other resources are loaded,
 then go for this method. Just take the contents of
-[dist/shader-web-background.min.js](dist/shader-web-background.min.js) file and put it as
-`<script>` in the `<head>` of your HTML file.
+
+https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js
+
+and put it as `<script>` in the `<head>` of your HTML file.
 
 See also this example, you can use it as a template:
 
@@ -617,8 +619,8 @@ $ ./gradlew compileJs
 It will trigger Google Closure Compiler which will check sources using type information
 and transpile them into minified JavaScript files:
 
- * [dist/shader-web-background.min.js](dist/shader-web-background.min.js)
- * [dist/shader-web-background.min.js.map](dist/shader-web-background.min.js.map)
+ * [dist/shader-web-background.min.js](docs/dist/shader-web-background.min.js)
+ * [dist/shader-web-background.min.js.map](docs/dist/shader-web-background.min.js.map)
 
 
 ## Contributing

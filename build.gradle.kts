@@ -88,7 +88,7 @@ task("compileJs", JavaExec::class) {
   main = "com.xemantic.web.shader.background.ShaderWebBackgroundClosureCompilerKt"
 
   val sourceDir = "src/main/js"
-  val outputDir = "dist"
+  val outputDir = "docs/dist"
   val outputJs = "shader-web-background.min.js"
   val outputJsMap = "$outputJs.map"
   val namespace = "shaderWebBackground"
