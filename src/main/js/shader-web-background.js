@@ -248,6 +248,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
 
   // we will start animation only when everything is loaded
   doOrWaitFor("load", () => {
+    context.resize();
     if (onInit) {
       onInit(context);
     }

@@ -57,7 +57,7 @@ k,f,G(h,f,A(f)),b[f].uniforms||{},k.buffers[f]));const t=()=>{k.u();d&&d(k);q.fo
 {f.l(()=>{{var m=f.v;const g=h.g;g.bindBuffer(g.ARRAY_BUFFER,h.o);g.enableVertexAttribArray(m);
 g.vertexAttribPointer(m,2,g.FLOAT,!1,0,0);g.drawArrays(g.TRIANGLE_STRIP,0,4);g.disableVertexAttribArray(m);
 g.bindBuffer(g.ARRAY_BUFFER,null)}});H(h)});l&&l();requestAnimationFrame(t)};B("load",
-()=>{c&&c(k);requestAnimationFrame(t)});return k}
+()=>{k.resize();c&&c(k);requestAnimationFrame(t)});return k}
 shaderWebBackground.ConfigError=class extends Error{constructor(a){super(a);this.name=
 "shaderWebBackground.ConfigError"}};
 shaderWebBackground.GlError=class extends Error{constructor(a){super(a);this.name=
