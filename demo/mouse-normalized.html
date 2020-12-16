@@ -61,9 +61,9 @@
        mouseY = event.clientY;
     });
 
-    // mouse coordinates relative to the shader, see below
-    var shaderMouseX;
-    var shaderMouseY;
+    // mouse coordinates relative to the shader and normalized, see below
+    var stMouseX;
+    var stMouseY;
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
@@ -81,8 +81,8 @@
 
         // What would happen in "mouse" example per pixel in GLSL, here
         // will happen once per frame
-        shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / minDimension;
-        shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / minDimension;
+        stMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / minDimension;
+        stMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / minDimension;
       },
       shaders: {
         image: {
@@ -90,7 +90,7 @@
             iResolution:   (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iTime:         (gl, loc) => gl.uniform1f(loc, time),
             iMinDimension: (gl, loc) => gl.uniform1f(loc, minDimension),
-            iMouse:        (gl, loc) => gl.uniform2f(loc, shaderMouseX, shaderMouseY)
+            iMouse:        (gl, loc) => gl.uniform2f(loc, stMouseX, stMouseY)
           }
         }
       }
