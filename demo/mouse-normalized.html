@@ -21,7 +21,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>How to add mouse support?</title>
+  <title>Precomputed normalized mouse coordinates</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="demo.css"/>
   <script src="../src/test/js/show-demo-source.js"></script>
@@ -41,8 +41,8 @@
 
     void main() {
       vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
-      vec2 mouse = (iMouse * 2. - iResolution) / iMinDimension;
-      float dist = distance(st, mouse);
+      // we don't have to compute normalized coordinates from iMouse, saves some GPU
+      float dist = distance(st, iMouse);
       float luma = (sin(dist * LENGTH - iTime * SPEED) + 1.) / 2.;
       gl_FragColor = vec4(vec3(luma), 1.0);
     }
@@ -79,16 +79,10 @@
       onBeforeFrame: (ctx) => {
         time = performance.now() / 1000;
 
-        // Note: shader (0, 0) pixel coordinates are actually (.5, .5)
-        // and they are located at the bottom-left corner of the canvas.
-        // Also the actual pixel-perfect resolution might differ from so
-        // called CSS pixels depending on the device or zoom level. See:
-        //
-        // https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
-        //
-        // therefore we need to translate to shader coordinates through the context
-        shaderMouseX = ctx.getCoordinateX(mouseX);
-        shaderMouseY = ctx.getCoordinateY(mouseY);
+        // What would happen in "mouse" example per pixel in GLSL, here
+        // will happen once per frame
+        shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / minDimension;
+        shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / minDimension;
       },
       shaders: {
         image: {
@@ -105,7 +99,7 @@
 </head>
 <body>
   <header>
-    <h1><a href="#source">How to add mouse support ?</a></h1>
+    <h1><a href="#source">Precomputed normalized mouse coordinates</a></h1>
   </header>
 </body>
 </html>
