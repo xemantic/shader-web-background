@@ -48,35 +48,55 @@
     }
   </script>
   <script>
-    var canvasWidth = 0;
-    var canvasHeight = 0;
-    var minDimension = 0;
+    "use strict";
 
-    // start in the center
-    var mouseX = window.innerWidth / 2;
-    var mouseY = window.innerHeight / 2;
+    var minDimension;
+    var time;
 
+    // mouse coordinates taken from from the mousemove event
+    var mouseX;
+    var mouseY;
     document.addEventListener("mousemove", (event) => {
-       // shader gl_FragCoord coordinates start in the middle of the pixel
-       // so we need to accommodate for that by removing half.
-       // also vertical coordinate needs to be flipped.
-       mouseX = event.clientX - .5;
-       mouseY = window.innerHeight - event.clientY - .5;
+       mouseX = event.clientX;
+       mouseY = event.clientY;
     });
 
+    // mouse coordinates relative to the shader, see below
+    var shaderMouseX;
+    var shaderMouseY;
+
     shaderWebBackground.shade({
+      onInit: (ctx) => {
+
+        // initially let's put mouse it in the center of the screen
+        // as long as the shader covers the whole screen it will work
+        mouseX = ctx.cssWidth / 2.;
+        mouseY = ctx.cssHeight / 2.;
+      },
       onResize: (width, height) => {
-        canvasWidth = width;
-        canvasHeight = height;
         minDimension = Math.min(width, height);
+      },
+      onBeforeFrame: (ctx) => {
+        time = performance.now() / 1000;
+
+        // Note: shader (0, 0) pixel coordinates are actually (.5, .5)
+        // and they are located at the bottom-left corner of the canvas.
+        // Also the actual pixel-perfect resolution might differ from so
+        // called CSS pixels depending on the device or zoom level. See:
+        //
+        // https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
+        //
+        // therefore we need to translate to shader coordinates through the context
+        shaderMouseX = ctx.getCoordinateX(mouseX);
+        shaderMouseY = ctx.getCoordinateY(mouseY);
       },
       shaders: {
         image: {
           uniforms: {
-            iResolution:   (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-            iTime:         (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+            iResolution:   (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iTime:         (gl, loc) => gl.uniform1f(loc, time),
             iMinDimension: (gl, loc) => gl.uniform1f(loc, minDimension),
-            iMouse:        (gl, loc) => gl.uniform2f(loc, mouseX, mouseY)
+            iMouse:        (gl, loc) => gl.uniform2f(loc, shaderMouseX, shaderMouseY)
           }
         }
       }
