@@ -118,12 +118,13 @@ function doOrWaitFor(eventType, call) {
 /**
  * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !Shader>} shaders
- * @param {function(!number, !number)|undefined} onResize
- * @param {function()|undefined} onBeforeFrame
+ * @param {function(Context=)|undefined} onInit
+ * @param {function(!number, !number, Context=)|undefined} onResize
+ * @param {function(Context=)|undefined} onBeforeFrame
  * @param {function()|undefined} onFrameComplete
- * @return {Player}
+ * @return {Context}
  */
-function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
+function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComplete) {
 
   const contextAttrs = {
     antialias: false,
@@ -139,61 +140,104 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
 
   /** @type {Array<!ProgramWrapper>} */
   const programs = [];
+
+  /** @type {Context} */
+  const context = {
+    canvas: canvas,
+    width: 0,
+    height: 0,
+    cssPixelRatio: 0,
+    cssWidth: 0,
+    cssHeight: 0,
+    /** @type {!function(!number, !number): !boolean} */
+    isOverShader: (x, y) => {
+      const rect = canvas.getBoundingClientRect();
+      return (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+    },
+    /*
+      gl_FragCoord contains floating point values aligned with the middle of a pixel,
+      therefore we are adjust our coordinates by half to make them match
+     */
+    /** @type {!function(!number): !number} */
+    getCoordinateX: (x) =>
+      (x - canvas.getBoundingClientRect().left) * context.cssPixelRatio + .5,
+    /** @type {!function(!number): !number} */
+    getCoordinateY: (y) =>
+      (canvas.height - (y - canvas.getBoundingClientRect().top) * context.cssPixelRatio) - .5,
+    /** @type {!function()} */
+    maybeResize: () => {
+      if ((context.cssWidth !== canvas.clientWidth)
+        || (context.cssHeight !== canvas.clientHeight)
+      ) {
+        context.resize();
+      }
+    },
+    /** @type {!function()} */
+    resize: () => {
+      const
+        pixelRatio = window.devicePixelRatio || 1,
+        cssWidth   = canvas.clientWidth,
+        cssHeight  = canvas.clientHeight,
+        width      = Math.floor(cssWidth  * pixelRatio),
+        height     = Math.floor(cssHeight * pixelRatio);
+
+      canvas.width  = width;
+      canvas.height = height;
+
+      context.width         = width;
+      context.height        = height;
+      context.cssPixelRatio = pixelRatio;
+      context.cssWidth      = cssWidth;
+      context.cssHeight     = cssHeight;
+
+      glWrapper.updateViewportSize();
+
+      programs.forEach((program) => {
+        program.init(width, height)
+      });
+
+      if (onResize) {
+        onResize(width, height, context);
+      }
+    },
+    /** @type {!TextureBinder} */
+    texture: (loc, tex) => glWrapper.bindTexture(loc, tex),
+    buffers: {}
+  }
+
   const imageShaderIndex = Object.keys(shaders).length - 1;
   let index = 0;
   for (const id in shaders) {
+
+    if (index++ < imageShaderIndex) {
+      context.buffers[id] = glWrapper.newDoubleBuffer(
+        shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER
+      );
+    }
+
     programs.push(glWrapper.wrapProgram(
+      context,
       id,
       glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
       VERTEX_ATTRIBUTE,
       (shaders[id].uniforms) || {},
-      (index++ < imageShaderIndex) // is buffered?
-        ? shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER
-        : null
+      context.buffers[id]
     ));
-  }
 
-  const player = {
-    width: 0,
-    height: 0,
-    maybeResize: () => {
-      if ((player.width !== canvas.clientWidth)
-        || (player.height !== canvas.clientHeight)
-      ) {
-        player.resize();
-      }
-    },
-    resize: () => {
-      const pixelRatio = window.devicePixelRatio || 1;
-      const pixelWidth = Math.floor(canvas.clientWidth * pixelRatio);
-      const pixelHeight = Math.floor(canvas.clientHeight * pixelRatio);
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-      glWrapper.updateViewportSize();
-      player.width = canvas.clientWidth;
-      player.height = canvas.clientHeight;
-
-      programs.forEach(program =>
-        program.init(pixelWidth, pixelHeight)
-      );
-
-      if (onResize) {
-        onResize(pixelWidth, pixelHeight);
-      }
-    }
   }
 
   const animate = () => {
 
-    player.maybeResize();
+    context.maybeResize();
 
     if (onBeforeFrame) {
-      onBeforeFrame();
+      onBeforeFrame(context);
     }
 
-    programs.forEach(program =>
-      program.draw(() => glWrapper.drawQuad(program.vertex))
-    );
+    programs.forEach((program) => {
+      program.draw(() => glWrapper.drawQuad(program.vertexAttributeLocation));
+      glWrapper.unbindTextures();
+    });
 
     if (onFrameComplete) {
       onFrameComplete();
@@ -203,8 +247,14 @@ function doShade(canvas, shaders, onResize, onBeforeFrame, onFrameComplete) {
   }
 
   // we will start animation only when everything is loaded
-  doOrWaitFor("load", () => requestAnimationFrame(animate));
-  return player;
+  doOrWaitFor("load", () => {
+    if (onInit) {
+      onInit(context);
+    }
+    requestAnimationFrame(animate);
+  });
+
+  return context;
 };
 
 /**
@@ -229,6 +279,7 @@ function shade(config) {
     return doShade(
       canvas,
       config.shaders,
+      config.onInit,
       config.onResize,
       config.onBeforeFrame,
       config.onFrameComplete

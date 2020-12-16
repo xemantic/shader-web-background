@@ -25,7 +25,7 @@ class WebGlStrategy {
 
   /**
    * @param {!WebGLRenderingContext} gl
-   * @param {!function(T, !string):T} check
+   * @param {!function((T|undefined), !string):!T} check
    * @template T
    */
   constructor(gl, check) {
@@ -57,12 +57,11 @@ class WebGl1Strategy extends WebGlStrategy {
 
   /**
    * @param {!WebGLRenderingContext} gl
-   * @param {!function(?T, !string):!T} check
+   * @param {!function((T|undefined), !string):!T} check
    * @template T
    */
   constructor(gl, check) {
     super(gl, check);
-    // TODO make double step checking
     this.ext = /** @type {OES_texture_half_float} */
       (this.getExtension("OES_texture_half_float"));
     this.getExtension("OES_texture_half_float_linear");
@@ -83,7 +82,7 @@ class WebGl2Strategy extends WebGlStrategy {
 
   /**
    * @param {!WebGL2RenderingContext} gl
-   * @param {!function(T, !string):T} check
+   * @param {!function((T|undefined), !string):!T} check
    * @template T
    */
   constructor(gl, check) {
@@ -103,14 +102,6 @@ class WebGl2Strategy extends WebGlStrategy {
 }
 
 /**
- * @typedef {{
- *   location: !WebGLUniformLocation,
- *   setter: !UniformSetter
- * }}
- */
-var UniformEntry;
-
-/**
  * @param {!string} str
  * @param {!number} targetLength
  * @return {!string} padded string
@@ -120,6 +111,9 @@ const padLineNumber = (str, targetLength) =>
     ? str
     : " ".repeat(targetLength - str.length) + str;
 
+/**
+ * @template T
+ */
 class GlWrapper {
 
   /**
@@ -132,10 +126,10 @@ class GlWrapper {
     this.glErrorFactory = glErrorFactory;
 
     /**
-     * @param {?T} condition
+     * @param {!C|undefined} condition
      * @param {!string} message
-     * @return {!T}
-     * @template T
+     * @return {!C}
+     * @template C
      * @suppress {reportUnknownTypes}
      */
     const check = (condition, message) => {
@@ -164,6 +158,7 @@ class GlWrapper {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     this.quad = positionBuffer;
     this.buffers = {};
+    this.textureCount = 0;
   }
 
   /**
@@ -222,21 +217,45 @@ class GlWrapper {
   }
 
   /**
+   * @param {!function(!WebGLRenderingContext)} textureInitializer
+   * @return {!DoubleBuffer}
+   */
+  newDoubleBuffer(textureInitializer) {
+    return new DoubleBuffer(this.gl, this.strategy, textureInitializer);
+  }
+
+  /**
+   * @param {!T} context
    * @param {!string} id
    * @param {!WebGLProgram} program
    * @param {!string} vertexAttribute
-   * @param {!UniformSetters} uniformSetters
-   * @param {?TextureInitializer} textureInitializer
+   * @param {!Object<
+   *          string,
+   *          !function(
+   *            !WebGLRenderingContext,
+   *            !WebGLUniformLocation,
+   *            T=
+   *          )
+   *        >} uniformSetters
+   * @param {DoubleBuffer|undefined} buffer
    * @return {!ProgramWrapper}
    */
-  wrapProgram(id, program, vertexAttribute, uniformSetters, textureInitializer) {
+  wrapProgram(context, id, program, vertexAttribute, uniformSetters, buffer) {
     const gl = this.gl;
 
-    /** @type {!Object<string, !UniformEntry>} */
-    this.uniforms = {};
+    /** @type {!Object<string, !function()>} */
+    const uniforms = {};
+
+    /**
+     * A small hack to bypass faulty generic checking
+     * @type {!Object}
+     * @suppress {reportUnknownTypes}
+     */
+    const ctx = context;
 
     const activeUniforms =
-      /** @type {!number} */ (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS));
+      /** @type {!number} */
+      (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS));
     for (let i = 0; i < activeUniforms; i++) {
       const uniform = gl.getActiveUniform(program, i);
       const setter = uniformSetters[uniform.name];
@@ -246,17 +265,21 @@ class GlWrapper {
             + "\" defined in shader \"" + id + "\""
         );
       }
-      this.uniforms[uniform.name] = {
-        location: gl.getUniformLocation(program, uniform.name),
-        setter: setter
+
+      const location =
+        /** @type {!WebGLUniformLocation} */
+        (gl.getUniformLocation(program, uniform.name));
+      uniforms[uniform.name] = () => {
+        setter(gl, location, ctx);
       }
     }
+
 
     // Let's check if we have some extra uniforms in the configuration
     // it's not a critical problem, but failing early might prevent from
     // some hard to debug issues later.
     for (const name in uniformSetters) {
-      if (!(name in this.uniforms)) {
+      if (!(name in uniforms)) {
         throw this.glErrorFactory(
           "No such uniform \"" + name + "\" defined in shader \"" + id
             + "\" - if unused it might be removed by GLSL compiler"
@@ -264,25 +287,57 @@ class GlWrapper {
       }
     }
 
-    let buffer = null;
-    if (textureInitializer) {
-      buffer = new DoubleBuffer(gl, this.strategy, textureInitializer);
-      this.buffers[id] = buffer;
-    }
+    return {
+      /** @type {!number} */
+      vertexAttributeLocation:
+        gl.getAttribLocation(program, vertexAttribute),
+      /** @type {!function(!number, !number)} */
+      init: buffer
+        ? (width, height) => buffer.init(width, height)
+        : (width, height) => {},
+      /** @type {!function(!function())} */
+      draw: (drawer) => {
+        gl.useProgram(program);
 
-    return new ProgramWrapper(
-      gl,
-      id,
-      program,
-      gl.getAttribLocation(program, vertexAttribute),
-      this.uniforms,
-      buffer,
-      this.buffers
-    );
+        for (const name in uniforms) {
+          uniforms[name]();
+        }
+
+        if (buffer) {
+          buffer.swapTextures();
+          buffer.draw(drawer);
+        } else {
+          drawer();
+        }
+      }
+    };
   }
 
   updateViewportSize() {
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * @param {!WebGLUniformLocation} location,
+   * @param {!WebGLTexture|!DoubleBuffer} texture
+   */
+  bindTexture(location, texture) {
+    const gl = this.gl;
+    const tex = (texture instanceof DoubleBuffer)
+      ? texture.out
+      : /** @type {!WebGLTexture} */ (texture);
+    gl.activeTexture(gl.TEXTURE0 + this.textureCount);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniform1i(location, this.textureCount++);
+  }
+
+  unbindTextures() {
+    const gl = this.gl;
+    for (let i = 0; i < this.textureCount; i++) {
+      gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+    this.textureCount = 0;
   }
 
   /**
@@ -300,90 +355,21 @@ class GlWrapper {
 
 }
 
-class ProgramWrapper {
-
-  /**
-   * @param {!WebGLRenderingContext} gl
-   * @param {!string} id
-   * @param {!WebGLProgram} program
-   * @param {!number} vertexAttributeLocation
-   * @param {!Object<string, !UniformEntry>} uniforms
-   * @param {?DoubleBuffer} buffer
-   * @param {!Object<string, !DoubleBuffer>} buffers
-   */
-  constructor(gl, id, program, vertexAttributeLocation, uniforms, buffer, buffers) {
-    this.gl = gl;
-    this.id = id;
-    this.program = program;
-    /** @type {!number} */
-    this.vertex = vertexAttributeLocation;
-    this.uniforms = uniforms;
-    this.buffer = buffer;
-
-    this.textureCount = 0;
-    this.context = {
-      buffers: buffers,
-      texture: (
-        /** @type {!WebGLUniformLocation} */ loc,
-        /** @type {!WebGLTexture|!Buffer} */ texture
-      ) => {
-        const tex = (texture instanceof DoubleBuffer)
-          ? texture.out
-          : /** @type {!WebGLTexture} */ (texture);
-
-        gl.activeTexture(gl.TEXTURE0 + this.textureCount);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(loc, this.textureCount++);
-      }
-    };
-  }
-
-  /**
-   * @param {!number} width
-   * @param {!number} height
-   */
-  init(width, height) {
-    if (this.buffer) {
-      this.buffer.init(width, height);
-    }
-  }
-
-  /**
-   * @param {!function()} drawer
-   */
-  draw(drawer) {
-    const gl = this.gl;
-
-    gl.useProgram(this.program);
-
-    for (const name in this.uniforms) {
-      const uniform = this.uniforms[name];
-      uniform.setter(gl, uniform.location, this.context);
-    }
-
-    const buffer = this.buffer;
-    if (buffer) {
-      buffer.swapTextures();
-      buffer.draw(drawer);
-    } else {
-      drawer();
-    }
-
-    for (let i = 0; i < this.textureCount; i++) {
-      gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(gl.TEXTURE_2D, null);
-    }
-    this.textureCount = 0;
-  }
-
-}
+/**
+ * @typedef {{
+ *   vertexAttributeLocation: !number,
+ *   init:                    !function(!number, !number),
+ *   draw:                    !function(!function()),
+ * }}
+ */
+var ProgramWrapper;
 
 class DoubleBuffer {
 
   /**
    * @param {!WebGLRenderingContext} gl
    * @param {!WebGlStrategy} strategy
-   * @param {!TextureInitializer} textureInitializer
+   * @param {!function(!WebGLRenderingContext)} textureInitializer
    */
   constructor(gl, strategy, textureInitializer) {
     this.fbo = gl.createFramebuffer();

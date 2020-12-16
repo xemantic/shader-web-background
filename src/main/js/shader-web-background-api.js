@@ -28,23 +28,34 @@ const shaderWebBackground = {};
 
 /**
  * @typedef {
+ *   function(!WebGLUniformLocation, (!WebGLTexture|!DoubleBuffer))
+ * }
+ */
+var TextureBinder;
+
+/**
+ * @typedef {{
+ *   canvas:          !HTMLCanvasElement,
+ *   width:           !number,
+ *   height:          !number,
+ *   cssPixelRatio:   !number,
+ *   cssWidth:        !number,
+ *   cssHeight:       !number,
+ *   isOverShader:    !function(!number, !number): !boolean,
+ *   getCoordinateX:  !function(!number): !number,
+ *   getCoordinateY:  !function(!number): !number,
+ *   buffers:         !Object<string, !DoubleBuffer>,
+ *   texture:         !TextureBinder
+ * }}
+ */
+var Context;
+
+/**
+ * @typedef {
  *   function(!WebGLRenderingContext)
  * }
  */
 var TextureInitializer;
-
-/**
- * @typedef {Object}
- */
-var Buffer;
-
-/**
- * @typedef {{
- *   buffers: !Object<string, !Buffer>,
- *   texture: function(!WebGLUniformLocation, (!WebGLTexture|!Buffer))
- * }}
- */
-var Context;
 
 /**
  * @typedef {
@@ -72,19 +83,14 @@ var Shader;
  * @typedef {{
  *   canvas:          (HTMLCanvasElement|undefined),
  *   fallback:        (boolean|undefined),
- *   onResize:        (function(!number, !number)|undefined),
- *   onBeforeFrame:   (function()|undefined),
+ *   onInit:          (function(Context=)|undefined),
+ *   onResize:        (function(!number, !number, Context=)|undefined),
+ *   onBeforeFrame:   (function(Context=)|undefined),
  *   shaders:         (!Object<string, !Shader>),
  *   onFrameComplete: (function()|undefined),
  * }}
  */
 var Config;
-
-/**
- * To be extended in the future.
- * @typedef {Object}
- */
-var Player;
 
 /**
  * Indicates misconfiguration.
@@ -99,7 +105,8 @@ shaderWebBackground.GlError = class extends Error {}
 /**
  * Will start shading.
  *
- * @param {Config} config
+ * @param {!Config} config
+ * @return {!Context} the shading context object
  * @throws {shaderWebBackground.ConfigError}
  * @throws {shaderWebBackground.GlError}
  */
