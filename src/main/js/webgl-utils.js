@@ -88,6 +88,7 @@ class WebGl2Strategy extends WebGlStrategy {
   constructor(gl, check) {
     super(gl, check);
     this.getExtension("EXT_color_buffer_float");
+    this.getExtension("OES_texture_float_linear");
   }
 
   /**
@@ -96,7 +97,7 @@ class WebGl2Strategy extends WebGlStrategy {
    */
   setUpTexture(width, height) {
     const gl = /** @type {!WebGL2RenderingContext} */ (this.gl);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.FLOAT, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.HALF_FLOAT, null);
   }
 
 }

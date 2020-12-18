@@ -73,8 +73,9 @@ class L{constructor(a,b){this.g=a;this.j=b}h(){}}
 class M extends L{constructor(a,b){super(a,b);this.i=K(this,"OES_texture_half_float");
 K(this,"OES_texture_half_float_linear")}h(a,b){const c=this.g;c.texImage2D(c.TEXTURE_2D,
 0,c.RGBA,a,b,0,c.RGBA,this.i.HALF_FLOAT_OES,null)}}
-class N extends L{constructor(a,b){super(a,b);K(this,"EXT_color_buffer_float")}h(a,
-b){const c=this.g;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.FLOAT,null)}}
+class N extends L{constructor(a,b){super(a,b);K(this,"EXT_color_buffer_float");K(this,
+"OES_texture_float_linear")}h(a,b){const c=this.g;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,
+a,b,0,c.RGBA,c.HALF_FLOAT,null)}}
 function F(a,b,c,e,d,l){const h=a.g,q={},k=h.getProgramParameter(e,h.ACTIVE_UNIFORMS);
 for(let n=0;n<k;n++){const p=h.getActiveUniform(e,n),t=d[p.name];if(!t)throw a.i('No configuration for uniform "'+
 p.name+'" defined in shader "'+c+'"');const f=h.getUniformLocation(e,p.name);q[p.name]=
