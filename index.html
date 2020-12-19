@@ -308,6 +308,42 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     var blob1Color;
     var blob2Color;
 
+    function toggleFullScreen(displayLabel) {
+      const header = document.querySelector("header");
+      const nav = document.querySelector("nav");
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen()
+          .then(() => {
+            header.scrollIntoView();
+            displayLabel("Exit FULLSCREEN");
+            header.classList.add("hidden");
+            nav.classList.add("hidden");
+          });
+      } else {
+        document.exitFullscreen();
+        displayLabel("Go FULLSCREEN");
+        header.classList.remove("hidden");
+        nav.classList.remove("hidden");
+      }
+    }
+
+    function initFullScreenAction() {
+      const fullScreenAction = document.getElementById("fullscreen-action");
+      const displayLabel = (label) => fullScreenAction.innerText = label;
+      fullScreenAction.addEventListener("click", () => {
+        toggleFullScreen(displayLabel);
+      });
+      fullScreenAction.addEventListener("keydown", (e) => {
+        const keyD = e.key !== undefined ? e.key : e.keyCode;
+        if ((keyD === 'Enter' || keyD === 13)
+          || (["Spacebar", ' '].indexOf(keyD) >= 0 || keyD === 32)
+        ) {
+          e.preventDefault();
+          fullScreenAction.click();
+        }
+      });
+    }
+
     document.addEventListener("mousemove", (event) => {
        mouseX = event.clientX;
        mouseY = event.clientY;
@@ -330,6 +366,7 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
         oldScrollY = window.scrollY;
         drawCenterX = 0;
         drawCenterY = 0;
+        initFullScreenAction();
       },
       onBeforeFrame: (ctx) => {
         stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
@@ -431,6 +468,8 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     }
     header {
       height: 100vh;
+      opacity: 1;
+      transition: opacity 2s;
     }
     header h1 {
       height: 100%;
@@ -525,6 +564,15 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     .fallback {
       background: url("media/fallback.jpg");
       background-size: cover;
+    }
+    .action {
+      cursor: pointer;
+    }
+    .hidden {
+      opacity: 0;
+    }
+    .center-text {
+      text-align: center;
     }
     @keyframes blink {
       0%   { opacity: 0; }
@@ -636,6 +684,11 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     <p>
       And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is
       here for you to provide an immersive experience on the web.
+    </p>
+    <p class="center-text">
+      <a id="fullscreen-action" class="action" tabindex="0" role="button" aria-pressed="false">
+        Go FULLSCREEN
+      </a>
     </p>
     <p>
       <a class="tea" href="https://www.buymeacoffee.com/kazik">
