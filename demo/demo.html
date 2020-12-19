@@ -247,7 +247,7 @@
         }
         oldScrollY = scrollY;
         feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor + tiltLR * .0002;
-        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor + tiltFB * .0002;
+        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor + tiltFB * -.0002;
         blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
         blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
       },
