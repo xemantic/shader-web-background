@@ -211,10 +211,23 @@
     var tiltFB = 0;
 
     if ("DeviceOrientationEvent" in window) {
-      window.addEventListener("deviceorientation", (event) => {
-        tiltLR = event.gamma;
-        tiltFB = event.beta;
-      }, false);
+      const listenToOrientation = () => {
+        window.addEventListener("deviceorientation", (event) => {
+          tiltLR = event.gamma;
+          tiltFB = event.beta;
+        }, false);
+      };
+      if (DeviceOrientationEvent.requestPermission) {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response == 'granted') {
+              listenToOrientation();
+            }
+          })
+          .catch(console.error);
+      } else {
+        listenToOrientation();
+      }
     }
 
     document.addEventListener("mousemove", (event) => {
