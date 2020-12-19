@@ -217,25 +217,28 @@
     var tiltFB = 0;
 
     function initOrientationReadings() {
-      if (typeof(DeviceOrientationEvent) !== "undefined") {
-        const listenToOrientation = () => {
-          window.addEventListener("deviceorientation", (event) => {
-            tiltLR = event.gamma;
-            tiltFB = event.beta;
-          }, false);
-        };
-        if (typeof(DeviceOrientationEvent.requestPermission) === "function") {
-          DeviceOrientationEvent.requestPermission()
-            .then(response => {
-              if (response == "granted") {
-                listenToOrientation();
-              }
-            })
-            .catch(console.error);
-        } else {
-          listenToOrientation();
-        }
-      }
+      document.documentElement.requestFullscreen()
+        .then(() => {
+          if (typeof(DeviceOrientationEvent) !== "undefined") {
+            const listenToOrientation = () => {
+              window.addEventListener("deviceorientation", (event) => {
+                tiltLR = event.gamma;
+                tiltFB = event.beta;
+              }, false);
+            };
+            if (typeof(DeviceOrientationEvent.requestPermission) === "function") {
+              DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                  if (response == "granted") {
+                    listenToOrientation();
+                  }
+                })
+                .catch(console.error);
+            } else {
+              listenToOrientation();
+            }
+          }
+        });
     }
 
     function initOrientationPermissionAction() {
