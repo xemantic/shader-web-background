@@ -146,12 +146,12 @@
 
       drawColor +=
         pow(
-          drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
+          drawBlob(st, iDrawCenter, iBlob1Radius * (1. + colorShift.r), drawAngle, iTime),
           iBlob1PowFactor
         ) * iBlob1Color;
       drawColor +=
         pow(
-          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime),
+          drawBlob(st, iDrawCenter, iBlob2Radius * (1. + colorShift.g), drawAngle, -iTime),
           iBlob2PowFactor
         ) * iBlob2Color;
 
