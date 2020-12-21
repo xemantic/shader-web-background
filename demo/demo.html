@@ -214,6 +214,28 @@
     var blob1Color;
     var blob2Color;
 
+    if (!Element.prototype.requestFullscreen) {
+      Element.prototype.requestFullscreen =
+        Element.prototype.mozRequestFullscreen
+        || Element.prototype.webkitRequestFullscreen
+        || Element.prototype.msRequestFullscreen;
+    }
+
+    function goFullScreen() {
+      const shader = document.getElementById("shader-web-background");
+      if (shader.requestFullscreen) {
+        shader.requestFullscreen();
+      } else {
+        console.log("No support for full screen mode");
+      }
+    }
+
+    function onClick(elementId, action) {
+      document
+        .getElementById(elementId)
+        .addEventListener("click", action);
+    }
+
     document.addEventListener("mousemove", (event) => {
        mouseX = event.clientX;
        mouseY = event.clientY;
@@ -236,6 +258,7 @@
         oldScrollY = window.scrollY;
         drawCenterX = 0;
         drawCenterY = 0;
+        onClick("full-screen-action", goFullScreen);
       },
       onBeforeFrame: (ctx) => {
         stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
@@ -298,7 +321,10 @@
 </head>
 <body>
   <header>
-    <h1><a href="#source">shader web background demo</a></h1>
+    <h1><a href="#controls">shader web background demo</a></h1>
   </header>
+  <section id="controls">
+    <button id="full-screen-action">Full Screen</button>
+  </section>
 </body>
 </html>

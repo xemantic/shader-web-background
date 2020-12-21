@@ -41,6 +41,13 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* switch off text selection on header */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 header h1 {
@@ -75,7 +82,34 @@ header h1 a {
   content: "You need WebGL enabled browser supporting floating point texture extensions"
 }
 
+section {
+  background: rgba(0, 0, 0, .4);
+  font-size: 1.6rem;
+}
+
+#controls {
+  text-align: center;
+  line-height: 4em;
+}
+
 #source {
   background: rgba(0, 0, 0, .6);
   overflow-x: auto;
+}
+
+button {
+  background: rgba(255, 0, 255, .5);
+  border: none;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-size: inherit;
+  transition: color 1.6s, background 1.6s;
+  border-radius: .47rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, .5);
+  color: black;
 }
