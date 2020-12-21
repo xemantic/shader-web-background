@@ -214,44 +214,37 @@
     var blob1Color;
     var blob2Color;
 
-    // seems cheap to polyfill so let's do it
-    if (!Element.prototype.requestFullscreen) {
-      Element.prototype.requestFullscreen =
-        Element.prototype.mozRequestFullscreen
-        || Element.prototype.webkitRequestFullscreen
-        || Element.prototype.msRequestFullscreen;
-    }
+    const loadScript = (src) => new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.type = "text/javascript";
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
 
-    function handleWakeLock(canvas, sentinel) {
-      const type = "fullscreenchange";
-      const onFullScreenChange = () => {
-        sentinel.release()
-          .then(() => {
-            if (!document.fullscreenElement) { // means we are exiting
-              canvas.removeEventListener(type, onFullScreenChange);
-            }
-          });
-      };
-      canvas.addEventListener(type, onFullScreenChange);
-    }
+    const onWindowLoad = () => new Promise((resolve) => {
+      window.addEventListener("load", resolve);
+    });
 
-    // this is relatively new API, there are libraries to hack
-    // this support for older browsers and iOS Safari
-    function maybeAddWakeLock(canvas) {
-      if ("wakeLock" in navigator) {
-        navigator.wakeLock
-          .request("screen")
-          .then((sentinel) => {
-            handleWakeLock(canvas, sentinel);
-          });
-      }
-    }
+    onWindowLoad()
+      .then(Promise.all([
+        loadScript("https://unpkg.com/screenfull/dist/screenfull.js"),
+        loadScript("https://www.unpkg.com/nosleep.js/dist/NoSleep.min.js")
+      ]))
+      .then(maybeAddFullScreenAction);
 
-    function goFullScreen() {
+    function goFullScreen(noSleep) {
       const canvas = document.getElementById("shader-web-background");
-      canvas
-        .requestFullscreen()
-        .then(maybeAddWakeLock(canvas));
+      screenfull.on("change", () => {
+        if (!screenfull.isFullscreen) {
+          noSleep.disable();
+        }
+      });
+      screenfull
+        .request(canvas)
+        .then(() => noSleep.enable());
     }
 
     function newButton(label, action) {
@@ -268,8 +261,9 @@
     }
 
     function maybeAddFullScreenAction() {
-      if (Element.prototype.requestFullscreen) {
-        addControl(newButton("Full Screen", goFullScreen));
+      if (screenfull.isEnabled) {
+        const noSleep = new NoSleep();
+        addControl(newButton("Full Screen", () => goFullScreen(noSleep)));
       }
     }
 
@@ -295,7 +289,6 @@
         oldScrollY = window.scrollY;
         drawCenterX = 0;
         drawCenterY = 0;
-        maybeAddFullScreenAction();
       },
       onBeforeFrame: (ctx) => {
         stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
