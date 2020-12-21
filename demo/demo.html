@@ -66,7 +66,7 @@
     uniform float     iMinDimension;
     uniform float     iTime;
     uniform sampler2D iChannel0;
-    uniform vec2      iScreenRatio;
+    uniform vec2      iScreenRatioHalf;
     uniform vec2      iMouse;
     uniform vec2      iFeedbackZoomCenter;
     uniform float     iFeedbackZoomRate;
@@ -131,14 +131,14 @@
 
       vec2 colorShift = repeatedTexture(
         iChannel0,
-        uv - st * iFeedbackColorShiftZoom * iScreenRatio
+        uv - st * iFeedbackColorShiftZoom * iScreenRatioHalf
       ).rg;
 
       vec2 stShift = vec2(0);
       stShift += iFeedbackZoomRate * (st - iFeedbackZoomCenter);
       stShift += (colorShift - .5) * iFeedbackColorShiftImpact;
       stShift += iFeedbackShiftVector;
-      stShift *= iScreenRatio;
+      stShift *= iScreenRatioHalf;
 
       vec3 prevColor = repeatedTexture(iChannel0, uv - stShift).rgb;
       prevColor *= iFeedbackFadeRate;
@@ -184,20 +184,27 @@
     "use strict";
     const GOLDEN_RATIO = .61803398875;
 
-    var canvasWidth = 0;
-    var canvasHeight = 0;
-    var minDimension = 1;
-    var stMouseX = 0;
-    var stMouseY = 0;
-    var screenRatioX = .5;
-    var screenRatioY = .5;
-    var time = 0;
-    var feedbackShiftVectorX = 0;
-    var feedbackShiftVectorY = 0;
-    var feedbackMouseShiftFactor = .003;
-    var oldScrollY = 0;
-    var drawCenterY = 0;
+    var time;
 
+    var minDimension;
+    var screenRatioHalfX;
+    var screenRatioHalfY;
+
+    var mouseX;
+    var mouseY;
+
+    var stMouseX;
+    var stMouseY;
+
+    var feedbackShiftVectorX;
+    var feedbackShiftVectorY;
+
+    var oldScrollY;
+
+    var drawCenterX;
+    var drawCenterY;
+
+    const feedbackMouseShiftFactor = .003;
     const backgroundParallaxScrollingFactor = .5;
     const blob1ColorPulseSpeed = .07;
     const blob2ColorPulseSpeed = .07;
@@ -207,77 +214,64 @@
     var blob1Color;
     var blob2Color;
 
-    var tiltLR = 0;
-    var tiltFB = 0;
-
-    if ("DeviceOrientationEvent" in window) {
-      const listenToOrientation = () => {
-        window.addEventListener("deviceorientation", (event) => {
-          tiltLR = event.gamma;
-          tiltFB = event.beta;
-        }, false);
-      };
-      if (DeviceOrientationEvent.requestPermission) {
-        DeviceOrientationEvent.requestPermission()
-          .then(response => {
-            if (response == 'granted') {
-              listenToOrientation();
-            }
-          })
-          .catch(console.error);
-      } else {
-        listenToOrientation();
-      }
-    }
-
     document.addEventListener("mousemove", (event) => {
-       const mouseX = event.clientX - .5;
-       const mouseY = canvasHeight - event.clientY - .5;
-       stMouseX = (2 * mouseX - canvasWidth) / minDimension;
-       stMouseY = (2 * mouseY - canvasHeight) / minDimension;
+       mouseX = event.clientX;
+       mouseY = event.clientY;
     });
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
         minDimension = Math.min(width, height);
-        canvasWidth = width;
-        canvasHeight = height;
         if (width >= height) {
-          screenRatioX = height / width * .5;
+          screenRatioHalfX = height / width * .5;
+          screenRatioHalfY = .5;
         } else {
-          screenRatioY = width / height * .5;
+          screenRatioHalfX = .5;
+          screenRatioHalfY = width / height * .5;
         }
       },
-      onBeforeFrame: () => {
+      onInit: (ctx) => {
+        mouseX = ctx.cssWidth / 2.;
+        mouseY = ctx.cssHeight / 2.;
+        oldScrollY = window.scrollY;
+        drawCenterX = 0;
+        drawCenterY = 0;
+      },
+      onBeforeFrame: (ctx) => {
+        stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
+        stMouseY = (2 * ctx.getCoordinateY(mouseY) - ctx.height) / minDimension;
         time = performance.now() / 1000;
         const scrollY = window.scrollY;
         const scrollYDelta = scrollY - oldScrollY;
         if (scrollYDelta === 0) {
           feedbackShiftVectorY = 0;
         } else {
-          feedbackShiftVectorY = scrollYDelta / canvasHeight * backgroundParallaxScrollingFactor;
+          feedbackShiftVectorY =
+            scrollYDelta / minDimension
+            * 2 * ctx.cssPixelRatio
+            * backgroundParallaxScrollingFactor;
           drawCenterY += feedbackShiftVectorY;
         }
         oldScrollY = scrollY;
-        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor + tiltLR * .0002;
-        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor + tiltFB * -.0002;
+        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
+        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
         blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
         blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
       },
       shaders: {
         feedback: {
           uniforms: {
-            iResolution:               (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution:               (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iMinDimension:             (gl, loc) => gl.uniform1f(loc, minDimension),
             iTime:                     (gl, loc) => gl.uniform1f(loc, time),
-            iScreenRatio:              (gl, loc) => gl.uniform2f(loc, screenRatioX, screenRatioY),
+            iScreenRatioHalf:          (gl, loc) => gl.uniform2f(loc, screenRatioHalfX, screenRatioHalfY),
             iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
             iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
             iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
             iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .999),
             iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
             iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
-            iDrawCenter:               (gl, loc) => gl.uniform2f(loc, 0, drawCenterY),
+            iDrawCenter:               (gl, loc) => gl.uniform2f(loc, drawCenterX, drawCenterY),
             iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .23),
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
             iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
@@ -291,7 +285,7 @@
         },
         image: {
           uniforms: {
-            iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         }
