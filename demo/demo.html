@@ -214,6 +214,7 @@
     var blob1Color;
     var blob2Color;
 
+    // seems cheap to polyfill so let's do it
     if (!Element.prototype.requestFullscreen) {
       Element.prototype.requestFullscreen =
         Element.prototype.mozRequestFullscreen
@@ -222,18 +223,28 @@
     }
 
     function goFullScreen() {
-      const shader = document.getElementById("shader-web-background");
-      if (shader.requestFullscreen) {
-        shader.requestFullscreen();
-      } else {
-        console.log("No support for full screen mode");
-      }
+      document
+        .getElementById("shader-web-background");
+        .requestFullscreen();
     }
 
-    function onClick(elementId, action) {
+    function newButton(label, action) {
+      const button = document.createElement("button");
+      button.textContent = label;
+      button.addEventListener("click", action);
+      return button;
+    }
+
+    function addControl(control) {
       document
-        .getElementById(elementId)
-        .addEventListener("click", action);
+        .getElementById("controls")
+        .appendChild(control);
+    }
+
+    function maybeAddFullScreenAction() {
+      if (Element.prototype.requestFullscreen) {
+        addControl(newButton("Full Screen", goFullScreen));
+      }
     }
 
     document.addEventListener("mousemove", (event) => {
@@ -258,7 +269,7 @@
         oldScrollY = window.scrollY;
         drawCenterX = 0;
         drawCenterY = 0;
-        onClick("full-screen-action", goFullScreen);
+        maybeAddFullScreenAction();
       },
       onBeforeFrame: (ctx) => {
         stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
@@ -324,7 +335,6 @@
     <h1><a href="#controls">shader web background demo</a></h1>
   </header>
   <section id="controls">
-    <button id="full-screen-action">Full Screen</button>
   </section>
 </body>
 </html>
