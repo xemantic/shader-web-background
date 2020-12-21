@@ -224,13 +224,15 @@
 
     function handleWakeLock(canvas, sentinel) {
       const type = "fullscreenchange";
-      const onFullScreenExit = () => {
+      const onFullScreenChange = () => {
         sentinel.release()
           .then(() => {
-            canvas.removeEventListener(type, onFullScreenExit);
+            if (!document.fullscreenElement) { // means we are exiting
+              canvas.removeEventListener(type, onFullScreenChange);
+            }
           });
       };
-      canvas.addEventListener("fullscreenchange", onFullScreenExit);
+      canvas.addEventListener(type, onFullScreenChange);
     }
 
     // this is relatively new API, there are libraries to hack
