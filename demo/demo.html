@@ -383,7 +383,7 @@
             iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
             iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
             iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
-            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .999),
+            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .9989),
             iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
             iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
             iDrawCenter:               (gl, loc) => gl.uniform2f(loc, drawCenterX, drawCenterY),
