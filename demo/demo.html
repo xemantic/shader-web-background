@@ -92,32 +92,14 @@
       return texture2D(channel, mod(uv, 1.));
     }
 
-    float drawCircle(
+    float drawBlob(
       in vec2 st,
       in vec2 center,
       in float radius,
       in float edgeSmoothing
     ) {
       float dist = length((st - center) / radius);
-      return dist * smoothstep(1., 1. - edgeSmoothing, dist);
-    }
-
-    float drawBlob(
-      in vec2 st,
-      in vec2 center,
-      in float radius,
-      in float angle,
-      in float phase
-    ) {
-      return drawCircle(
-        st,
-        center,
-        radius
-          - sin(angle * 3. - phase * .3) * .07 * radius
-          - sin(angle * 5. + phase * .7) * .05 * radius
-        ,
-        iBlobEdgeSmoothing
-      );
+      return dist * smoothstep(1., 1. - iBlobEdgeSmoothing, dist);
     }
 
     void main() {
@@ -129,14 +111,14 @@
       float drawAngle = atan(drawDelta.x, drawDelta.y);
       float drawDist = length(drawDelta);
 
-      vec2 colorShift = repeatedTexture(
+      vec3 colorShift = repeatedTexture(
         iChannel0,
         uv - st * iFeedbackColorShiftZoom * iScreenRatioHalf
-      ).rg;
+      ).rgb;
 
       vec2 stShift = vec2(0);
       stShift += iFeedbackZoomRate * (st - iFeedbackZoomCenter);
-      stShift += (colorShift - .5) * iFeedbackColorShiftImpact;
+      stShift += (colorShift.rg - .5) * iFeedbackColorShiftImpact;
       stShift += iFeedbackShiftVector;
       stShift *= iScreenRatioHalf;
 
@@ -145,14 +127,16 @@
 
       vec3 drawColor = vec3(0);
 
+      float radius = 1. + colorShift.r + colorShift.g + colorShift.b;
+      radius *= .7;
       drawColor +=
         pow(
-          drawBlob(st, iDrawCenter, iBlob1Radius, drawAngle, iTime),
+          drawBlob(st, iDrawCenter, radius * iBlob1Radius, iBlobEdgeSmoothing),
           iBlob1PowFactor
         ) * iBlob1Color;
       drawColor +=
         pow(
-          drawBlob(st, iDrawCenter, iBlob2Radius, drawAngle, -iTime),
+          drawBlob(st, iDrawCenter, radius * iBlob2Radius, iBlobEdgeSmoothing),
           iBlob2PowFactor
         ) * iBlob2Color;
 
@@ -396,7 +380,6 @@
           uniforms: {
             iResolution:               (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iMinDimension:             (gl, loc) => gl.uniform1f(loc, minDimension),
-            iTime:                     (gl, loc) => gl.uniform1f(loc, time),
             iScreenRatioHalf:          (gl, loc) => gl.uniform2f(loc, screenRatioHalfX, screenRatioHalfY),
             iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
             iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
@@ -407,11 +390,11 @@
             iDrawCenter:               (gl, loc) => gl.uniform2f(loc, drawCenterX, drawCenterY),
             iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .23),
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
-            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO),
-            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
+            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, .6),
+            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 36.),
             iBlob1Color:               (gl, loc) => gl.uniform3f(loc, blob1Color[0], blob1Color[1], blob1Color[2]),
-            iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, GOLDEN_RATIO - .2),
-            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
+            iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, .4),
+            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 36.),
             iBlob2Color:               (gl, loc) => gl.uniform3f(loc, blob2Color[0], blob2Color[1], blob2Color[2]),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
