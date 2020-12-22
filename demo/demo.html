@@ -198,11 +198,7 @@
 
     var tiltLR = 0;
     var tiltFB = 0;
-
     var tiltFBDelta = null;
-
-    var calibratedTiltLR = 0;
-    var calibratedTileFB = 0;
 
     var feedbackShiftVectorX;
     var feedbackShiftVectorY;
@@ -385,7 +381,7 @@
           drawCenterY += feedbackShiftVectorY;
         }
         oldScrollY = scrollY;
-        if (tiltFBDelta) {
+        if (tiltFBDelta) { // we have device orientation readings, better than mouse
           feedbackShiftVectorX = tiltLR * feedbackTiltShiftFactor;
           feedbackShiftVectorY += tiltFB * -feedbackTiltShiftFactor;
         } else {
