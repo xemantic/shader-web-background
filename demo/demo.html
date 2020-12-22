@@ -229,14 +229,13 @@
     });
 
     onWindowLoad()
-      .then(Promise.all([
+      .then(() => Promise.all([
         loadScript("https://unpkg.com/screenfull/dist/screenfull.js"),
         loadScript("https://www.unpkg.com/nosleep.js/dist/NoSleep.min.js")
       ]))
       .then(maybeAddFullScreenAction);
 
-    function goFullScreen(noSleep) {
-      const canvas = document.getElementById("shader-web-background");
+    function goFullScreen(canvas, noSleep) {
       screenfull.on("change", () => {
         if (!screenfull.isFullscreen) {
           noSleep.disable();
@@ -262,8 +261,14 @@
 
     function maybeAddFullScreenAction() {
       if (screenfull.isEnabled) {
+        const canvas = document.getElementById("shader-web-background");
         const noSleep = new NoSleep();
-        addControl(newButton("Full Screen", () => goFullScreen(noSleep)));
+        addControl(
+          newButton(
+            "Full Screen",
+            () => goFullScreen(canvas, noSleep)
+          )
+        );
       }
     }
 
