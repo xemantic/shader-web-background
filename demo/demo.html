@@ -64,7 +64,6 @@
 
     uniform vec2      iResolution;
     uniform float     iMinDimension;
-    uniform float     iTime;
     uniform sampler2D iChannel0;
     uniform vec2      iScreenRatioHalf;
     uniform vec2      iMouse;
@@ -247,7 +246,7 @@
         const noSleep = new NoSleep();
         addControl(
           newButton(
-            "Full Screen",
+            "Go Full Screen",
             () => goFullScreen(canvas, noSleep)
           )
         );
