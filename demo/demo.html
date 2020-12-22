@@ -196,6 +196,14 @@
     var stMouseX;
     var stMouseY;
 
+    var tiltLR = 0;
+    var tiltFB = 0;
+
+    var tiltFBDelta = null;
+
+    var calibratedTiltLR = 0;
+    var calibratedTileFB = 0;
+
     var feedbackShiftVectorX;
     var feedbackShiftVectorY;
 
@@ -205,6 +213,7 @@
     var drawCenterY;
 
     const feedbackMouseShiftFactor = .003;
+    const feedbackTiltShiftFactor = .0002;
     const backgroundParallaxScrollingFactor = .5;
     const blob1ColorPulseSpeed = .07;
     const blob2ColorPulseSpeed = .07;
@@ -227,13 +236,6 @@
     const onWindowLoad = () => new Promise((resolve) => {
       window.addEventListener("load", resolve);
     });
-
-    onWindowLoad()
-      .then(() => Promise.all([
-        loadScript("https://unpkg.com/screenfull/dist/screenfull.js"),
-        loadScript("https://www.unpkg.com/nosleep.js/dist/NoSleep.min.js")
-      ]))
-      .then(maybeAddFullScreenAction);
 
     function goFullScreen(canvas, noSleep) {
       screenfull.on("change", () => {
@@ -272,10 +274,82 @@
       }
     }
 
+    function handleDeviceOrientationChange(event) {
+      if (event.beta) {
+        if (tiltFBDelta) {
+          tiltFB = event.beta - tiltFBDelta;
+        } else {  // first reading or calibration
+          tiltFBDelta = event.beta;
+          tiltFB = 0;
+        }
+      }
+      if (event.gamma) {
+        tiltLR = event.gamma;
+      }
+    }
+
+    function trackDeviceOrientation() {
+      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+    }
+
+    function untrackDeviceOrientation() {
+      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+    }
+
+    function calibrateDeviceOrientation() {
+      tiltFBDelta = null;
+    }
+
+    function initDeviceOrientation() {
+      if (DeviceOrientationEvent.requestPermission) {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response == "granted") {
+              tiltFBDelta = null;
+              untrackDeviceOrientation(); // just in case it is subsequent attempt
+              trackDeviceOrientation();
+            }
+          })
+          .catch(console.error);
+      } else {
+        trackDeviceOrientation();
+        tiltFBDelta = null;
+      }
+    }
+
+    function maybeAddCalibrateDeviceOrientationAction() {
+      if (window.DeviceOrientationEvent) {
+       addControl(
+          newButton(
+            "Calibrate Device Orientation",
+            () => initDeviceOrientation()
+          )
+        );
+      }
+    }
+
+    function maybeAddActions() {
+      maybeAddCalibrateDeviceOrientationAction();
+      maybeAddFullScreenAction();
+    }
+
+    if (window.DeviceOrientationEvent) {
+      if (!DeviceOrientationEvent.requestPermission) {
+        trackDeviceOrientation();
+      }
+    }
+
     document.addEventListener("mousemove", (event) => {
        mouseX = event.clientX;
        mouseY = event.clientY;
     });
+
+    onWindowLoad()
+      .then(() => Promise.all([
+        loadScript("https://unpkg.com/screenfull/dist/screenfull.js"),
+        loadScript("https://unpkg.com/nosleep.js/dist/NoSleep.min.js")
+      ]))
+      .then(maybeAddActions);
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
@@ -311,8 +385,13 @@
           drawCenterY += feedbackShiftVectorY;
         }
         oldScrollY = scrollY;
-        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
-        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        if (tiltFBDelta) {
+          feedbackShiftVectorX = tiltLR * feedbackTiltShiftFactor;
+          feedbackShiftVectorY += tiltFB * -feedbackTiltShiftFactor;
+        } else {
+          feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
+          feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        }
         blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
         blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
       },
