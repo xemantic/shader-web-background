@@ -290,6 +290,10 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     var stMouseX;
     var stMouseY;
 
+    var tiltLR = 0;
+    var tiltFB = 0;
+    var tiltFBDelta = null;
+
     var feedbackShiftVectorX;
     var feedbackShiftVectorY;
 
@@ -299,6 +303,7 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     var drawCenterY;
 
     const feedbackMouseShiftFactor = .003;
+    const feedbackTiltShiftFactor = .0002;
     const backgroundParallaxScrollingFactor = .5;
     const blob1ColorPulseSpeed = .07;
     const blob2ColorPulseSpeed = .07;
@@ -308,10 +313,133 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     var blob1Color;
     var blob2Color;
 
+    const loadScript = (src) => new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.type = "text/javascript";
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+
+    const onWindowLoad = () => new Promise((resolve) => {
+      window.addEventListener("load", resolve);
+    });
+
+    function goFullScreen(canvas, noSleep) {
+      screenfull.on("change", () => {
+        if (!screenfull.isFullscreen) {
+          noSleep.disable();
+        }
+      });
+      screenfull
+        .request(canvas)
+        .then(() => noSleep.enable());
+    }
+
+    function newButton(label, action) {
+      const button = document.createElement("button");
+      button.textContent = label;
+      button.addEventListener("click", action);
+      return button;
+    }
+
+    function addControl(control) {
+      document
+        .getElementById("controls")
+        .appendChild(control);
+    }
+
+    function maybeAddFullScreenAction() {
+      if (screenfull.isEnabled) {
+        const canvas = document.getElementById("shader-web-background");
+        const noSleep = new NoSleep();
+        addControl(
+          newButton(
+            "Go Full Screen",
+            () => goFullScreen(canvas, noSleep)
+          )
+        );
+      }
+    }
+
+    function handleDeviceOrientationChange(event) {
+      if (event.beta) {
+        if (tiltFBDelta) {
+          tiltFB = event.beta - tiltFBDelta;
+        } else {  // first reading or calibration
+          tiltFBDelta = event.beta;
+          tiltFB = 0;
+        }
+      }
+      if (event.gamma) {
+        tiltLR = event.gamma;
+      }
+    }
+
+    function trackDeviceOrientation() {
+      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+    }
+
+    function untrackDeviceOrientation() {
+      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+    }
+
+    function calibrateDeviceOrientation() {
+      tiltFBDelta = null;
+    }
+
+    function initDeviceOrientation() {
+      if (DeviceOrientationEvent.requestPermission) {
+        DeviceOrientationEvent.requestPermission()
+          .then(response => {
+            if (response == "granted") {
+              tiltFBDelta = null;
+              untrackDeviceOrientation(); // just in case it is subsequent attempt
+              trackDeviceOrientation();
+            }
+          })
+          .catch(console.error);
+      } else {
+        trackDeviceOrientation();
+        tiltFBDelta = null;
+      }
+    }
+
+    function maybeAddCalibrateDeviceOrientationAction() {
+      if (window.DeviceOrientationEvent) {
+       addControl(
+          newButton(
+            "Calibrate Device Orientation",
+            () => initDeviceOrientation()
+          )
+        );
+      }
+    }
+
+    function maybeAddActions() {
+      maybeAddCalibrateDeviceOrientationAction();
+      maybeAddFullScreenAction();
+    }
+
+    if (window.DeviceOrientationEvent) {
+      if (!DeviceOrientationEvent.requestPermission) {
+        trackDeviceOrientation();
+      }
+    }
+
     document.addEventListener("mousemove", (event) => {
        mouseX = event.clientX;
        mouseY = event.clientY;
     });
+
+    onWindowLoad()
+      .then(() => Promise.all([
+        loadScript("https://unpkg.com/screenfull/dist/screenfull.js"),
+        loadScript("https://unpkg.com/nosleep.js/dist/NoSleep.min.js")
+      ]))
+      .then(maybeAddActions);
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
@@ -347,8 +475,13 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
           drawCenterY += feedbackShiftVectorY;
         }
         oldScrollY = scrollY;
-        feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
-        feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        if (tiltFBDelta) { // we have device orientation readings, better than mouse
+          feedbackShiftVectorX = tiltLR * feedbackTiltShiftFactor;
+          feedbackShiftVectorY += tiltFB * -feedbackTiltShiftFactor;
+        } else {
+          feedbackShiftVectorX = stMouseX * feedbackMouseShiftFactor;
+          feedbackShiftVectorY += stMouseY * feedbackMouseShiftFactor;
+        }
         blob1Color = spectral_zucconi6((time * blob1ColorPulseSpeed) % 1);
         blob2Color = spectral_zucconi6((time * blob2ColorPulseSpeed + blob2ColorPulseShift) % 1);
       },
@@ -447,7 +580,7 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     a {
       text-decoration: none;
       color: white;
-      background: rgba(255, 0, 255, .3);
+      background: rgba(255, 0, 255, .2);
       transition: color 2s, background 2s;
       padding: .31rem .13rem;
       margin: -.31rem -.13rem;
@@ -455,7 +588,7 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     }
     a:hover {
       color: black;
-      background: white;
+      background: rgba(0, 255, 0, .2);
     }
     ul {
       margin-left: 1.1rem;
@@ -484,6 +617,22 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
       animation: 5s blink linear infinite;
       animation-fill-mode: both;
       animation-delay: 10s;
+    }
+    button {
+      background: rgba(255, 0, 255, .6);
+      margin: .618em;
+      border: none;
+      color: white;
+      padding: .618em;
+      text-align: center;
+      font-size: inherit;
+      transition: color 1.6s, background 1.6s;
+      border-radius: .47rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: rgba(0, 255, 0, .6);
+      color: black;
     }
     a.tea {
       background: transparent;
@@ -527,6 +676,9 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     .fallback {
       background: url("media/fallback.jpg");
       background-size: cover;
+    }
+    #controls {
+      text-align: center;
     }
     /*
     .action {
@@ -650,11 +802,7 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
       And you can have it! The <em><nobr>shader-web-background</nobr></em> open source project is
       here for you to provide an immersive experience on the web.
     </p>
-<!--    <p class="center-text">-->
-<!--      <a id="fullscreen-action" class="action" tabindex="0" role="button" aria-pressed="false">-->
-<!--        Go FULLSCREEN-->
-<!--      </a>-->
-<!--    </p>-->
+    <div id="controls"></div>
     <p>
       <a class="tea" href="https://www.buymeacoffee.com/kazik">
         <img loading="lazy" alt="Buy me a tea" src="https://img.buymeacoffee.com/button-api/?text=Buy me a tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF">
