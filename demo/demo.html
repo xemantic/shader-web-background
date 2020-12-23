@@ -165,7 +165,6 @@
   </script>
   <script>
     "use strict";
-    const GOLDEN_RATIO = .61803398875;
 
     var time;
 
@@ -267,12 +266,14 @@
       }
     }
 
+    const deviceOrientationEvent = "deviceorientation";
+
     function trackDeviceOrientation() {
-      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+      window.addEventListener(deviceOrientationEvent, handleDeviceOrientationChange, false);
     }
 
     function untrackDeviceOrientation() {
-      window.addEventListener("deviceorientation", handleDeviceOrientationChange, false);
+      window.removeEventListener(deviceOrientationEvent, handleDeviceOrientationChange, false);
     }
 
     function calibrateDeviceOrientation() {
