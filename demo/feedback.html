@@ -68,9 +68,7 @@
     The "image" shader will just copy the "feedback" output to the canvas.
    -->
   <script type="x-shader/x-fragment" id="image">
-    #ifdef GL_ES
     precision highp float;
-    #endif
 
     uniform vec2 iResolution;
     uniform sampler2D iChannel0;
