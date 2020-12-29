@@ -652,5 +652,8 @@ Or send me a link with description.
 
 ## TODO
 
- * fix iOS retina resolution uniforms, like it is done in glslCanvas
+ * remove h1 on iphone as an alternative to real fullscreen
  * provide example with multiple canvases
+ * parallax scrolling demo
+ * implement fullscreen according to: https://developers.google.com/web/fundamentals/native-hardware/fullscreen
+ * add support for DeviceOrientationEvent.alpha - heading

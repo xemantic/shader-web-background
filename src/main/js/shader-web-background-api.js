@@ -80,27 +80,36 @@ var UniformSetters;
 var Shader;
 
 /**
+ * @typedef {
+ *   function(!HTMLCanvasElement, !Error)
+ * }
+ */
+var ErrorHandler;
+
+/**
  * @typedef {{
  *   canvas:          (HTMLCanvasElement|undefined),
- *   fallback:        (boolean|undefined),
  *   onInit:          (function(Context=)|undefined),
  *   onResize:        (function(!number, !number, Context=)|undefined),
  *   onBeforeFrame:   (function(Context=)|undefined),
  *   shaders:         (!Object<string, !Shader>),
  *   onFrameComplete: (function()|undefined),
+ *   onError:         (ErrorHandler|undefined)
  * }}
  */
 var Config;
 
+shaderWebBackground.Error = class extends Error {}
+
 /**
  * Indicates misconfiguration.
  */
-shaderWebBackground.ConfigError = class extends Error {}
+shaderWebBackground.ConfigError = class extends shaderWebBackground.Error {}
 
 /**
  * Indicates WebGL problems.
  */
-shaderWebBackground.GlError = class extends Error {}
+shaderWebBackground.GlError = class extends shaderWebBackground.Error {}
 
 /**
  * Will start shading.

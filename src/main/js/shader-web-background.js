@@ -31,14 +31,23 @@ const
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  }
+  },
+  /** @type {ErrorHandler} */
+  DEFAULT_ON_ERROR = (canvas, error) => {
+    canvas.classList.add(FALLBACK_CLASS);
+    if (error instanceof shaderWebBackground.GlError) {
+      console.log("Could not shade, adding fallback class to canvas: " + error);
+    } else {
+      throw error;
+    }
+  };
 
 /**
  * @param {*} condition
  * @param {!string} message
  */
 function check(condition, message) {
-  if (!condition) throw new shaderWebBackground.ConfigError(message)
+  if (!condition) throw new shaderWebBackground.ConfigError(message);
 }
 
 /**
@@ -286,17 +295,21 @@ function shade(config) {
       config.onFrameComplete
     );
   } catch (/** @type {!Error} */ e) {
-    if (config.fallback && (e instanceof shaderWebBackground.GlError)) {
-      console.log("Could not load shaders, adding fallback class to canvas" + e);
-      canvas.classList.add(FALLBACK_CLASS);
-    } else {
-      throw e;
-    }
+    (config.onError || DEFAULT_ON_ERROR)(canvas, e);
   }
 }
 
 /** @suppress {checkTypes} to redefine the type declared in externs */
-shaderWebBackground.ConfigError = class extends Error {
+shaderWebBackground.Error = class extends Error {
+  /** @param {!string} message */
+  constructor(message) {
+    super(message);
+    this.name = "shaderWebBackground.Error";
+  }
+};
+
+/** @suppress {checkTypes} to redefine the type declared in externs */
+shaderWebBackground.ConfigError = class extends shaderWebBackground.Error {
   /** @param {!string} message */
   constructor(message) {
     super(message);
@@ -305,7 +318,7 @@ shaderWebBackground.ConfigError = class extends Error {
 };
 
 /** @suppress {checkTypes} to redefine the type declared in externs */
-shaderWebBackground.GlError = class extends Error {
+shaderWebBackground.GlError = class extends shaderWebBackground.Error {
   /** @param {!string} message */
   constructor(message) {
     super(message);
