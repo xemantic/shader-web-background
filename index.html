@@ -172,7 +172,6 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     uniform float     iMinDimension;
     uniform sampler2D iChannel0;
     uniform vec2      iScreenRatioHalf;
-    uniform vec2      iMouse;
     uniform vec2      iFeedbackZoomCenter;
     uniform float     iFeedbackZoomRate;
     uniform vec2      iFeedbackShiftVector;
@@ -210,7 +209,6 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     void main() {
       vec2 uv = gl_FragCoord.xy / iResolution;
       vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
-      vec2 mouseSt = (iMouse * 2. - iResolution) / iMinDimension;
 
       vec2  drawDelta = st - iDrawCenter;
       float drawAngle = atan(drawDelta.x, drawDelta.y);
