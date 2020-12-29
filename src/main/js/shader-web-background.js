@@ -274,7 +274,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
  */
 function shade(config) {
   // first we need to validate all the configuration
-  check(config, "Missing config argument")
+  check(config, "Missing config argument");
 
   const canvas = (config.canvas)
     ? checkIfCanvas(config.canvas)
