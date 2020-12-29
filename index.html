@@ -260,8 +260,6 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     uniform vec2 R;uniform sampler2D T0;void main(){gl_FragColor=texture2D(T0,gl_FragCoord.xy/R);}
   </script>
   <script>
-    "use strict";
-
     var time;
 
     var minDimension;
@@ -506,7 +504,8 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
         drawCenterY *= drawCenterShiftDownScale;
       },
       onError: (canvas, error) => {
-        canvas.classList.add("fallback");
+        canvas.remove();
+        document.documentElement.classList.add("fallback-background");
         if (error instanceof shaderWebBackground.GlError) {
           console.error(error);
           // in regular web design we would just silently switch to fallback style
@@ -673,8 +672,8 @@ this.o);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
     #controls {
       text-align: center;
     }
-    #shader-web-background.fallback {
-      background: url("media/fallback.jpg");
+    .fallback-background {
+      background: black url("media/fallback.jpg");
       background-size: cover;
       background-position: center;
     }
