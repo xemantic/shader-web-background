@@ -108,15 +108,10 @@ TL;DR:
     #shader-web-background.fallback {
       display: none;
     }
-    header {
-      height: 100vh;
-    }
   </style>
 </head>
 <body>
-<header>
-  <h1><a href="#source">Minimal shader with embedded library</a></h1>
-</header>
+  <h1>shader-web-background minimal example</h1>
 </body>
 </html>
 ```
