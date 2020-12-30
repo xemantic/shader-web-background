@@ -17,8 +17,6 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-"use strict";
-
 window.addEventListener("DOMContentLoaded", () => {
   const pre = document.createElement("pre");
   pre.id = "source";

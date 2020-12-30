@@ -17,8 +17,6 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-"use strict";
-
 const report = (message, color) => {
   const div = document.createElement("div")
   div.style.fontSize = "1.4rem";
