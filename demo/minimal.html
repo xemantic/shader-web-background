@@ -24,7 +24,6 @@
   <title>Minimal shader with embedded library</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="stylesheet" href="demo.css"/>
   <script src="../src/test/js/show-demo-source.js"></script>
   <script>
 // -- https://xemantic.github.io/shader-web-background/
@@ -120,10 +119,12 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
   <script type="x-shader/x-fragment" id="image">
     precision highp float;
 
+    uniform float iTime;
+
     void main() {
       gl_FragColor = vec4(
         mod(gl_FragCoord.x / 256., 1.),
-        mod(gl_FragCoord.x + gl_FragCoord.y / 256., 1.),
+        mod((gl_FragCoord.x + gl_FragCoord.y - iTime * 40.) / 256. , 1.),
         mod(gl_FragCoord.y / 256., 1.),
         1.
       );
@@ -132,10 +133,27 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
   <script>
     shaderWebBackground.shade({
       shaders: {
-        image: {}
+        image: {
+          uniforms: {
+            iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000)
+          }
+        }
       }
     });
   </script>
+  <style>
+    .shader-web-background-fallback {
+      background: url("https://placekitten.com/666/666");
+      background-position: center;
+      background-size: cover;
+    }
+    #shader-web-background.fallback {
+      display: none;
+    }
+    header {
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
 <header>
