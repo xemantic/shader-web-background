@@ -77,11 +77,6 @@ header h1 a {
   }
 }
 
-.shader-web-background.fallback {
-  background: pink;
-  content: "You need WebGL enabled browser supporting floating point texture extensions"
-}
-
 section {
   background: rgba(0, 0, 0, .4);
   font-size: 1.6rem;
@@ -90,11 +85,6 @@ section {
 #controls {
   text-align: center;
   line-height: 4em;
-}
-
-#source {
-  background: rgba(0, 0, 0, .6);
-  overflow-x: auto;
 }
 
 button {
@@ -112,4 +102,17 @@ button {
 button:hover {
   background: rgba(255, 255, 255, .5);
   color: black;
+}
+
+.shader-web-background-fallback {
+  background: red;
+}
+
+.shader-web-background-fallback h1::after {
+  color: red;
+  content: " shader-web-background not supported"
+}
+
+#shader-web-background.fallback {
+  display: none;
 }

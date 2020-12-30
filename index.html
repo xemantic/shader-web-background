@@ -258,9 +258,19 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
       gl_FragColor = vec4(color, 1.);
     }
   </script>
+
+  <!--
+    The "image" shader will just copy the "feedback" output to the canvas.
+   -->
   <script type="x-shader/x-fragment" id="image">
     precision highp float;
-    uniform vec2 R;uniform sampler2D T0;void main(){gl_FragColor=texture2D(T0,gl_FragCoord.xy/R);}
+
+    uniform vec2 iResolution;
+    uniform sampler2D iChannel0;
+
+    void main(){
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
+    }
   </script>
   <script>
     var time;
@@ -498,8 +508,8 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
         },
         image: {
           uniforms: {
-            R: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
-            T0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
           }
         }
       },

@@ -158,12 +158,10 @@
     uniform sampler2D iChannel0;
 
     void main(){
-      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution).rrrr;
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
     }
   </script>
   <script>
-    "use strict";
-
     var time;
 
     var minDimension;
@@ -400,7 +398,7 @@
         image: {
           uniforms: {
             iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
-            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+            iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
           }
         }
       },

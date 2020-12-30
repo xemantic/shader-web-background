@@ -22,6 +22,8 @@
 window.addEventListener("DOMContentLoaded", () => {
   const pre = document.createElement("pre");
   pre.id = "source";
+  pre.style.background = "rgba(0, 0, 0, .6)";
+  pre.style.overflowX = "auto";
   pre.classList.add("language-html");
 
   const source = document.firstElementChild.outerHTML
