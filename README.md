@@ -62,16 +62,16 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 * **shadertoy support**: including multipass shaders
 * **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
 
-## How to use it in your projects?
+## How to use it?
 
-TL;DR:
+**TL;DR:**
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Minimal shader with embedded library</title>
+  <title>Minimal shader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
@@ -125,9 +125,9 @@ https://xemantic.github.io/shader-web-background/#demo
 There are several ways of using this library depending on your needs:
 
 
-### 1. Add library to your website
+### Step 1 - Add library to your website
 
-#### a) Embedded minified library code in the source of your website
+#### option a) Embedded minified library code in the source of your website
 
 If you want your shaders to start rendering before any other resources are loaded,
 then go for this method. Just take the contents of
@@ -143,7 +143,7 @@ https://xemantic.github.io/shader-web-background/demo/minimal.html
 See [minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html) for reference. 
 
 
-#### b) Reference the minified library
+#### option b) Reference the minified library
 
 Add this `script` to the `<head>` of your HTML:
 
@@ -151,7 +151,7 @@ Add this `script` to the `<head>` of your HTML:
 <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
 ```
 
-### 2. Add your fragment shaders
+### Step 2 - Add your fragment shaders
 
 You will need at least one fragment shader defined like this:
 
@@ -171,7 +171,7 @@ The `id` attribute is arbitrary.
 :warning: Note: Remember to give unique `id` to each of your shaders if you are
 defining more of them.
 
-### 3. Start shading
+### Step 3 - Start shading
 
 ```javascript
 <script>
@@ -186,29 +186,33 @@ shaderWebBackground.shade({
 :warning: Note: the shader name `image` should match the one defined as
 shader `id` attribute. 
 
-### 4. Specify fallback (optional)
+### Step 4 - Specify fallback styles
 
-Optional but highly recommended:
+It is still possible that your shaders cannot be supported technically on
+your browser / hardware. For consistent web experience you can define "ersatz"
+fallback CSS style, for example a static screenshot of your shader frame: 
 
-```javascript
-<script>
-shaderWebBackground.shade({
-  fallback: true,
-  // ...
-});
-</script>
+```html
+  <style>
+    .shader-web-background-fallback {
+      background: url("https://placekitten.com/666/666");
+      background-position: center;
+      background-size: cover;
+    }
+    #shader-web-background.fallback {
+      display: none;
+    }
+  </style>
 ```
+The `.shader-web-background-fallback` class is applied to HTML document root.
 
-Setting `fallback` will swallow `shaderWebBackground.GlError`s indicating
-lack of required WebGL capabilities on the browser. In such a case the
-`fallback` class is being added to the `canvas` element and can be use in
-CSS for styling;
+The `#shader-web-background.fallback` is a class applied to the default canvas
+element added by the library to cover the whole viewport with `z-index: -9999`.
+On some browser it is enough to provide a background for this canvas element.
+But for better compatibility it's better to apply it to the HTML document
+root while hiding the created canvas. It is also possible to alter the
+default error handler applying these styles. See onError.
 
-```css
-#shader-web-background.fallback {
-  background: url("my-fallback-image.jpg");
-}
-```
 
 ## How to configure shading?
 
