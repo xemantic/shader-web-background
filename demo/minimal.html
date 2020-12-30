@@ -28,88 +28,90 @@
   <script src="../src/test/js/show-demo-source.js"></script>
   <script>
 // -- https://xemantic.github.io/shader-web-background/
-const shaderWebBackground={};(()=>{'use strict';const p=(a,b)=>{b.initHalfFloatRGBATexture(b.width,b.height);a.texParameteri(a.TEXTURE_2D,
+const shaderWebBackground={};(()=>{'use strict';const r=(a,b)=>{b.initHalfFloatRGBATexture(b.width,b.height);a.texParameteri(a.TEXTURE_2D,
 a.TEXTURE_MIN_FILTER,a.LINEAR);a.texParameteri(a.TEXTURE_2D,a.TEXTURE_MAG_FILTER,
 a.LINEAR);a.texParameteri(a.TEXTURE_2D,a.TEXTURE_WRAP_S,a.CLAMP_TO_EDGE);a.texParameteri(a.TEXTURE_2D,
-a.TEXTURE_WRAP_T,a.CLAMP_TO_EDGE)},u=(a,b)=>{document.documentElement.classList.add("shader-web-background-fallback");
-a.classList.add("fallback");if(b instanceof shaderWebBackground.GlError)console.log("Could not shade, adding fallback CSS classes:",
+a.TEXTURE_WRAP_T,a.CLAMP_TO_EDGE)},x=(a,b)=>{console.warn("shader-web-background cannot shade, adding fallback CSS classes");
+document.documentElement.classList.add("shader-web-background-fallback");a.classList.add("fallback");
+if(b instanceof shaderWebBackground.GlError)console.warn("Not sufficient WebGL support:",
 b);else throw b;};
-function v(a,b){if(!a)throw new shaderWebBackground.ConfigError(b);}
-function w(a){v(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");
+function y(a,b){if(!a)throw new shaderWebBackground.ConfigError(b);}
+function z(a){y(a instanceof HTMLCanvasElement,"config.canvas must be instance of canvas");
 return a}
-function x(){const a=document.createElement("canvas"),b=a.style;a.id="shader-web-background";b.width=
+function A(){const a=document.createElement("canvas"),b=a.style;a.id="shader-web-background";b.width=
 "100vw";b.height="100vh";b.position="fixed";b.top="0";b.left="0";b.zIndex=-9999;return a}
-const z=a=>'<script type="x-shader/x-fragment" id="'+a+'">';
-function A(a){const b=document.getElementById(a);v(b,"Missing shader source: "+z(a));
-v(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source element of id "'+
-a+'" should be of type: '+z(a));return b.text}
-function B(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
-class C{constructor(a,b,c,h){this.g=c;const d=a.g;this.h=()=>{for(const f of h)f.v(d,
-f.location,b)};this.j=()=>{var f=c.A,e=a.g;e.bindBuffer(e.ARRAY_BUFFER,a.o);e.enableVertexAttribArray(f);
-e.vertexAttribPointer(f,2,e.FLOAT,!1,0,0);e.drawArrays(e.TRIANGLE_STRIP,0,4);e.disableVertexAttribArray(f);
-e.bindBuffer(e.ARRAY_BUFFER,null);f=a.g;for(e=0;e<a.h;e++)f.activeTexture(f.TEXTURE0+
-e),f.bindTexture(f.TEXTURE_2D,null);a.h=0}}}
-function D(a,b,c,h,d,f){const e=new E(a,g=>new shaderWebBackground.GlError(g)),K=
-e.g,t=[],k={canvas:a,width:0,height:0,cssPixelRatio:0,cssWidth:0,cssHeight:0,isOverShader:(g,
-l)=>{const m=a.getBoundingClientRect();return g>=m.left&&g<=m.right&&l>=m.top&&l<=
-m.bottom},getCoordinateX:g=>(g-a.getBoundingClientRect().left)*k.cssPixelRatio+.5,
-getCoordinateY:g=>a.height-(g-a.getBoundingClientRect().top)*k.cssPixelRatio-.5,u:()=>
-{k.cssWidth===a.clientWidth&&k.cssHeight===a.clientHeight||k.resize()},resize:()=>
-{const g=window.devicePixelRatio||1,l=a.clientWidth,m=a.clientHeight,n=Math.floor(l*
-g),q=Math.floor(m*g);a.width=n;a.height=q;k.width=n;k.height=q;k.cssPixelRatio=g;
-k.cssWidth=l;k.cssHeight=m;e.g.viewport(0,0,e.canvas.width,e.canvas.height);for(const L of t)L.g.m(n,
-q);h&&h(n,q,k)},texture:(g,l)=>{{const m=e.g;l=l instanceof F?l.g:l;m.activeTexture(m.TEXTURE0+
-e.h);m.bindTexture(m.TEXTURE_2D,l);m.uniform1i(g,e.h++)}},buffers:{},initHalfFloatRGBATexture:(g,
-l)=>{e.i.h(g,l)}},M=Object.keys(b).length-1;let N=0;for(const g in b){if(N++<M){const n=
-b[g].texture||p;k.buffers[g]=G(e,()=>{n(K,k)})}const l=H(e,I(e,g,A(g)),k.buffers[g]),
-m=b[g].uniforms||{};var r=Object.keys(m);for(const n of l.s)v(m[n.name],'No configuration for uniform "'+
-n.name+'" defined in shader "'+g+'"'),r=r.filter(q=>q!==n.name);0!==r.length&&console.log('Extra uniforms configured for shader "'+
-g+'", which are not present in the shader code - might have been removed by GLSL compiler if not used: '+
-r.join(", "));r=l.s.map(n=>({location:n.location,v:m[n.name]}));t.push(new C(e,k,
-l,r))}const y=()=>{k.u();d&&d(k);for(const g of t)g.g.j(g.h,g.j);f&&f();requestAnimationFrame(y)};
-B("load",()=>{k.resize();c&&c(k);requestAnimationFrame(y)});return k}
+const B=a=>'<script type="x-shader/x-fragment" id="'+a+'">';
+function D(a){const b=document.getElementById(a);y(b,"Missing shader source: "+B(a));
+y(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source element of id "'+
+a+'" should be of type: '+B(a));return b.text}
+function E(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
+class F{constructor(a,b,c,d){this.g=c;const k=a.g;this.h=()=>{for(const f of d)f.v(k,
+f.location,b)};this.j=()=>{var f=c.A,g=a.g;g.bindBuffer(g.ARRAY_BUFFER,a.l);g.enableVertexAttribArray(f);
+g.vertexAttribPointer(f,2,g.FLOAT,!1,0,0);g.drawArrays(g.TRIANGLE_STRIP,0,4);g.disableVertexAttribArray(f);
+g.bindBuffer(g.ARRAY_BUFFER,null);f=a.g;for(g=0;g<a.h;g++)f.activeTexture(f.TEXTURE0+
+g),f.bindTexture(f.TEXTURE_2D,null);a.h=0}}}
+function G(a){var b={antialias:!1,depth:!1,alpha:!1};try{return new H(a,b)}catch(c){throw new shaderWebBackground.GlError(c.message);
+}}
+function I(a,b,c,d,k,f){function g(e,m){try{{var n=q;const p=n.g,v=J(n,e,p.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}"),
+O=J(n,e,p.FRAGMENT_SHADER,m),u=p.createProgram();p.attachShader(u,v);p.attachShader(u,
+O);p.linkProgram(u);var h=u}return h}catch(p){throw new shaderWebBackground.ConfigError(p.message);
+}}const q=G(a),P=q.g,w=[],l={canvas:a,width:0,height:0,cssPixelRatio:0,cssWidth:0,
+cssHeight:0,isOverShader:(e,m)=>{const n=a.getBoundingClientRect();return e>=n.left&&
+e<=n.right&&m>=n.top&&m<=n.bottom},getCoordinateX:e=>(e-a.getBoundingClientRect().left)*
+l.cssPixelRatio+.5,getCoordinateY:e=>a.height-(e-a.getBoundingClientRect().top)*l.cssPixelRatio-
+.5,u:()=>{l.cssWidth===a.clientWidth&&l.cssHeight===a.clientHeight||l.resize()},resize:()=>
+{const e=window.devicePixelRatio||1,m=a.clientWidth,n=a.clientHeight,h=Math.floor(m*
+e),p=Math.floor(n*e);a.width=h;a.height=p;l.width=h;l.height=p;l.cssPixelRatio=e;
+l.cssWidth=m;l.cssHeight=n;q.g.viewport(0,0,q.canvas.width,q.canvas.height);for(const v of w)v.g.m(h,
+p);d&&d(h,p,l)},texture:(e,m)=>{{var n=q;const h=n.g;m=m instanceof K?m.g:m;h.activeTexture(h.TEXTURE0+
+n.h);h.bindTexture(h.TEXTURE_2D,m);h.uniform1i(e,n.h++)}},buffers:{},initHalfFloatRGBATexture:(e,
+m)=>{q.i.h(e,m)}},Q=Object.keys(b).length-1;let R=0;for(const e in b){if(R++<Q){const h=
+b[e].texture||r;l.buffers[e]=L(q,()=>{h(P,l)})}const m=M(q,g(e,D(e)),l.buffers[e]),
+n=b[e].uniforms||{};var t=Object.keys(n);for(const h of m.o)y(n[h.name],'No configuration for uniform "'+
+h.name+'" defined in shader "'+e+'"'),t=t.filter(p=>p!==h.name);0!==t.length&&console.warn('Extra uniforms configured for shader "'+
+e+'", which are not present in the shader code - might have been removed by GLSL compiler if not used: '+
+t.join(", "));t=m.o.map(h=>({location:h.location,v:n[h.name]}));w.push(new F(q,l,
+m,t))}const C=()=>{l.u();k&&k(l);for(const e of w)e.g.j(e.h,e.j);f&&f();requestAnimationFrame(C)};
+E("load",()=>{l.resize();c&&c(l);requestAnimationFrame(C)});return l}
 shaderWebBackground.Error=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.Error"}};
 shaderWebBackground.ConfigError=class extends shaderWebBackground.Error{constructor(a){super(a);
 this.name="shaderWebBackground.ConfigError"}};
 shaderWebBackground.GlError=class extends shaderWebBackground.Error{constructor(a){super(a);this.name=
 "shaderWebBackground.GlError"}};
-shaderWebBackground.shade=function(a){v(a,"Missing config argument");const b=a.canvas?
-w(a.canvas):x();v(a.shaders,"No shaders specified in config");try{return a.canvas||
-B("DOMContentLoaded",()=>document.body.appendChild(b)),D(b,a.shaders,a.onInit,a.onResize,
-a.onBeforeFrame,a.onFrameComplete)}catch(c){(a.onError||u)(b,c)}};const J=[-1,1,1,1,-1,-1,1,-1];
-function O(a,b){return a.l(a.g.getExtension(b),b+" extension is not supported")}
-class P{constructor(a,b){this.g=a;this.l=b}h(){}}
-class Q extends P{constructor(a,b){super(a,b);this.i=O(this,"OES_texture_half_float");
-O(this,"OES_texture_half_float_linear")}h(a,b){const c=this.g;c.texImage2D(c.TEXTURE_2D,
+shaderWebBackground.shade=function(a){y(a,"Missing config argument");const b=a.canvas?
+z(a.canvas):A();y(a.shaders,"No shaders specified in config");try{return a.canvas||
+E("DOMContentLoaded",()=>document.body.appendChild(b)),I(b,a.shaders,a.onInit,a.onResize,
+a.onBeforeFrame,a.onFrameComplete)}catch(c){(a.onError||x)(b,c)}};const N=[-1,1,1,1,-1,-1,1,-1];
+function S(a,b){return a.l(a.g.getExtension(b),b+" extension is not supported")}
+class T{constructor(a,b){this.g=a;this.l=b}h(){}}
+class U extends T{constructor(a,b){super(a,b);this.i=S(this,"OES_texture_half_float");
+S(this,"OES_texture_half_float_linear")}h(a,b){const c=this.g;c.texImage2D(c.TEXTURE_2D,
 0,c.RGBA,a,b,0,c.RGBA,this.i.HALF_FLOAT_OES,null)}}
-class R extends P{constructor(a,b){super(a,b);O(this,"EXT_color_buffer_float");this.g.getExtension("OES_texture_float_linear")}h(a,
+class V extends T{constructor(a,b){super(a,b);S(this,"EXT_color_buffer_float");this.g.getExtension("OES_texture_float_linear")}h(a,
 b){const c=this.g;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.HALF_FLOAT,
-null)}}function G(a,b){return new F(a.g,()=>{b(a.g)})}
-function H(a,b,c){const h=a.g;a=[];const d=h.getProgramParameter(b,h.ACTIVE_UNIFORMS);
-for(let f=0;f<d;f++){const e=h.getActiveUniform(b,f);a.push({name:e.name,location:h.getUniformLocation(b,
-e.name)})}return{A:h.getAttribLocation(b,"V"),s:a,m:c?(f,e)=>c.m(f,e):()=>{},j:(f,
-e)=>{h.useProgram(b);f();c?(f=c.g,c.g=c.h,c.h=f,c.j(e)):e()}}}
-function I(a,b,c){const h=a.g,d=S(a,b,h.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}");
-a=S(a,b,h.FRAGMENT_SHADER,c);b=h.createProgram();h.attachShader(b,d);h.attachShader(b,
-a);h.linkProgram(b);return b}
-function T(a){a=a.split(/r?n/);const b=a.length.toString().length,c=[];a.forEach((h,
-d)=>{var f=c.push;d=""+(d+1);d=d.length>=b?d:" ".repeat(b-d.length)+d;f.call(c,d+
-":");c.push(h);c.push("n")});return c.join("")}
-function S(a,b,c,h){const d=a.g;c=d.createShader(c);d.shaderSource(c,h);d.compileShader(c);
-if(!d.getShaderParameter(c,d.COMPILE_STATUS)){const f=String(d.getShaderInfoLog(c));
-d.deleteShader(c);b="Cannot compile shader - "+b+": "+f;console.log(b);console.log(T(h));
-throw a.l(b);}return c}
-class E{constructor(a,b){var c={antialias:!1,depth:!1,alpha:!1};this.canvas=a;this.l=
-b;const h=(f,e)=>{if(!f)throw b(e);return f};let d=a.getContext("webgl2",c);if(d)this.i=
-new R(d,h);else if(d=a.getContext("webgl",c))this.i=new Q(d,h);h(d,"webgl context not supported on supplied canvas element: "+
+null)}}function L(a,b){return new K(a.g,()=>{b(a.g)})}
+function M(a,b,c){const d=a.g;a=[];const k=d.getProgramParameter(b,d.ACTIVE_UNIFORMS);
+for(let f=0;f<k;f++){const g=d.getActiveUniform(b,f);a.push({name:g.name,location:d.getUniformLocation(b,
+g.name)})}return{A:d.getAttribLocation(b,"V"),o:a,m:c?(f,g)=>c.m(f,g):()=>{},j:(f,
+g)=>{d.useProgram(b);f();c?(f=c.g,c.g=c.h,c.h=f,c.j(g)):g()}}}
+function W(a){a=a.split(/r?n/);const b=a.length.toString().length,c=[];a.forEach((d,
+k)=>{var f=c.push;k=""+(k+1);k=k.length>=b?k:" ".repeat(b-k.length)+k;f.call(c,k+
+":");c.push(d);c.push("n")});return c.join("")}
+function J(a,b,c,d){a=a.g;c=a.createShader(c);a.shaderSource(c,d);a.compileShader(c);
+if(!a.getShaderParameter(c,a.COMPILE_STATUS)){const k=String(a.getShaderInfoLog(c));
+a.deleteShader(c);b="Cannot compile shader - "+b+": "+k;console.log(b);console.log(W(d));
+throw Error(b);}return c}
+class H{constructor(a,b){this.canvas=a;const c=(k,f)=>{if(!k)throw Error(f);return k};
+let d=a.getContext("webgl2",b);if(d)this.i=new V(d,c);else if(d=a.getContext("webgl",
+b))this.i=new U(d,c);c(d,"webgl context not supported on supplied canvas element: "+
 a);this.g=d;a=d.createBuffer();d.bindBuffer(d.ARRAY_BUFFER,a);d.bufferData(d.ARRAY_BUFFER,
-new Float32Array(J),d.STATIC_DRAW);d.bindBuffer(d.ARRAY_BUFFER,null);this.o=a;this.buffers=
+new Float32Array(N),d.STATIC_DRAW);d.bindBuffer(d.ARRAY_BUFFER,null);this.l=a;this.buffers=
 {};this.h=0}}
-function U(a){const b=a.i,c=b.createTexture();b.bindTexture(b.TEXTURE_2D,c);a.o(b);
+function X(a){const b=a.i,c=b.createTexture();b.bindTexture(b.TEXTURE_2D,c);a.s(b);
 b.bindTexture(b.TEXTURE_2D,null);return c}
-class F{constructor(a,b){this.l=a.createFramebuffer();this.i=a;this.o=b;this.g=this.h=
+class K{constructor(a,b){this.l=a.createFramebuffer();this.i=a;this.s=b;this.g=this.h=
 null}m(){this.h&&this.i.deleteTexture(this.h);this.g&&this.i.deleteTexture(this.g);
-this.h=U(this);this.g=U(this)}j(a){const b=this.i;b.bindFramebuffer(b.FRAMEBUFFER,
+this.h=X(this);this.g=X(this)}j(a){const b=this.i;b.bindFramebuffer(b.FRAMEBUFFER,
 this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,this.g,
 0);a();b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,null,
 0);b.bindFramebuffer(b.FRAMEBUFFER,null)}};})()

@@ -42,6 +42,13 @@ function appendSource() {
   document.body.append(pre);
 }
 
+function addReport(report) {
+  window.addEventListener("DOMContentLoaded", () => {
+    appendSource();
+    document.body.prepend(report);
+  }, true);
+}
+
 function shouldThrow(expectedError, call) {
   var report;
   try {
@@ -56,10 +63,22 @@ function shouldThrow(expectedError, call) {
       );
     }
   }
+  addReport(report);
+}
 
-  window.addEventListener("DOMContentLoaded", () => {
-    appendSource();
-    document.body.prepend(report);
-  }, true);
-
+function shouldWarn(expectedWarning, call) {
+  var report;
+  var message;
+  console.warn = (arg) => {
+    message = arg;
+  }
+  call();
+  if (message === expectedWarning) {
+    report = reportSuccess("Expected warning was logged: [" + expectedWarning + "]");
+  } else {
+    report = reportFailure(
+      "Warning not logged, expected: [" + expectedWarning + "], but was: [" + message + "]"
+    );
+  }
+  addReport(report);
 }

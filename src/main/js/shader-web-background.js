@@ -35,10 +35,11 @@ const
   },
   /** @type {!ErrorHandler} */
   DEFAULT_ON_ERROR = (canvas, error) => {
+    console.warn("shader-web-background cannot shade, adding fallback CSS classes");
     document.documentElement.classList.add(CANVAS_ELEMENT_ID + "-" + FALLBACK_CLASS);
     canvas.classList.add(FALLBACK_CLASS);
     if (error instanceof shaderWebBackground.GlError) {
-      console.log("Could not shade, adding fallback CSS classes:", error);
+      console.warn("Not sufficient WebGL support:", error);
     } else {
       throw error;
     }
@@ -155,6 +156,20 @@ class Renderer {
 
 /**
  * @param {!HTMLCanvasElement} canvas
+ * @param {!Object} contextAttrs
+ * @return {!GlWrapper}
+ * @throws {shaderWebBackground.GlError}
+ */
+function initCanvas(canvas, contextAttrs) {
+  try {
+    return new GlWrapper(canvas, contextAttrs);
+  } catch (/** @type {!Error} */ error) {
+    throw new shaderWebBackground.GlError(error.message);
+  }
+}
+
+/**
+ * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !Shader>} shaders
  * @param {function(Context=)|undefined} onInit
  * @param {function(!number, !number, Context=)|undefined} onResize
@@ -164,19 +179,28 @@ class Renderer {
  */
 function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComplete) {
 
+  // in the future it should be configurable as well
   const contextAttrs = {
     antialias: false,
     depth: false,
     alpha: false
-  }
-
-  const glWrapper = new GlWrapper(
-    canvas,
-    (message) => new shaderWebBackground.GlError(message),
-    contextAttrs
-  );
-
+  };
+  const glWrapper = initCanvas(canvas, contextAttrs);
   const gl = glWrapper.gl;
+
+  /**
+   * @param {!string} id
+   * @param {!string} source
+   * @return {!WebGLProgram}
+   * @throws {shaderWebBackground.ConfigError}
+   */
+  function initProgram(id, source) {
+    try {
+      return glWrapper.initProgram(id, VERTEX_SHADER, source)
+    } catch (/** @type {!Error} */ error) {
+      throw new shaderWebBackground.ConfigError(error.message);
+    }
+  }
 
   /** @type {!Array<!Renderer>} */
   const renderers = [];
@@ -251,7 +275,6 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
     }
   }
 
-
   const imageShaderIndex = Object.keys(shaders).length - 1;
   let index = 0;
   for (const id in shaders) {
@@ -265,7 +288,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
 
     const program = glWrapper.wrapProgram(
       id,
-      glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
+      initProgram(id, getSource(id)),
       VERTEX_ATTRIBUTE,
       context.buffers[id]
     );
@@ -283,7 +306,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
     }
 
     if (extraUniforms.length !== 0) {
-      console.log(
+      console.warn(
         "Extra uniforms configured for shader \"" + id
           + "\", which are not present in the shader code "
           + "- might have been removed by GLSL compiler if not used: " + extraUniforms.join(", ")

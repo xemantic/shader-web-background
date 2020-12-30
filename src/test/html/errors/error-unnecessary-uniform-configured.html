@@ -33,11 +33,10 @@
   <script src="../../../../dist/shader-web-background.min.js"></script>
   <script src="../../js/test-error.js"></script>
   <script>
-    shouldThrow(
-      new shaderWebBackground.GlError(
-        "No such uniform \"iSuperfluous\" defined in shader \"image\" "
-          + "- if unused it might be removed by GLSL compiler"
-      ),
+    shouldWarn(
+      "Extra uniforms configured for shader \"image\", which are not present in the shader code "
+        + "- might have been removed by GLSL compiler if not used: iSuperfluous"
+      ,
       () => shaderWebBackground.shade({
         shaders: {
           image: {

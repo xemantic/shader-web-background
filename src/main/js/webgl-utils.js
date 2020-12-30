@@ -145,12 +145,10 @@ class GlWrapper {
 
   /**
    * @param {!HTMLCanvasElement} canvas
-   * @param {!function(!string):!Error} glErrorFactory
-   * @param {Object<string, ?>=} contextAttrs
+   * @param {Object=} contextAttrs
    */
-  constructor(canvas, glErrorFactory, contextAttrs) {
+  constructor(canvas, contextAttrs) {
     this.canvas = canvas;
-    this.glErrorFactory = glErrorFactory;
 
     /**
      * @param {!C|undefined} condition
@@ -160,7 +158,7 @@ class GlWrapper {
      * @suppress {reportUnknownTypes}
      */
     const check = (condition, message) => {
-      if (!condition) throw glErrorFactory(message);
+      if (!condition) throw new Error(message);
       return (condition);
     };
 
@@ -222,7 +220,7 @@ class GlWrapper {
       const message = "Cannot compile shader - " + id + ": " + info;
       console.log(message);
       console.log(this.getLineNumberedSource(source));
-      throw this.glErrorFactory(message);
+      throw new Error(message);
     }
     return shader;
   }
