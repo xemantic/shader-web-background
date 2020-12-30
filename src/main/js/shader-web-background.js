@@ -24,19 +24,21 @@ const
   CANVAS_ELEMENT_ID = "shader-web-background",
   FALLBACK_CLASS = "fallback",
   VERTEX_ATTRIBUTE = "V",
-  VERTEX_SHADER = `attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}`,
-  /** @type {TextureInitializer} */
-  DEFAULT_TEXTURE_INITIALIZER = (gl) => {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  VERTEX_SHADER = "attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}",
+  /** @type {!TextureInitializer} */
+  DEFAULT_TEXTURE_INITIALIZER = (gl, ctx) => {
+    ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   },
-  /** @type {ErrorHandler} */
+  /** @type {!ErrorHandler} */
   DEFAULT_ON_ERROR = (canvas, error) => {
+    document.documentElement.classList.add(CANVAS_ELEMENT_ID + "-" + FALLBACK_CLASS);
     canvas.classList.add(FALLBACK_CLASS);
     if (error instanceof shaderWebBackground.GlError) {
-      console.log("Could not shade, adding fallback class to canvas: " + error);
+      console.log("Could not shade, adding fallback CSS classes:", error);
     } else {
       throw error;
     }
@@ -78,23 +80,11 @@ function newBackgroundCanvas() {
 }
 
 /**
- * @param {!HTMLCanvasElement} canvas
- * @return {boolean}
- */
-function isResized(canvas) {
-  return (
-    (canvas.width !== canvas.clientWidth)
-      || (canvas.height !== canvas.clientHeight)
-  );
-}
-
-/**
  * @param {!string} id
  * @return {!string}
  */
 const scriptSpec = (id) =>
-  "<script type=\"" + SHADER_SCRIPT_TYPE
-    + "\" id=\"" + id + "\">";
+  "<script type=\"" + SHADER_SCRIPT_TYPE + "\" id=\"" + id + "\">";
 
 /**
  * @param {!string} id
@@ -125,6 +115,45 @@ function doOrWaitFor(eventType, call) {
 }
 
 /**
+ * @typedef {{
+ *   location: !WebGLUniformLocation,
+ *   setter:   !UniformSetter
+ * }}
+ */
+var Uniform;
+
+class Renderer {
+
+  /**
+   * @param {!GlWrapper} glWrapper
+   * @param {!Context} context
+   * @param {!Program} program
+   * @param {!Array<!Uniform>} uniforms
+   */
+  constructor(glWrapper, context, program, uniforms) {
+    this.program = program;
+    const gl = glWrapper.gl;
+    this.fillUniforms = () => {
+      for (const uniform of uniforms) {
+        uniform.setter(gl, uniform.location, context);
+      }
+    }
+    this.draw = () => {
+      glWrapper.drawQuad(program.vertexAttributeLocation);
+      glWrapper.unbindTextures();
+    }
+  }
+
+  render() {
+    this.program.draw(
+      this.fillUniforms,
+      this.draw
+    );
+  }
+
+}
+
+/**
  * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !Shader>} shaders
  * @param {function(Context=)|undefined} onInit
@@ -147,8 +176,10 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
     contextAttrs
   );
 
-  /** @type {Array<!ProgramWrapper>} */
-  const programs = [];
+  const gl = glWrapper.gl;
+
+  /** @type {!Array<!Renderer>} */
+  const renderers = [];
 
   /** @type {Context} */
   const context = {
@@ -169,10 +200,12 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
      */
     /** @type {!function(!number): !number} */
     getCoordinateX: (x) =>
-      (x - canvas.getBoundingClientRect().left) * context.cssPixelRatio + .5,
+      (x - canvas.getBoundingClientRect().left)
+      * context.cssPixelRatio + .5,
     /** @type {!function(!number): !number} */
     getCoordinateY: (y) =>
-      (canvas.height - (y - canvas.getBoundingClientRect().top) * context.cssPixelRatio) - .5,
+      (canvas.height - (y - canvas.getBoundingClientRect().top)
+      * context.cssPixelRatio) - .5,
     /** @type {!function()} */
     maybeResize: () => {
       if ((context.cssWidth !== canvas.clientWidth)
@@ -201,9 +234,9 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
 
       glWrapper.updateViewportSize();
 
-      programs.forEach((program) => {
-        program.init(width, height)
-      });
+      for (const renderer of renderers) {
+        renderer.program.init(width, height);
+      }
 
       if (onResize) {
         onResize(width, height, context);
@@ -211,27 +244,63 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
     },
     /** @type {!TextureBinder} */
     texture: (loc, tex) => glWrapper.bindTexture(loc, tex),
-    buffers: {}
+    buffers: {},
+    /** @type {!function(!number, !number)} */
+    initHalfFloatRGBATexture: (width, height) => {
+      glWrapper.texImage2DHalfFloatRGBA(width, height);
+    }
   }
+
 
   const imageShaderIndex = Object.keys(shaders).length - 1;
   let index = 0;
   for (const id in shaders) {
 
     if (index++ < imageShaderIndex) {
-      context.buffers[id] = glWrapper.newDoubleBuffer(
-        shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER
-      );
+      const textureInitializer = shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER;
+      context.buffers[id] = glWrapper.newDoubleBuffer(() => {
+        textureInitializer(gl, context);
+      });
     }
 
-    programs.push(glWrapper.wrapProgram(
-      context,
+    const program = glWrapper.wrapProgram(
       id,
       glWrapper.initProgram(id, VERTEX_SHADER, getSource(id)),
       VERTEX_ATTRIBUTE,
-      (shaders[id].uniforms) || {},
       context.buffers[id]
-    ));
+    );
+
+    const uniformSetters =
+      (shaders[id].uniforms) || /** @type {!UniformSetters} */ ({});
+    var extraUniforms = Object.keys(uniformSetters);
+    for (const spec of program.uniformSpecs) {
+      check(
+        uniformSetters[spec.name],
+        "No configuration for uniform \"" + spec.name
+          + "\" defined in shader \"" + id + "\""
+      );
+      extraUniforms = extraUniforms.filter(name => name !== spec.name);
+    }
+
+    if (extraUniforms.length !== 0) {
+      console.log(
+        "Extra uniforms configured for shader \"" + id
+          + "\", which are not present in the shader code "
+          + "- might have been removed by GLSL compiler if not used: " + extraUniforms.join(", ")
+      );
+    }
+
+    /** @type {!Array<!Uniform>} */
+    const uniforms = program.uniformSpecs.map(spec => ({
+      /** @type {!WebGLUniformLocation} */
+      location: spec.location,
+      /** @type {!UniformSetter} */
+      setter: uniformSetters[spec.name]
+    }));
+
+    renderers.push(
+      new Renderer(glWrapper, context, program, uniforms)
+    );
 
   }
 
@@ -243,10 +312,9 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
       onBeforeFrame(context);
     }
 
-    programs.forEach((program) => {
-      program.draw(() => glWrapper.drawQuad(program.vertexAttributeLocation));
-      glWrapper.unbindTextures();
-    });
+    for (const renderer of renderers) {
+      renderer.render();
+    }
 
     if (onFrameComplete) {
       onFrameComplete();

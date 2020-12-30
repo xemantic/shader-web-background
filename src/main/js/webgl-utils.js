@@ -21,6 +21,24 @@
 
 const QUAD_POSITIONS = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
 
+/**
+ * @typedef {{
+ *   name:     !string,
+ *   location: !WebGLUniformLocation
+ * }}
+ */
+var UniformSpec;
+
+/**
+ * @typedef {{
+ *   vertexAttributeLocation: !number,
+ *   uniformSpecs:            !Array<!UniformSpec>,
+ *   init:                    !function(!number, !number),
+ *   draw:                    !function(!function(), !function()),
+ * }}
+ */
+var Program;
+
 class WebGlStrategy {
 
   /**
@@ -37,7 +55,7 @@ class WebGlStrategy {
    * @param {!number} width
    * @param {!number} height
    */
-  setUpTexture(width, height) {}
+  texImage2DHalfFloatRGBA(width, height) {}
 
   /**
    * @param {!string} extension
@@ -71,9 +89,11 @@ class WebGl1Strategy extends WebGlStrategy {
    * @param {!number} width
    * @param {!number} height
    */
-  setUpTexture(width, height) {
+  texImage2DHalfFloatRGBA(width, height) {
     const gl = this.gl;
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, this.ext.HALF_FLOAT_OES, null);
+    gl.texImage2D(
+      gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, this.ext.HALF_FLOAT_OES, null
+    );
   }
 
 }
@@ -99,9 +119,11 @@ class WebGl2Strategy extends WebGlStrategy {
    * @param {!number} width
    * @param {!number} height
    */
-  setUpTexture(width, height) {
+  texImage2DHalfFloatRGBA(width, height) {
     const gl = /** @type {!WebGL2RenderingContext} */ (this.gl);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.HALF_FLOAT, null);
+    gl.texImage2D(
+      gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.HALF_FLOAT, null
+    );
   }
 
 }
@@ -155,6 +177,7 @@ class GlWrapper {
       gl,
       "webgl context not supported on supplied canvas element: " + canvas
     );
+    /** @type {!WebGLRenderingContext} */
     this.gl = /** @type {!WebGLRenderingContext} */ (gl);
 
     const positionBuffer = gl.createBuffer();
@@ -226,87 +249,53 @@ class GlWrapper {
    * @return {!DoubleBuffer}
    */
   newDoubleBuffer(textureInitializer) {
-    return new DoubleBuffer(this.gl, this.strategy, textureInitializer);
+    return new DoubleBuffer(
+      this.gl,
+      this.strategy,
+      () => {
+        textureInitializer(this.gl)
+      }
+    );
   }
 
   /**
-   * @param {!T} context
    * @param {!string} id
    * @param {!WebGLProgram} program
    * @param {!string} vertexAttribute
-   * @param {!Object<
-   *          string,
-   *          !function(
-   *            !WebGLRenderingContext,
-   *            !WebGLUniformLocation,
-   *            T=
-   *          )
-   *        >} uniformSetters
    * @param {DoubleBuffer|undefined} buffer
-   * @return {!ProgramWrapper}
+   * @return {!Program}
    */
-  wrapProgram(context, id, program, vertexAttribute, uniformSetters, buffer) {
+  wrapProgram(id, program, vertexAttribute, buffer) {
     const gl = this.gl;
 
-    /** @type {!Object<string, !function()>} */
-    const uniforms = {};
-
-    /**
-     * A small hack to bypass faulty generic checking
-     * @type {!Object}
-     * @suppress {reportUnknownTypes}
-     */
-    const ctx = context;
-
+    const uniformSpecs = [];
     const activeUniforms =
       /** @type {!number} */
       (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS));
+
     for (let i = 0; i < activeUniforms; i++) {
       const uniform = gl.getActiveUniform(program, i);
-      const setter = uniformSetters[uniform.name];
-      if (!setter) {
-        throw this.glErrorFactory(
-          "No configuration for uniform \"" + uniform.name
-            + "\" defined in shader \"" + id + "\""
-        );
-      }
-
-      const location =
-        /** @type {!WebGLUniformLocation} */
-        (gl.getUniformLocation(program, uniform.name));
-      uniforms[uniform.name] = () => {
-        setter(gl, location, ctx);
-      }
-    }
-
-
-    // Let's check if we have some extra uniforms in the configuration
-    // it's not a critical problem, but failing early might prevent from
-    // some hard to debug issues later.
-    for (const name in uniformSetters) {
-      if (!(name in uniforms)) {
-        throw this.glErrorFactory(
-          "No such uniform \"" + name + "\" defined in shader \"" + id
-            + "\" - if unused it might be removed by GLSL compiler"
-        );
-      }
+      uniformSpecs.push({
+        name: uniform.name,
+        location: gl.getUniformLocation(program, uniform.name)
+      });
     }
 
     return {
       /** @type {!number} */
       vertexAttributeLocation:
         gl.getAttribLocation(program, vertexAttribute),
+      /** @type {!Array<!UniformSpec>} */
+      uniformSpecs: uniformSpecs,
       /** @type {!function(!number, !number)} */
       init: buffer
         ? (width, height) => buffer.init(width, height)
         : (width, height) => {},
-      /** @type {!function(!function())} */
-      draw: (drawer) => {
+      /** @type {!function(!function(), !function())} */
+      draw: (uniforms, drawer) => {
         gl.useProgram(program);
 
-        for (const name in uniforms) {
-          uniforms[name]();
-        }
+        uniforms();
 
         if (buffer) {
           buffer.swapTextures();
@@ -320,6 +309,14 @@ class GlWrapper {
 
   updateViewportSize() {
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * @param {!number} width
+   * @param {!number} height
+   */
+  texImage2DHalfFloatRGBA(width, height) {
+    this.strategy.texImage2DHalfFloatRGBA(width, height);
   }
 
   /**
@@ -360,15 +357,6 @@ class GlWrapper {
 
 }
 
-/**
- * @typedef {{
- *   vertexAttributeLocation: !number,
- *   init:                    !function(!number, !number),
- *   draw:                    !function(!function()),
- * }}
- */
-var ProgramWrapper;
-
 class DoubleBuffer {
 
   /**
@@ -406,7 +394,6 @@ class DoubleBuffer {
     const gl = this.gl;
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    this.strategy.setUpTexture(width, height);
     this.textureInitializer(gl);
     gl.bindTexture(gl.TEXTURE_2D, null);
     return texture;

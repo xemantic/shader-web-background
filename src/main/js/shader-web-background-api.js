@@ -35,24 +35,25 @@ var TextureBinder;
 
 /**
  * @typedef {{
- *   canvas:          !HTMLCanvasElement,
- *   width:           !number,
- *   height:          !number,
- *   cssPixelRatio:   !number,
- *   cssWidth:        !number,
- *   cssHeight:       !number,
- *   isOverShader:    !function(!number, !number): !boolean,
- *   getCoordinateX:  !function(!number): !number,
- *   getCoordinateY:  !function(!number): !number,
- *   buffers:         !Object<string, !DoubleBuffer>,
- *   texture:         !TextureBinder
+ *   canvas:                   !HTMLCanvasElement,
+ *   width:                    !number,
+ *   height:                   !number,
+ *   cssPixelRatio:            !number,
+ *   cssWidth:                 !number,
+ *   cssHeight:                !number,
+ *   isOverShader:             !function(!number, !number): !boolean,
+ *   getCoordinateX:           !function(!number): !number,
+ *   getCoordinateY:           !function(!number): !number,
+ *   buffers:                  !Object<string, !DoubleBuffer>,
+ *   texture:                  !TextureBinder,
+ *   initHalfFloatRGBATexture: !function(!number, !number)
  * }}
  */
 var Context;
 
 /**
  * @typedef {
- *   function(!WebGLRenderingContext)
+ *   function(!WebGLRenderingContext, !Context)
  * }
  */
 var TextureInitializer;
