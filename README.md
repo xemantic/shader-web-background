@@ -69,15 +69,20 @@ TL;DR:
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Minimal shader</title>
+  <meta charset="utf-8">
+  <title>Minimal shader with embedded library</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
   <script type="x-shader/x-fragment" id="image">
     precision highp float;
 
+    uniform float iTime;
+
     void main() {
       gl_FragColor = vec4(
         mod(gl_FragCoord.x / 256., 1.),
-        mod(gl_FragCoord.x + gl_FragCoord.y / 256., 1.),
+        mod((gl_FragCoord.x + gl_FragCoord.y - iTime * 40.) / 256. , 1.),
         mod(gl_FragCoord.y / 256., 1.),
         1.
       );
@@ -86,12 +91,32 @@ TL;DR:
   <script>
     shaderWebBackground.shade({
       shaders: {
-        image: {}
+        image: {
+          uniforms: {
+            iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000)
+          }
+        }
       }
     });
   </script>
+  <style>
+    .shader-web-background-fallback {
+      background: url("https://placekitten.com/666/666");
+      background-position: center;
+      background-size: cover;
+    }
+    #shader-web-background.fallback {
+      display: none;
+    }
+    header {
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
+<header>
+  <h1><a href="#source">Minimal shader with embedded library</a></h1>
+</header>
 </body>
 </html>
 ```
