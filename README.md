@@ -122,10 +122,10 @@ with their highlighted source code:
 
 https://xemantic.github.io/shader-web-background/#demo
 
-There are several ways of using this library depending on your needs:
+There are several ways of adjusting this library to your needs:
 
 
-### Step 1 - Add library to your website
+### Step 1 - Add library to your project
 
 #### Option A - Embedded minified library directly in HTML
 
@@ -151,6 +151,12 @@ Add this `script` to the `<head>` of your HTML:
 <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
 ```
 
+#### Option C - Download
+
+In the future I will publish `shader-web-background` to npm. For now you can just
+download the latest minified distribution together with source map.
+
+
 ### Step 2 - Add your fragment shaders
 
 You will need at least one fragment shader defined like this:
@@ -165,8 +171,8 @@ You will need at least one fragment shader defined like this:
 </script>
 ``` 
 
-Put it in the `<head>` of your HTML. The the `type` should be `x-shader/x-fragment`.
-The `id` attribute is arbitrary. 
+Put it in the `<head>` of your HTML. The `type` should be `x-shader/x-fragment` and
+the `id` attribute is arbitrary. 
 
 :warning: Note: Remember to give unique `id` to each of your shaders if you are
 defining more of them.
@@ -175,11 +181,11 @@ defining more of them.
 
 ```javascript
 <script>
-shaderWebBackground.shade({
-  shaders: {
-    image: {}
-  }
-});
+  shaderWebBackground.shade({
+    shaders: {
+      image: {}
+    }
+  });
 </script>
 ```
 
@@ -188,30 +194,34 @@ shader `id` attribute.
 
 ### Step 4 - Specify fallback styles
 
-It is still possible that your shaders cannot be supported technically on
-your browser / hardware. For consistent web experience you can define "ersatz"
-fallback CSS style, for example a static screenshot of your shader frame: 
+:information_source: This step is not necessary, however adding it will improve
+the experience for the small amount of users who still cannot
+run shaders on their devices.
+
+Define fallback CSS style, for example a static screenshot of your shader frame: 
 
 ```html
-  <style>
-    .shader-web-background-fallback {
-      background: url("https://placekitten.com/666/666");
-      background-position: center;
-      background-size: cover;
-    }
-    #shader-web-background.fallback {
-      display: none;
-    }
-  </style>
+<style>
+  .shader-web-background-fallback {
+    background: url("https://placekitten.com/666/666");
+    background-position: center;
+    background-size: cover;
+  }
+  #shader-web-background.fallback {
+    display: none;
+  }
+</style>
 ```
 The `.shader-web-background-fallback` class is applied to HTML document root.
 
 The `#shader-web-background.fallback` is a class applied to the default canvas
-element added by the library to cover the whole viewport with `z-index: -9999`.
-On some browser it is enough to provide a background for this canvas element.
-But for better compatibility it's better to apply it to the HTML document
-root while hiding the created canvas. It is also possible to alter the
-default error handler applying these styles. See onError.
+element added by the library to cover the whole viewport behind other elements.
+
+:information_source: On some of the browser it is enough to provide a fallback
+background for the canvas element. However fot the sake of compatibility it's
+better to apply fallback style to the HTML document root, while hiding the created
+canvas. It is also possible to alter the default error handler, see [onError](#onerror)
+documentation.
 
 
 ## Configuring shading
@@ -220,21 +230,21 @@ The configuration object passed to the `shaderWebBackground.shade` method in the
 example above will establish minimal rendering pipeline consisting of one fragment
 shader named `image`. A new static
 `<canvas id="shader-web-background">` element covering the whole viewport
-will be added to the page.
+will be added to the page with `z-index: -9999` to be always behind other page elements.
 
-:warning: Note: the default canvas element will be attached to document `<body>` only when the
-whole DOM tree is constructed. Also the actual rendering of shader frames will not
-happen until the HTML is fully loaded.
+:information_source: Note: the default canvas element will be attached to document
+`<body>` only when the whole DOM tree is constructed. Also the actual rendering
+of shader frames will not happen until the page is fully loaded, even though shaders
+can be compiled before.
 
-### fallback style
 
 ### Configuring shader uniforms
 
 Most likely you want to pass more information to your shaders. For example if
-you defined in your `image` shader:
+you defined in the `image` shader:
 
 ```glsl
-uniform vec2 iTime;
+uniform float iTime;
 ```
 
 then it can be set with the following configuration:
@@ -254,10 +264,15 @@ shaderWebBackground.shade({
 ```
 
 The `(gl, loc) => gl.uniform1f(loc, performance.now() / 1000)` function will
-be invoked before each frame. 
+be invoked before each frame.
 
-Note: if you will forget to declare a uniform, or make a typo, then specific exception
-informing you about it will be thrown. See
+:information_source: Check documentation of the
+[performance.now()](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now)
+which returns number of milliseconds since the page started. Dividing it by 1000 will
+result in floating point value measured in seconds.
+
+:information_source: Note: if you will forget to configure a declared uniform, or make
+a typo, then specific exception informing you about it will be thrown. See
 [error-no-configuration-of-shader-uniform](src/test/html/errors/error-no-configuration-of-shader-uniform.html)
 and
 [error-unnecessary-uniform-configured](src/test/html/errors/error-unnecessary-uniform-configured.html) 
@@ -265,70 +280,110 @@ test cases.
 
 ### shader-web-background API
 
-The detailed API is defined in
+The `shaderWebBackground.shade()` method requires providing configuration object
+which the following structure:
+
+```javascript
+/**
+ * @typedef {{
+ *   shaders:         (!Object<string, !Shader>), 
+ *   canvas:          (HTMLCanvasElement|undefined),
+ *   onInit:          (function(Context=)|undefined),
+ *   onResize:        (function(!number, !number, Context=)|undefined),
+ *   onBeforeFrame:   (function(Context=)|undefined),
+ *   onFrameComplete: (function()|undefined),
+ *   onError:         (ErrorHandler|undefined)
+ * }}
+ */
+```
+
+:information_source: The detailed API is defined in
 [src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
 
-Here is the full example of configuration object:
+All the attributes are optional except for the `shader`. Here is a comprehensive example of
+configuration object with comments. It is using [Shadertoy](https://www.shadertoy.com/)
+conventions for naming uniforms.
 
 ```javascript
 {
-  canvas:   myCanvas,              // supplied HTMLCanvasElement to use 
-  fallback: true,                  // boolean, default: false
-  onResize: (widht, height) => {}, // the function called on resizing the window
-  onBeforeFrame: () => {},         // the function called before each frame
-  onFrameComplete: () => {},       // the function called on completing the frame
   shaders: {
-    shader1: {
+    // the first buffer to be rendered in pipeline
+    BufferA: {
+      // optional custom initializer of buffer's texture                   
+      texture: (ctx) => {        
+        ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
+      },
       uniforms: {
-        uniform1: (gl, loc, ctx) => {},
-        // ...
-        uniformN: (gl, loc, ctx) => {}
+        iTime: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
+        // inputing the previous output of itself - feedback loop 
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+        // ... more uniforms
       }
     },
-    // ...
-    shaderN: {
+    // ... more buffers
+    BufferD: {
       uniforms: {
-        uniform1: (gl, loc, ctx) => {},
-        // ...
-        uniformN: (gl, loc, ctx) => {}
+        iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+        // ... more uniforms
       }
-    }
-  }
+    },
+    Image: {
+      uniforms: {
+        iTime: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
+        iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+        // ... more uniforms
+      }
+    }    
+  },
+  // supplied canvas to use for shading
+  canvas: myCanvas,
+  onResize: (width, height, ctx) => {
+  },                 
+  onInit: (ctx) => {
+  },
+  onBeforeFrame: (ctx) => {
+  },
+  onFrameComplete: (ctx) => {
+    ctx.iFrame++;
+  },
+  onError:         (ErrorHandler|undefined)
 }
 ```
 
-#### canvas
+The `ctx` argument passed to many functions is an object with the following attributes
+and functions:
 
-If `canvas` is not specified, the default one covering the whole viewport behind other
-DOM elements will be created.
+```javascrpit
+/**
+ * @typedef {{
+ *   canvas:                   !HTMLCanvasElement,
+ *   width:                    !number,
+ *   height:                   !number,
+ *   cssPixelRatio:            !number,
+ *   cssWidth:                 !number,
+ *   cssHeight:                !number,
+ *   isOverShader:             !function(!number, !number): !boolean,
+ *   getCoordinateX:           !function(!number): !number,
+ *   getCoordinateY:           !function(!number): !number,
+ *   buffers:                  !Object<string, !DoubleBuffer>,
+ *   texture:                  !TextureBinder,
+ *   initHalfFloatRGBATexture: !function(!number, !number)
+ * }}
+ */
+```
+#### Config attributes
 
-
-#### fallback
-
-If `fallback` is not specified, it will default to `false`, meaning that all the
-errors will be thrown, including these indicating lack of required WebGL capabilities.
-
-
-#### onResize
-
-The `onResize` function is invoked with `with` and `height` parameters indicating actual
-screen dimensions of the canvas after browser window is resized. It will be also
-called when the shading is started with the `shaderWebBackground.shade(config)` call.
-  
-
-#### onFrameComplete
-
-The `onFrameComplete` function is invoked when scheduling of the rendering of the whole
-animation frame is finished. It can be used to increment frame counters, etc. 
-
-
-#### shaders
+##### Config attribute: shaders
 
 Many shaders can be defined by name under `shaders` config attribute. All together they
 will establish rendering pipeline processed in sequence called `Multipass` in Shadertoy
 nomenclature. The last of defined shaders will render to screen. The output of previous
 shaders, including feedback loop of the previous frame rendered by the same shader,
-can be easily passed to uniforms, here is an example using Shadertoy naming conventions: 
+can be easily passed to uniforms, here is an example using Shadertoy naming conventions:
 
 ```javascript
 shaderWebBackground.shade({
@@ -368,8 +423,8 @@ input or output texture of a buffer will be selected. The buffers can be
 accessed through `ctx.buffers` object. Names of the attributes in this object will
 match the names of attributes defined in `shaders` config attribute, except for the
 last shader which is not offscreen and cannot be accessed as a texture.
- 
-#### Uniform setter  
+
+#### Uniform setter
 
 The uniform setter function example:
 
@@ -415,7 +470,42 @@ the previous texture generated by this shader will be used. Otherwise the most r
 generated output texture will be used.
 
 Another valid argument type to be passed to the `texture` function is an instance
-of `WebGLTexture`. It can represent for example a frame taken from the webcam input. 
+of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
+
+
+##### Config attribute: canvas
+
+If `canvas` attribute is not specified, the default one covering the whole viewport behind other
+DOM elements will be created.
+
+##### Config attribute: onInit
+
+##### Config attribute: onResize
+
+The `onResize` function is invoked with `with` and `height` parameters indicating actual
+screen dimensions of the canvas after browser window is resized. It will be also
+called when the shading is started with the `shaderWebBackground.shade(config)` call.
+
+##### Config attribute: onBeforeFrame
+
+##### Config attribute: onFrameComplete
+
+The `onFrameComplete` function is invoked when scheduling of the rendering of the whole
+animation frame is finished. It can be used to increment frame counters, etc.
+
+##### Config attribute: onError
+
+
+  
+
+##### onFrameComplete
+
+#### Context attributes
+
+##### canvas
+
+
+
  
 
 #### Configuration errors
