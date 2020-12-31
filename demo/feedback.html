@@ -82,8 +82,6 @@
     Now we need to calculate uniforms before each frame, and provide them to the shaders.
    -->
   <script>
-    var canvasWidth  = 0;
-    var canvasHeight = 0;
     var minDimension = 0;
     var time = 0;
 
@@ -96,8 +94,6 @@
 
     shaderWebBackground.shade({
       onResize: (width, height) => {
-        canvasWidth = width;
-        canvasHeight = height;
         minDimension = Math.min(width, height);
       },
       onBeforeFrame: () => {
@@ -108,7 +104,7 @@
       shaders: {
         feedback: {
           uniforms: {
-            iResolution:          (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution:          (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iMinDimension:        (gl, loc) => gl.uniform1f(loc, minDimension),
             iFeedbackFadeRate:    (gl, loc) => gl.uniform1f(loc, feedbackFadeRate),
             iCircleCenter:        (gl, loc) => gl.uniform2f(loc, circleCenterX, circleCenterY),
@@ -119,7 +115,7 @@
         },
         image: {
           uniforms: {
-            iResolution:   (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution:   (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iChannel0:     (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         }

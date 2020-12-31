@@ -269,8 +269,6 @@
     }
   </script>
   <script>
-    var canvasWidth;
-    var canvasHeight;
     var frame;
     var time;
 
@@ -286,7 +284,7 @@
       shaders: {
         BufferA: {
           uniforms: {
-            iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iTime:       (gl, loc) => gl.uniform1f(loc, time),
             iFrame:      (gl, loc) => gl.uniform1i(loc, frame),
             iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
@@ -294,7 +292,7 @@
         },
         Image: {
           uniforms: {
-            iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iTime:       (gl, loc) => gl.uniform1f(loc, time),
             iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
           }

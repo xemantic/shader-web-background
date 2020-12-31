@@ -151,18 +151,11 @@
     }
   </script>
   <script>
-    var canvasWidth = 0;
-    var canvasHeight = 0;
-
     shaderWebBackground.shade({
-      onResize: (width, height) => {
-        canvasWidth = width;
-        canvasHeight = height;
-      },
       shaders: {
         Image: {
           uniforms: {
-            iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
           }
         }
