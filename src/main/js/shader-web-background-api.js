@@ -89,11 +89,11 @@ var ErrorHandler;
 
 /**
  * @typedef {{
+ *   shaders:         (!Object<string, !Shader>),
  *   canvas:          (HTMLCanvasElement|undefined),
  *   onInit:          (function(Context=)|undefined),
  *   onResize:        (function(!number, !number, Context=)|undefined),
  *   onBeforeFrame:   (function(Context=)|undefined),
- *   shaders:         (!Object<string, !Shader>),
  *   onFrameComplete: (function()|undefined),
  *   onError:         (ErrorHandler|undefined)
  * }}
