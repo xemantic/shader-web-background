@@ -11,14 +11,14 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 **Table of Contents**
 
 - [Features](#features)
-- [How to use it?](#how-to-use-it)
+- [Adding shader-web-background to your projects](#adding-shader-web-background-to-your-projects)
   - [Step 1 - Add library to your website](#step-1---add-library-to-your-website)
-    - [option a) Embedded minified library code in the source of your website](#option-a-embedded-minified-library-code-in-the-source-of-your-website)
-    - [option b) Reference the minified library](#option-b-reference-the-minified-library)
+    - [Option A - Embedded minified library directly in HTML](#option-a---embedded-minified-library-directly-in-html)
+    - [Option B - Reference the minified library](#option-b---reference-the-minified-library)
   - [Step 2 - Add your fragment shaders](#step-2---add-your-fragment-shaders)
   - [Step 3 - Start shading](#step-3---start-shading)
   - [Step 4 - Specify fallback styles](#step-4---specify-fallback-styles)
-- [How to configure shading?](#how-to-configure-shading)
+- [Configuring shading](#configuring-shading)
   - [fallback style](#fallback-style)
   - [Configuring shader uniforms](#configuring-shader-uniforms)
   - [shader-web-background API](#shader-web-background-api)
