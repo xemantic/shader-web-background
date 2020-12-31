@@ -196,7 +196,8 @@ defining more of them.
 ```
 
 :warning: Note: the shader name `image` should match the one defined as
-shader `id` attribute. 
+shader source `id` attribute. 
+
 
 ### Step 4 - Specify fallback styles
 
@@ -306,48 +307,56 @@ which the following structure:
 :information_source: The detailed API is defined in
 [src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
 
-All the attributes are optional except for the `shader`. Here is a comprehensive example of
-configuration object with comments. It is using [Shadertoy](https://www.shadertoy.com/)
-conventions for naming uniforms.
+All the attributes are optional except for the `shader`. Here is a comprehensive example
+of a configuration object with comments. It is using
+[Shadertoy](https://www.shadertoy.com/) conventions for naming buffers and uniforms.
 
 ```javascript
 {
   shaders: {
-    // the first buffer to be rendered in pipeline
+    // the first buffer to be rendered in the pipeline
     BufferA: {
       // optional custom initializer of buffer's texture                   
-      texture: (ctx) => {        
+      texture: (gl, ctx) => {
+        // initializing floating point texture in custom way for WebGL 1 and 2        
         ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
+        // standard WebGL texture parameters
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
       },
+      // uniform setters, attribute names should match with those defined in the shader
       uniforms: {
-        iTime: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
+        // uniform value calculated in place
+        iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+        // uniform value taken from the context, see onResize below
+        iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
+        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),        
         // inputing the previous output of itself - feedback loop 
         iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
         // ... more uniforms
       }
     },
-    // ... more buffers
+    // ... more shaders
     BufferD: {
       uniforms: {
         iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
         // ... more uniforms
       }
     },
+    // the last shader will render to screen
     Image: {
       uniforms: {
-        iTime: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
-        iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+        iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferD)
         // ... more uniforms
       }
     }    
   },
   // supplied canvas to use for shading
-  canvas: myCanvas,
+  canvas: document.getElementById("my-canvas"),
   onResize: (width, height, ctx) => {
+    ctx.iMinDimension = Math.min(width, height);
   },                 
   onInit: (ctx) => {
   },
@@ -356,7 +365,11 @@ conventions for naming uniforms.
   onFrameComplete: (ctx) => {
     ctx.iFrame++;
   },
-  onError:         (ErrorHandler|undefined)
+  onError: (canvas, error) => {
+    canvas.remove();
+    console.error(error);
+    document.documentElement.classList.add("fallback");
+  }
 }
 ```
 
@@ -502,19 +515,141 @@ animation frame is finished. It can be used to increment frame counters, etc.
 ##### Config attribute: onError
 
 
-  
-
-##### onFrameComplete
-
 #### Context attributes
 
-##### canvas
+##### Context attribute: canvas
+
+The HTML canvas element associated with this context.
+
+
+##### Context attribute: width
+
+The "pixel" width of the canvas,
+might differ from the [cssWidth](#context-attribute-csswidth).
+
+Typically used together with the [height](#context-attribute-height) attribute.
+
+
+##### Context attribute: height
+
+The "pixel" height of the canvas,
+might differ from the [cssHeight](#context-attribute-cssheight).
+
+Example usage:
+
+```javascript
+shaderWebBackground.shade({
+  shaders: {
+    image: {
+      uniforms: {
+        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height)        
+      }
+    }
+  }
+});
+```
+
+
+##### Context attribute: cssPixelRatio
+
+The ratio of "CSS pixels" comparing to real "pixels", might be necessary for some
+calculations, for example simulation of background scrolling,
+possibly with [parallax scrolling](https://en.wikipedia.org/wiki/Parallax_scrolling):
+
+```javascript
+shaderWebBackground.shade({
+  onBeforeFrame: (ctx) => {
+    ctx.iVerticalShift = window.scrollY * ctx.cssPixelRatio;
+  },
+  shaders {
+    scrollableBackground: {
+      uniforms: {
+        iVerticalShift: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iVerticalShift)
+      }
+    }
+  }
+});
+```
+
+
+##### Context attribute: cssWidth
+
+The width of the canvas as reported by the browser,
+might differ from the pixel [width](#context-attribute-width).
+
+
+##### Context attribute: cssHeight
+
+The height of the canvas as reported by the browser,
+might differ from the pixel [height](#context-attribute-height).
+
+
+##### Context attribute: isOverShader
+
+A helper function to tell if provided coordinates are within the rectangle
+of shader canvas. Not very useful for full screen shaders, but might
+be handy for smaller canvases.
+
+
+##### Context attribute: getCoordinateX
+
+Translates horizontal CSS coordinate to respective pixel coordinate of a given
+shader.
+
+##### Context attribute: getCoordinateY
+
+Translates horizontal CSS coordinate to respective pixel coordinate of a given
+shader.
+
+:warning: Note: shader rectangle coordinate `(0, 0)` is located in the bottom-left
+corner, so the Y-axis is reversed. Actual coordinate passed to the shader
+in `gl_FragCoord` is actually in the middle of the pixel, therefore in case of
+a background shader covering the whole browser window the bottom-left corner
+pixel will receive values `(.5, .5)`. The `getCoordinate[X|Y]` functions account
+for this as well.
+
+
+##### Context attribute: buffers
+
+And object representing offscreen buffers of all the shaders except for the last
+one in the rendering pipeline. The attribute names match the shader names. 
+
+
+##### Context attribute: texture
+
+A function to bind uniforms of type `sampler2D`.
+
+
+##### Context attribute: initHalfFloatRGBATexture
+
+A function to initialize a texture where each pixel RGBA values have
+floating point precision. It takes `width` and `height` as parameters.
+
+
+Example usage:
+
+```javascript
+shaderWebBackground.shade({
+  shaders: {
+    feedback: {
+      texture: (gl, ctx) => {
+        ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
+        // standard WebGL texture parameters
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
+      }
+    }
+  }
+});
+```
 
 
 
  
 
-#### Configuration errors
+#### Handling errors
 
 Several validations are being performed on supplied configuration to avoid common problems
 which are usually hard to debug otherwise. The
@@ -523,12 +658,6 @@ These test cases can be also accessed directly on project GitHub page:
 
 https://xemantic.github.io/shader-web-background/src/test/html/errors/
 
-
-### 3. Adding own uniforms
-
-There is no standard support for mouse movement and it is by design.
-Adding mouse tracking is relatively simple with own uniform setters. Check the `Custom Uniforms`
-section below.
 
 ## Setting uniforms
 
