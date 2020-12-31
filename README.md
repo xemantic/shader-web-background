@@ -62,7 +62,7 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 * **shadertoy support**: including multipass shaders
 * **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
 
-## How to use it?
+## Adding shader-web-background to your projects
 
 **TL;DR:**
 
@@ -127,7 +127,7 @@ There are several ways of using this library depending on your needs:
 
 ### Step 1 - Add library to your website
 
-#### option a) Embedded minified library code in the source of your website
+#### Option A - Embedded minified library directly in HTML
 
 If you want your shaders to start rendering before any other resources are loaded,
 then go for this method. Just take the contents of
@@ -143,7 +143,7 @@ https://xemantic.github.io/shader-web-background/demo/minimal.html
 See [minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html) for reference. 
 
 
-#### option b) Reference the minified library
+#### Option B - Reference the minified library
 
 Add this `script` to the `<head>` of your HTML:
 
@@ -214,7 +214,7 @@ root while hiding the created canvas. It is also possible to alter the
 default error handler applying these styles. See onError.
 
 
-## How to configure shading?
+## Configuring shading
 
 The configuration object passed to the `shaderWebBackground.shade` method in the
 example above will establish minimal rendering pipeline consisting of one fragment
