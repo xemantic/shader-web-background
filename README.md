@@ -6,6 +6,15 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 
 **Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :fireworks:
 
+I ([xemantic](https://xemantic.com/)) designed this library to use complex
+fragment shaders as part of web design and development process. It finally
+lets me embrace the web browser as a creative coding environment. If you
+are familiar with GLSL, then it might help you publishing your work on web.
+If you are coming from web development background, then you might want to
+learn a bit more about shaders, for example from
+[The Book of Shaders](https://thebookofshaders.com/).
+
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -167,13 +176,14 @@ See [minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal
 
 #### Option B - Reference the minified library
 
-Add this `script` to the `<head>` of your HTML:
+Add this code to the `<head>` of your HTML:
 
 ```html
 <script src="https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js"></script>
 ```
 
-#### Option C - Download
+
+#### Option C - Download distribution
 
 In the future I will publish `shader-web-background` to npm. For now you can just
 download the latest minified distribution together with source map.
@@ -235,45 +245,47 @@ Define fallback CSS style, for example a static screenshot of your shader frame:
   }
 </style>
 ```
-The `.shader-web-background-fallback` class is applied to HTML document root.
+The `.shader-web-background-fallback` CSS class is applied to HTML document root.
 
-The `#shader-web-background.fallback` is a class applied to the default canvas
-element added by the library to cover the whole viewport behind other elements.
+The `.fallback` CSS is applied to the canvas rendering the shader.
+The default shader attached as the whole page background canvas will
+have id `shader-web-background` therefore `#shader-web-background.fallback` CSS
+selector will match it. 
 
 :information_source: On some of the browser it is enough to provide a fallback
 background for the canvas element. However fot the sake of compatibility it's
 better to apply fallback style to the HTML document root, while hiding the created
-canvas. It is also possible to alter the default error handler, see [onError](#onerror)
-documentation.
+canvas. It is also possible to alter the default error handler, see
+[Handling errors](#handling-errors) section for details.
 
 
 ## Configuring shading
 
-The configuration object passed to the `shaderWebBackground.shade` method in the
-example above will establish minimal rendering pipeline consisting of one fragment
+The [configuration object](API.md#config) passed to the
+[shaderWebBackground.shade(config)](API.md#shaderwebbackgroundshadeconfig)
+call in the example above will result in a minimal rendering pipeline consisting of one fragment
 shader named `image`. A new static
 `<canvas id="shader-web-background">` element covering the whole viewport
-will be added to the page with `z-index: -9999` to be always behind other page elements.
+will be added to the page with `z-index: -9999`, to be displayed behind other page elements.
 
-:information_source: Note: the default canvas element will be attached to document
+:information_source: Note: the default `<canvas>` element will be attached to document
 `<body>` only when the whole DOM tree is constructed. Also the actual rendering
 of shader frames will not happen until the page is fully loaded, even though shaders
-can be compiled before.
+are compiled immediately.
 
 
-### Configuring shader uniforms
+### Adding shader uniforms
 
 Most likely you want to pass more information to your shaders. For example if
-you defined in the `image` shader:
+you defined a uniform in the `image` shader:
 
 ```glsl
 uniform float iTime;
 ```
 
-then it can be set with the following configuration:
+then you also need to provide corresponding configuration:
 
 ```javascript
-<script>
 shaderWebBackground.shade({
   shaders: {
     image: {
@@ -283,37 +295,82 @@ shaderWebBackground.shade({
     }
   }
 });
-</script>
 ```
 
 The `(gl, loc) => gl.uniform1f(loc, performance.now() / 1000)` function will
-be invoked before each frame.
+be invoked before rendering each shader frame.
 
 :information_source: Check documentation of the
 [performance.now()](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now)
-which returns number of milliseconds since the page started. Dividing it by 1000 will
+which returns number of milliseconds since the page started. Dividing it by `1000` will
 result in floating point value measured in seconds.
 
-:information_source: Note: if you will forget to configure a declared uniform, or make
-a typo, then specific exception informing you about it will be thrown. See
+:warning: During development check the console often. If you will forget to configure
+a uniform declared in the shader, then exception will be thrown (See
 [error-no-configuration-of-shader-uniform](src/test/html/errors/error-no-configuration-of-shader-uniform.html)
-and
+test case). Also if you configure a uniform which does not exist in the shader, 
+then a warning will pop up on console (see
 [error-unnecessary-uniform-configured](src/test/html/errors/error-unnecessary-uniform-configured.html) 
-test cases.
+test case).
 
 
-## Complex config example
+### Complex config example
 
-Here is a comprehensive example of a configuration object with comments. It is using
-[Shadertoy](https://www.shadertoy.com/) conventions for naming buffers and uniforms
-although these conventions are arbitrary and might be adjusted to the needs of your
-project.
+Here is a comprehensive example of a [configuration object](API.md#config) with
+comments. It is using [Shadertoy] conventions for naming buffers and uniforms
+but keep in mind that the naming is arbitrary and might be adjusted to the needs
+of your project.
 
 ```javascript
-{
+
+// mouse coordinates taken from from the mousemove event
+var mouseX;
+var mouseY;
+
+document.addEventListener("mousemove", (event) => {
+   mouseX = event.clientX;
+   mouseY = event.clientY;
+});
+
+shaderWebBackground.shade({
+  // supplied canvas to use for shading
+  canvas: document.getElementById("my-canvas"),
+  // called only once before the first run
+  // although it is called after first onResize
+  onInit: (ctx) => {
+    // so we can get access to actual dimensions and center the mouse
+    // representation even before any "mousemove" event occurs
+    mouseX = ctx.cssWidth / 2.
+    mouseY = ctx.cssHeight / 2.
+    ctx.iFrame = 0;
+  },
+  onResize: (width, height, ctx) => {
+    // for convenience you can store your attributes on context
+    ctx.iMinDimension = Math.min(width, height);
+  },                 
+  onBeforeFrame: (ctx) => {
+    ctx.shaderMouseX = ctx.getCoordinateX(mouseX);
+    ctx.shaderMouseY = ctx.getCoordinateY(mouseY);
+  },
   shaders: {
     // the first buffer to be rendered in the pipeline
     BufferA: {
+      // uniform setters, attribute names should match with those defined in the shader
+      uniforms: {
+        // uniform value calculated in place, you can ommit ctx arg if not needed
+        iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+        iFrame: (gl, loc) => gl.uniform1i(loc, ctx.iFrame),
+        // uniform value taken from the context, see onResize below
+        iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iMinDimension),
+        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+        iMouse: (gl, loc, ctx) => gl.uniform2f(loc, ctx.shaderMouseX, ctx.shaderMouseY),        
+        // inputing the previous output of itself - feedback loop 
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+        // ... more uniforms
+      }
+    },
+    // ... more shaders
+    BufferD: {
       // optional custom initializer of buffer's texture                   
       texture: (gl, ctx) => {
         // initializing floating point texture in custom way for WebGL 1 and 2        
@@ -323,21 +380,7 @@ project.
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
-      },
-      // uniform setters, attribute names should match with those defined in the shader
-      uniforms: {
-        // uniform value calculated in place
-        iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
-        // uniform value taken from the context, see onResize below
-        iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iTime),
-        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),        
-        // inputing the previous output of itself - feedback loop 
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
-        // ... more uniforms
-      }
-    },
-    // ... more shaders
-    BufferD: {
+      },    
       uniforms: {
         iChanel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
         // ... more uniforms
@@ -351,361 +394,21 @@ project.
       }
     }    
   },
-  // supplied canvas to use for shading
-  canvas: document.getElementById("my-canvas"),
-  onResize: (width, height, ctx) => {
-    ctx.iMinDimension = Math.min(width, height);
-  },                 
-  onInit: (ctx) => {
-  },
-  onBeforeFrame: (ctx) => {
-  },
   onAfterFrame: (ctx) => {
     ctx.iFrame++;
   },
   onError: (canvas, error) => {
     canvas.remove();
     console.error(error);
-    document.documentElement.classList.add("fallback");
+    document.documentElement.classList.add("my-fallback");
   }
-}
+});
 ```
 
 The API is intended to be self explanatory, in case of any 
 doubts please check the next API chapter.
 
 
-## shader-web-background API
-
-:information_source: The detailed API is defined in
-[src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
-
-
-### shaderWebBackground.shade(config)
-
-Shading starts with the `shaderWebBackground.shade(config)` call which requires
-providing a [configuration](#config) object and returns a [context](#context) object. 
-
-This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)s of type:
-
- * [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
- * [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
-
-
-### Config
-
-An object with the following attributes:
-
-| attribute                              | type (`=`- optional)                               | description                           |  
-| -------------------------------------- | -------------------------------------------------- | ------------------------------------- |
-| [shaders](#config-shaders)             | Object                                             | definition of shaders                 |                                           |
-| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                   |
-| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |  
-| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized     |
-| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame              |
-| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete     |
-| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started |
-
-All the attributes are optional except for the [shaders](#config-shaders).
-
-
-### Context
-
-An object with the following attributes:
-
-| attribute                                                     | type                                                       | description | 
-| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
-| [canvas](#context-canvas)                                     | canvas                                                     | the canvas being shaded | 
-| [width](#context-width)                                       | number                                                     | device pixel width            | 
-| [height](#context-height)                                     | number                                                     | device pixel height            | 
-| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
-| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
-| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
-| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
-| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x to respective pixel coordinate of a given shader.            |    
-| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
-| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
-| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
-| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
-
-:information_source: Note: the `context` is passed as an argument to many functions and it is
-also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-
-### shaderWebBackground.Error
-
-A base class to indicate problems with the 
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-### shaderWebBackground.ConfigError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate misconfiguration of
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-### shaderWebBackground.GlError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate that 
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call cannot be satisfied
-due to lack of WebGL capabilities of the browser (might be a hardware limitation).
-
-See [Config: onError](#config-onerror)
-
-
-### Config attributes
-
-#### Config: shaders
-
-Many shaders can be defined by name under `shaders` config attribute. All together they
-will establish rendering pipeline processed in sequence called `Multipass` in Shadertoy
-nomenclature. The last of defined shaders will render to screen. The output of previous
-shaders, including feedback loop of the previous frame rendered by the same shader,
-can be easily passed to uniforms, here is an example using Shadertoy naming conventions:
-
-```javascript
-shaderWebBackground.shade({
-  shaders: {
-    BufferA: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)  // previous frame of self
-      }
-    },
-    BufferB: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // previous frame of self
-      }
-    },
-    Image: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // latest output
-      }
-    }
-  }
-});
-```
-
-The `iChannelN` uniforms are defined in GLSL as follows:
-
-```glsl
-uniform sampler2D iChannelN;
-```
-
-The uniform setter function `(gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferX)`
-is the same as the one used for providing other uniforms, but in this case optional
-3rd parameter `ctx` is provided. The `ctx.texture()` call can take either `WebGLTexture`
-instance or the instance of `shader-web-background` internal context from which proper
-input or output texture of a buffer will be selected. The buffers can be
-accessed through `ctx.buffers` object. Names of the attributes in this object will
-match the names of attributes defined in `shaders` config attribute, except for the
-last shader which is not offscreen and cannot be accessed as a texture.
-
-##### Uniform setter
-
-The uniform setter function example:
-
-```
-(
-  gl,     // the WebGLContext instance
-  loc,    // the WebGLUniformLocation instace assigned with this uniform 
-  ctx     // the context object
-) => {}
-```
-
-The `gl` and the `loc` parameters are WebGL specific which allows performing low level
-operation. In most cases it will be very simple uniform setting which can be
-used idiomatically:
-
-```javascript
-(gl, loc) => gl.uniform1f(loc, uniformValue)
-```
-
-See the full specification here:
-https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform
-
-The `loc` `WebGLUniformLocation` instance is provided according to the uniform
-location taken from compiled shader program.
-
-The optional `ctx` parameter represents internal context of the library and will have
-the following structure:
-
-```javascript
-{
-  buffers: {
-    BufferA: buffer_a,
-    // ...
-    BufferN: buffer_n,
-  },
-  texture: (loc, textureOrBuffer) => {}
-}
-```
-
-The `buffer_n` instances are used just as references to be possibly passed to the
-`texture` function. If we are injecting a buffer to the shader of the same buffer,
-the previous texture generated by this shader will be used. Otherwise the most recent
-generated output texture will be used.
-
-Another valid argument type to be passed to the `texture` function is an instance
-of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
-
-
-#### Config: canvas
-
-If `canvas` attribute is not specified, the default one covering the whole viewport behind other
-DOM elements will be created.
-
-#### Config: onInit
-
-#### Config: onResize
-
-The `onResize` function is invoked with `with` and `height` parameters indicating actual
-screen dimensions of the canvas after browser window is resized. It will be also
-called when the shading is started with the `shaderWebBackground.shade(config)` call.
-
-#### Config: onBeforeFrame
-
-#### Config: onAfterFrame
-
-The `onAfterFrame` function is invoked when scheduling of the rendering of the whole
-animation frame is finished. It can be used to increment frame counters, etc.
-
-#### Config: onError
-
-### Context attributes
-
-#### Context: canvas
-
-The HTML canvas element associated with this context.
-
-
-#### Context: width
-
-The "pixel" width of the canvas,
-might differ from the [cssWidth](#context-attribute-csswidth).
-
-Typically used together with the [height](#context-height) attribute.
-
-
-#### Context: height
-
-The "pixel" height of the canvas,
-might differ from the [cssHeight](#context-attribute-cssheight).
-
-Example usage:
-
-```javascript
-shaderWebBackground.shade({
-  shaders: {
-    image: {
-      uniforms: {
-        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height)        
-      }
-    }
-  }
-});
-```
-
-
-#### Context: cssPixelRatio
-
-The ratio of "CSS pixels" comparing to real "pixels", might be necessary for some
-calculations, for example simulation of background scrolling,
-possibly with [parallax scrolling](https://en.wikipedia.org/wiki/Parallax_scrolling):
-
-```javascript
-shaderWebBackground.shade({
-  onBeforeFrame: (ctx) => {
-    ctx.iVerticalShift = window.scrollY * ctx.cssPixelRatio;
-  },
-  shaders {
-    scrollableBackground: {
-      uniforms: {
-        iVerticalShift: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iVerticalShift)
-      }
-    }
-  }
-});
-```
-
-
-#### Context: cssWidth
-
-The width of the canvas as reported by the browser,
-might differ from the pixel [width](#context-attribute-width).
-
-
-#### Context: cssHeight
-
-The height of the canvas as reported by the browser,
-might differ from the pixel [height](#context-attribute-height).
-
-
-#### Context: isOverShader
-
-A helper function to tell if provided coordinates are within the rectangle
-of shader canvas. Not very useful for full screen shaders, but might
-be handy for smaller canvases.
-
-
-#### Context: toShaderX
-
-Translates horizontal CSS coordinate to respective pixel coordinate of a given
-shader.
-
-#### Context: toShaderY
-
-Translates horizontal CSS coordinate to respective pixel coordinate of a given
-shader.
-
-:warning: Note: shader rectangle coordinate `(0, 0)` is located in the bottom-left
-corner, so the Y-axis is reversed. Actual coordinate passed to the shader
-in `gl_FragCoord` is actually in the middle of the pixel, therefore in case of
-a background shader covering the whole browser window the bottom-left corner
-pixel will receive values `(.5, .5)`. The `getCoordinate[X|Y]` functions account
-for this as well.
-
-
-#### Context: buffers
-
-And object representing offscreen buffers of all the shaders except for the last
-one in the rendering pipeline. The attribute names match the shader names. 
-
-
-#### Context: texture
-
-A function to bind uniforms of type `sampler2D`.
-
-
-#### Context: initHalfFloatRGBATexture
-
-A function to initialize a texture where each pixel RGBA values have
-floating point precision. It takes `width` and `height` as parameters.
-
-
-Example usage:
-
-```javascript
-shaderWebBackground.shade({
-  shaders: {
-    feedback: {
-      texture: (gl, ctx) => {
-        ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
-        // standard WebGL texture parameters
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
-      }
-    }
-  }
-});
-```
 
 #### Handling errors
 
@@ -966,6 +669,4 @@ Or send me a link with description.
  * implement fullscreen according to: https://developers.google.com/web/fundamentals/native-hardware/fullscreen
  * add support for DeviceOrientationEvent.alpha - heading
 
-[HTMLCanvasElement]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
-[WebGLUniformLocation]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
-[WebGLTexture]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
+[Shadertoy]: https://www.shadertoy.com/
