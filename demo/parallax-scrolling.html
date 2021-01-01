@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright 2021  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Parallax background scrolling shader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
+  <script type="x-shader/x-fragment" id="chessboard">
+    precision highp float;
+
+    const float CHECKER_SIZE = 256.;
+
+    uniform float iScrollY;
+
+    void main() {
+      gl_FragColor = vec4(
+        vec3(
+          mod(
+            floor(gl_FragCoord.x / CHECKER_SIZE)
+              + floor((gl_FragCoord.y + iScrollY) / CHECKER_SIZE),
+            2.
+          )
+        ),
+        1.
+      );
+    }
+  </script>
+  <script>
+    // rate=1 will make no parallax effect.
+    const PARALLAX_SCROLLING_RATE = .5;
+
+    shaderWebBackground.shade({
+      shaders: {
+        chessboard: {
+          uniforms: {
+            iScrollY: (gl, loc, ctx) => gl.uniform1f(
+              loc,
+              // we need to convert to real shader pixels and reverse Y-axis
+              (window.scrollY * ctx.cssPixelRatio) * -PARALLAX_SCROLLING_RATE
+            )
+          }
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1><a href="#source">Parallax background scrolling shader</a></h1>
+  </header>
+</body>
+</html>
