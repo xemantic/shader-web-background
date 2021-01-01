@@ -6,12 +6,8 @@
 
 - [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig)
 - [Config](#config)
-- [Context](#context)
-- [shaderWebBackground.Error](#shaderwebbackgrounderror)
-- [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
-- [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
-- [Config attributes](#config-attributes)
   - [Config: shaders](#config-shaders)
+    - [Shader object](#shader-object)
       - [Uniform setter](#uniform-setter)
   - [Config: canvas](#config-canvas)
   - [Config: onInit](#config-oninit)
@@ -19,7 +15,7 @@
   - [Config: onBeforeFrame](#config-onbeforeframe)
   - [Config: onAfterFrame](#config-onafterframe)
   - [Config: onError](#config-onerror)
-- [Context attributes](#context-attributes)
+- [Context](#context)
   - [Context: canvas](#context-canvas)
   - [Context: width](#context-width)
   - [Context: height](#context-height)
@@ -32,6 +28,9 @@
   - [Context: buffers](#context-buffers)
   - [Context: texture](#context-texture)
   - [Context: initHalfFloatRGBATexture](#context-inithalffloatrgbatexture)
+- [shaderWebBackground.Error](#shaderwebbackgrounderror)
+- [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
+- [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

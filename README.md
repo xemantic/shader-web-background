@@ -29,6 +29,7 @@ documentation should be self-explanatory.
   - [Step 2 - Add your fragment shaders](#step-2---add-your-fragment-shaders)
   - [Step 3 - Start shading](#step-3---start-shading)
   - [Step 4 - Specify fallback styles](#step-4---specify-fallback-styles)
+- [shader-web-background API](#shader-web-background-api)
 - [Configuring shading](#configuring-shading)
   - [Adding shader uniforms](#adding-shader-uniforms)
   - [Complex config example](#complex-config-example)
