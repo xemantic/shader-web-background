@@ -171,10 +171,10 @@ function initCanvas(canvas, contextAttrs) {
 /**
  * @param {!HTMLCanvasElement} canvas
  * @param {!Object<string, !Shader>} shaders
- * @param {function(Context=)|undefined} onInit
+ * @param {function(Context)|undefined} onInit
  * @param {function(!number, !number, Context=)|undefined} onResize
- * @param {function(Context=)|undefined} onBeforeFrame
- * @param {function()|undefined} onFrameComplete
+ * @param {function(Context)|undefined} onBeforeFrame
+ * @param {function(Context)|undefined} onFrameComplete
  * @return {Context}
  */
 function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComplete) {
@@ -340,7 +340,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
     }
 
     if (onFrameComplete) {
-      onFrameComplete();
+      onFrameComplete(context);
     }
 
     requestAnimationFrame(animate);

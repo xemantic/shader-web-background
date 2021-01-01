@@ -94,7 +94,7 @@ var ErrorHandler;
  *   onInit:          (function(Context=)|undefined),
  *   onResize:        (function(!number, !number, Context=)|undefined),
  *   onBeforeFrame:   (function(Context=)|undefined),
- *   onFrameComplete: (function()|undefined),
+ *   onFrameComplete: (function(Context=)|undefined),
  *   onError:         (ErrorHandler|undefined)
  * }}
  */
