@@ -2,6 +2,37 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig)
+- [Config](#config)
+- [Context](#context)
+- [shaderWebBackground.Error](#shaderwebbackgrounderror)
+- [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
+- [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
+- [Config attributes](#config-attributes)
+  - [Config: shaders](#config-shaders)
+      - [Uniform setter](#uniform-setter)
+  - [Config: canvas](#config-canvas)
+  - [Config: onInit](#config-oninit)
+  - [Config: onResize](#config-onresize)
+  - [Config: onBeforeFrame](#config-onbeforeframe)
+  - [Config: onAfterFrame](#config-onafterframe)
+  - [Config: onError](#config-onerror)
+- [Context attributes](#context-attributes)
+  - [Context: canvas](#context-canvas)
+  - [Context: width](#context-width)
+  - [Context: height](#context-height)
+  - [Context: cssPixelRatio](#context-csspixelratio)
+  - [Context: cssWidth](#context-csswidth)
+  - [Context: cssHeight](#context-cssheight)
+  - [Context: isOverShader](#context-isovershader)
+  - [Context: toShaderX](#context-toshaderx)
+  - [Context: toShaderY](#context-toshadery)
+  - [Context: buffers](#context-buffers)
+  - [Context: texture](#context-texture)
+  - [Context: initHalfFloatRGBATexture](#context-inithalffloatrgbatexture)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 :information_source: The detailed API is defined in
