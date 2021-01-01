@@ -1,0 +1,143 @@
+<!--
+  ~ Copyright 2021  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Multiple shaders and ctx.isOverShader()</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
+  <script type="x-shader/x-fragment" id="image">
+    precision highp float;
+
+    uniform float iTime;
+    uniform vec2  iResolution;
+    uniform float iMinDimension;
+    uniform vec2  iMouse;
+    uniform vec3  iColor;
+
+    const float SPEED = 4.;
+    const float LENGTH = 10.;
+
+    void main() {
+      // coordinates normalized to -1..1 in minimal dimension
+      vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
+      // mouse coordinates already normalized to this system
+      float dist = distance(st, iMouse);
+      float luma = (sin(dist * LENGTH - iTime * SPEED) + 1.) / 2.;
+      gl_FragColor = vec4(iColor * luma, 1.0);
+    }
+  </script>
+  <script>
+    // Note: mouse position is expressed in CSS pixels
+    var mouseX = 0;
+    var mouseY = 0;
+
+    document.addEventListener("mousemove", (event) => {
+       mouseX = event.clientX;
+       mouseY = event.clientY;
+    });
+
+    // we are wrapping preconfigured shade to be able to call it with different canvases
+    // instead of keeping computed uniform values in variables, we store them on ctx
+    // be careful not to override an existing context property, like width, etc.
+    function shade(canvas, color, useIsOverShader) {
+      shaderWebBackground.shade({
+        canvas: canvas,
+        onInit: (ctx) => {
+          // it might take some time until any mouse movement is registered for the first time
+          // therefore initially we put mouse in the center of the screen, and do it only for
+          // the full viewport shader
+          if (!canvas) {
+            // Note: CSS pixels
+            mouseX = ctx.cssWidth / 2.;
+            mouseY = ctx.cssHeight / 2.;
+          }
+        },
+        onResize: (width, height, ctx) => {
+          ctx.minDimension = Math.min(width, height);
+          ctx.shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / ctx.minDimension;
+          ctx.shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / ctx.minDimension;
+        },
+        onBeforeFrame: (ctx) => {
+          ctx.time = performance.now() / 1000;
+          // hover over blueish canvas to check how isOverShader works
+          if (!useIsOverShader || ctx.isOverShader(mouseX, mouseY)) {
+            ctx.shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / ctx.minDimension;
+            ctx.shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / ctx.minDimension;
+          }
+        },
+        shaders: {
+          image: {
+            uniforms: {
+              iResolution:   (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+              iTime:         (gl, loc, ctx) => gl.uniform1f(loc, ctx.time),
+              iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.minDimension),
+              iMouse:        (gl, loc, ctx) => gl.uniform2f(loc, ctx.shaderMouseX, ctx.shaderMouseY),
+              iColor:        (gl, loc) => gl.uniform3f(loc, color[0], color[1], color[2]),
+            }
+          }
+        }
+      });
+    }
+
+    // null - no canvas, the default, it will add full screen background canvas
+    shade(null, [1, 0, 0], false); // red
+
+    // the other canvases we are getting from the document, therefore we need to wait
+    // until it is loaded
+    window.addEventListener("DOMContentLoaded", () => {
+      shade(document.getElementById("shader2"), [0, 1, 0], false); // green
+      shade(document.getElementById("shader3"), [0, 0, 1], true);  // blue + use ctx.isOverShader
+    });
+  </script>
+  <style>
+    header {
+      height: 50vh;
+    }
+    #canvases {
+      height: 50vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-evenly;
+      padding: 1vw;
+    }
+    #shader2, #shader3 {
+      width: 46vw;
+      border-radius: 2vw;
+      margin: 1vw;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="#source">Multiple shaders and ctx.isOverShader()</a></h1>
+  </header>
+  <section id="canvases">
+    <canvas id="shader2"></canvas>
+    <canvas id="shader3"></canvas>
+  </section>
+</body>
+</html>
