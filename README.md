@@ -299,93 +299,13 @@ and
 [error-unnecessary-uniform-configured](src/test/html/errors/error-unnecessary-uniform-configured.html) 
 test cases.
 
-### shader-web-background API
 
-:information_source: The detailed API is defined in
-[src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
-
-
-#### shaderWebBackground.shade(config)
-
-Shading starts with the `shaderWebBackground.shade(config)` call which requires
-providing a [configuration](#config) object and returns a [context](#context) object. 
-
-This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)s of type:
-
- * [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
- * [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
-
-
-#### Config
-
-An object with the following attributes:
-
-| attribute                              | type (`=`- optional)                               | description                           |  
-| -------------------------------------- | -------------------------------------------------- | ------------------------------------- |
-| [shaders](#config-shaders)             | Object                                             | definition of shaders                 |                                           |
-| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                   |
-| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |  
-| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized     |
-| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame              |
-| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete     |
-| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started |
-
-All the attributes are optional except for the [shaders](#config-shaders).
-
-
-#### Context
-
-An object with the following attributes:
-
-| attribute                                                     | type                                                       | description | 
-| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
-| [canvas](#context-canvas)                                     | canvas                                                     | the canvas being shaded | 
-| [width](#context-width)                                       | number                                                     | device pixel width            | 
-| [height](#context-height)                                     | number                                                     | device pixel height            | 
-| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
-| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
-| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
-| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
-| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x to respective pixel coordinate of a given shader.            |    
-| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
-| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
-| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
-| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
-
-:information_source: Note: the `context` is passed as an argument to many functions and it is
-also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-
-#### shaderWebBackground.Error
-
-A base class to indicate problems with the 
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-#### shaderWebBackground.ConfigError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate misconfiguration of
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-#### shaderWebBackground.GlError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate that 
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call cannot be satisfied
-due to lack of WebGL capabilities of the browser (might be a hardware limitation).
-
-See [Config: onError](#config-onerror)
-
-
-#### Config object example
+## Complex config example
 
 Here is a comprehensive example of a configuration object with comments. It is using
-[Shadertoy](https://www.shadertoy.com/) conventions for naming buffers and uniforms although
-these conventions are arbitrary and might be adjusted to the needs of your project.
+[Shadertoy](https://www.shadertoy.com/) conventions for naming buffers and uniforms
+although these conventions are arbitrary and might be adjusted to the needs of your
+project.
 
 ```javascript
 {
@@ -438,7 +358,7 @@ these conventions are arbitrary and might be adjusted to the needs of your proje
   },
   onBeforeFrame: (ctx) => {
   },
-  onFrameComplete: (ctx) => {
+  onAfterFrame: (ctx) => {
     ctx.iFrame++;
   },
   onError: (canvas, error) => {
@@ -449,13 +369,95 @@ these conventions are arbitrary and might be adjusted to the needs of your proje
 }
 ```
 
-The `ctx` argument passed to many functions is an object with the following attributes
-and functions:
+The API is intended to be self explanatory, in case of any 
+doubts please check the next API chapter.
 
 
+## shader-web-background API
+
+:information_source: The detailed API is defined in
+[src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
 
 
-##### Config: shaders
+### shaderWebBackground.shade(config)
+
+Shading starts with the `shaderWebBackground.shade(config)` call which requires
+providing a [configuration](#config) object and returns a [context](#context) object. 
+
+This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)s of type:
+
+ * [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
+ * [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
+
+
+### Config
+
+An object with the following attributes:
+
+| attribute                              | type (`=`- optional)                               | description                           |  
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------- |
+| [shaders](#config-shaders)             | Object                                             | definition of shaders                 |                                           |
+| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                   |
+| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |  
+| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized     |
+| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame              |
+| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete     |
+| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started |
+
+All the attributes are optional except for the [shaders](#config-shaders).
+
+
+### Context
+
+An object with the following attributes:
+
+| attribute                                                     | type                                                       | description | 
+| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
+| [canvas](#context-canvas)                                     | canvas                                                     | the canvas being shaded | 
+| [width](#context-width)                                       | number                                                     | device pixel width            | 
+| [height](#context-height)                                     | number                                                     | device pixel height            | 
+| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
+| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
+| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
+| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
+| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x to respective pixel coordinate of a given shader.            |    
+| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
+| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
+| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
+| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
+
+:information_source: Note: the `context` is passed as an argument to many functions and it is
+also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+
+### shaderWebBackground.Error
+
+A base class to indicate problems with the 
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+See [Config: onError](#config-onerror)
+
+
+### shaderWebBackground.ConfigError
+
+Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate misconfiguration of
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+See [Config: onError](#config-onerror)
+
+
+### shaderWebBackground.GlError
+
+Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate that 
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call cannot be satisfied
+due to lack of WebGL capabilities of the browser (might be a hardware limitation).
+
+See [Config: onError](#config-onerror)
+
+
+### Config attributes
+
+#### Config: shaders
 
 Many shaders can be defined by name under `shaders` config attribute. All together they
 will establish rendering pipeline processed in sequence called `Multipass` in Shadertoy
@@ -502,7 +504,7 @@ accessed through `ctx.buffers` object. Names of the attributes in this object wi
 match the names of attributes defined in `shaders` config attribute, except for the
 last shader which is not offscreen and cannot be accessed as a texture.
 
-#### Uniform setter
+##### Uniform setter
 
 The uniform setter function example:
 
@@ -558,20 +560,22 @@ DOM elements will be created.
 
 #### Config: onInit
 
-##### Config: onResize
+#### Config: onResize
 
 The `onResize` function is invoked with `with` and `height` parameters indicating actual
 screen dimensions of the canvas after browser window is resized. It will be also
 called when the shading is started with the `shaderWebBackground.shade(config)` call.
 
-##### Config: onBeforeFrame
+#### Config: onBeforeFrame
 
-##### Config: onFrameComplete
+#### Config: onAfterFrame
 
-The `onFrameComplete` function is invoked when scheduling of the rendering of the whole
+The `onAfterFrame` function is invoked when scheduling of the rendering of the whole
 animation frame is finished. It can be used to increment frame counters, etc.
 
 #### Config: onError
+
+### Context attributes
 
 #### Context: canvas
 
@@ -586,7 +590,7 @@ might differ from the [cssWidth](#context-attribute-csswidth).
 Typically used together with the [height](#context-height) attribute.
 
 
-##### Context: height
+#### Context: height
 
 The "pixel" height of the canvas,
 might differ from the [cssHeight](#context-attribute-cssheight).
@@ -606,7 +610,7 @@ shaderWebBackground.shade({
 ```
 
 
-##### Context: cssPixelRatio
+#### Context: cssPixelRatio
 
 The ratio of "CSS pixels" comparing to real "pixels", might be necessary for some
 calculations, for example simulation of background scrolling,
@@ -628,31 +632,31 @@ shaderWebBackground.shade({
 ```
 
 
-##### Context: cssWidth
+#### Context: cssWidth
 
 The width of the canvas as reported by the browser,
 might differ from the pixel [width](#context-attribute-width).
 
 
-##### Context: cssHeight
+#### Context: cssHeight
 
 The height of the canvas as reported by the browser,
 might differ from the pixel [height](#context-attribute-height).
 
 
-##### Context: isOverShader
+#### Context: isOverShader
 
 A helper function to tell if provided coordinates are within the rectangle
 of shader canvas. Not very useful for full screen shaders, but might
 be handy for smaller canvases.
 
 
-##### Context: toShaderX
+#### Context: toShaderX
 
 Translates horizontal CSS coordinate to respective pixel coordinate of a given
 shader.
 
-##### Context: toShaderY
+#### Context: toShaderY
 
 Translates horizontal CSS coordinate to respective pixel coordinate of a given
 shader.
@@ -665,18 +669,18 @@ pixel will receive values `(.5, .5)`. The `getCoordinate[X|Y]` functions account
 for this as well.
 
 
-##### Context: buffers
+#### Context: buffers
 
 And object representing offscreen buffers of all the shaders except for the last
 one in the rendering pipeline. The attribute names match the shader names. 
 
 
-##### Context: texture
+#### Context: texture
 
 A function to bind uniforms of type `sampler2D`.
 
 
-##### Context: initHalfFloatRGBATexture
+#### Context: initHalfFloatRGBATexture
 
 A function to initialize a texture where each pixel RGBA values have
 floating point precision. It takes `width` and `height` as parameters.
@@ -700,10 +704,6 @@ shaderWebBackground.shade({
   }
 });
 ```
-
-
-
- 
 
 #### Handling errors
 
