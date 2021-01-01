@@ -37,12 +37,17 @@
 
 :information_source: The detailed API is defined in
 [src/main/js/shader-web-background-api.js](src/main/js/shader-web-background-api.js)
+as 
+[Closure Compiler externs](https://developers.google.com/closure/compiler/docs/externs-and-exports).
 
 
 ## shaderWebBackground.shade(config)
 
 Shading starts with the `shaderWebBackground.shade(config)` call which requires
 providing a [configuration](#config) object and returns a [context](#context) object.
+
+The processing of configuration and shader compilation will start immediately,
+however the animation frames will be requested only when the page is loaded.
 
 This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)s of type:
 
@@ -365,3 +370,8 @@ shaderWebBackground.shade({
   }
 });
 ```
+
+[HTMLCanvasElement]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
+[WebGLUniformLocation]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
+[WebGLTexture]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
+
