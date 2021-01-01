@@ -7,12 +7,13 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 **Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :fireworks:
 
 I ([xemantic](https://xemantic.com/)) designed this library to use complex
-fragment shaders as part of web design and development process. It finally
-lets me embrace the web browser as a creative coding environment. If you
-are familiar with GLSL, then it might help you publishing your work on web.
-If you are coming from web development background, then you might want to
-learn a bit more about shaders, for example from
-[The Book of Shaders](https://thebookofshaders.com/).
+fragment shaders as part of my web design and development process. This is the tool
+which finally lets me embrace the web browser as a creative coding environment. If you
+are familiar with GLSL, then it might help you publish your work on the web.
+If you are coming from a web development background, then you might want to
+learn a bit more about shaders first, for example from
+[The Book of Shaders](https://thebookofshaders.com/). The simple code examples of this
+documentation should be self-explanatory.
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -228,6 +229,10 @@ background for the canvas element. However fot the sake of compatibility it's
 better to apply fallback style to the HTML document root, while hiding the created
 canvas. It is also possible to alter the default error handler, see
 [Handling errors](#handling-errors) section for details.
+
+## shader-web-background API
+
+See the full [shader-web-background API](API.md) 
 
 
 ## Configuring shading

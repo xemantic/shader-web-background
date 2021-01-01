@@ -59,73 +59,61 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`- optional)                               | description                           |  
+| attribute                              | type (`=`- optional)                               | description                           |
 | -------------------------------------- | -------------------------------------------------- | ------------------------------------- |
-| [shaders](#config-shaders)             | Object                                             | definition of shaders                 |                                           |
 | [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                   |
-| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |  
+| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |
 | [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized     |
 | [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame              |
+| [shaders](#config-shaders)             | Object (attribute=shader)                          | definition of shaders                 |
 | [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete     |
 | [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started |
 
-All the attributes are optional except for the [shaders](#config-shaders).
+All the attributes are optional except for the [shaders](#config-shaders). Their order is arbitrary,
+but here they are sorted by their "lifecycle" in rendering pipeline.
 
-
-## Context
-
-An object with the following attributes:
-
-| attribute                                                     | type                                                       | description | 
-| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
-| [canvas](#context-canvas)                                     | canvas                                                     | the canvas being shaded | 
-| [width](#context-width)                                       | number                                                     | device pixel width            | 
-| [height](#context-height)                                     | number                                                     | device pixel height            | 
-| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
-| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
-| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
-| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
-| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x to respective pixel coordinate of a given shader.            |    
-| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
-| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
-| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
-| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
-
-:information_source: Note: the `context` is passed as an argument to many functions and it is
-also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-
-## shaderWebBackground.Error
-
-A base class to indicate problems with the
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-## shaderWebBackground.ConfigError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate misconfiguration of
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
-
-See [Config: onError](#config-onerror)
-
-
-## shaderWebBackground.GlError
-
-Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate that
-the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call cannot be satisfied
-due to lack of WebGL capabilities of the browser (might be a hardware limitation).
-
-See [Config: onError](#config-onerror)
-
-
-## Config attributes
 
 ### Config: shaders
 
-Many shaders can be defined by name under `shaders` config attribute. All together they
-will establish rendering pipeline processed in sequence called `Multipass` in Shadertoy
+The `shaders` is the only required attribute of the config object. It's value should
+be an object, where each attribute name represents one shader, therefore multiple
+shaders can be defined in sequence. All together they will establish a rendering pipeline.
+
+Example:
+
+```javascript
+shaderWebBackground.shade({
+  shaders: {
+    BufferA: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)  // previous frame of self
+      }
+    },
+    BufferB: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // previous frame of self
+      }
+    },
+    Image: {
+      uniforms: {
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // latest output
+      }
+    }
+  }
+});
+```
+
+:information_source: Note: shader names are arbitrary. The last shader will render to screen,
+the previous ones to offscreen buffers.
+
+#### Shader object
+
+
+
+
+processed in sequence called `Multipass` in Shadertoy
 nomenclature. The last of defined shaders will render to screen. The output of previous
 shaders, including feedback loop of the previous frame rendered by the same shader,
 can be easily passed to uniforms, here is an example using Shadertoy naming conventions:
@@ -240,7 +228,29 @@ animation frame is finished. It can be used to increment frame counters, etc.
 
 ### Config: onError
 
-## Context attributes
+
+
+## Context
+
+An object with the following attributes:
+
+| attribute                                                     | type                                                       | description                               | 
+| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
+| [canvas](#context-canvas)                                     | [HTMLCanvasElement]                                        | the canvas being shaded | 
+| [width](#context-width)                                       | number                                                     | device pixel width            | 
+| [height](#context-height)                                     | number                                                     | device pixel height            | 
+| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
+| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
+| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
+| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
+| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x .            |    
+| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
+| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
+| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
+| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
+
+:information_source: Note: the `context` object is passed as an argument to many functions and it is
+also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
 
 ### Context: canvas
 
@@ -370,6 +380,32 @@ shaderWebBackground.shade({
   }
 });
 ```
+
+
+## shaderWebBackground.Error
+
+A base class to indicate problems with the
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
+
+
+## shaderWebBackground.ConfigError
+
+Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate misconfiguration of
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
+
+
+## shaderWebBackground.GlError
+
+Extends [shaderWebBackground.Error](#shaderwebbackgrounderror) to indicate that
+the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call cannot be satisfied
+due to lack of WebGL capabilities of the browser (might be a hardware limitation).
+
+See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
+
 
 [HTMLCanvasElement]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
 [WebGLUniformLocation]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
