@@ -42,8 +42,8 @@ var TextureBinder;
  *   cssWidth:                 !number,
  *   cssHeight:                !number,
  *   isOverShader:             !function(!number, !number): !boolean,
- *   getCoordinateX:           !function(!number): !number,
- *   getCoordinateY:           !function(!number): !number,
+ *   toShaderX:                !function(!number): !number,
+ *   toShaderY:                !function(!number): !number,
  *   buffers:                  !Object<string, !DoubleBuffer>,
  *   texture:                  !TextureBinder,
  *   initHalfFloatRGBATexture: !function(!number, !number)
@@ -94,7 +94,7 @@ var ErrorHandler;
  *   onInit:          (function(Context=)|undefined),
  *   onResize:        (function(!number, !number, Context=)|undefined),
  *   onBeforeFrame:   (function(Context=)|undefined),
- *   onFrameComplete: (function(Context=)|undefined),
+ *   onAfterFrame:    (function(Context=)|undefined),
  *   onError:         (ErrorHandler|undefined)
  * }}
  */

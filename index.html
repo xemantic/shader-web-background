@@ -90,8 +90,8 @@ O=J(n,e,p.FRAGMENT_SHADER,m),u=p.createProgram();p.attachShader(u,v);p.attachSha
 O);p.linkProgram(u);var h=u}return h}catch(p){throw new shaderWebBackground.ConfigError(p.message);
 }}const q=G(a),P=q.g,w=[],k={canvas:a,width:0,height:0,cssPixelRatio:0,cssWidth:0,
 cssHeight:0,isOverShader:(e,m)=>{const n=a.getBoundingClientRect();return e>=n.left&&
-e<=n.right&&m>=n.top&&m<=n.bottom},getCoordinateX:e=>(e-a.getBoundingClientRect().left)*
-k.cssPixelRatio+.5,getCoordinateY:e=>a.height-(e-a.getBoundingClientRect().top)*k.cssPixelRatio-
+e<=n.right&&m>=n.top&&m<=n.bottom},toShaderX:e=>(e-a.getBoundingClientRect().left)*
+k.cssPixelRatio+.5,toShaderY:e=>a.height-(e-a.getBoundingClientRect().top)*k.cssPixelRatio-
 .5,u:()=>{k.cssWidth===a.clientWidth&&k.cssHeight===a.clientHeight||k.resize()},resize:()=>
 {const e=window.devicePixelRatio||1,m=a.clientWidth,n=a.clientHeight,h=Math.floor(m*
 e),p=Math.floor(n*e);a.width=h;a.height=p;k.width=h;k.height=p;k.cssPixelRatio=e;
@@ -114,7 +114,7 @@ shaderWebBackground.GlError=class extends shaderWebBackground.Error{constructor(
 shaderWebBackground.shade=function(a){y(a,"Missing config argument");const b=a.canvas?
 z(a.canvas):A();y(a.shaders,"No shaders specified in config");try{return a.canvas||
 E("DOMContentLoaded",()=>document.body.appendChild(b)),I(b,a.shaders,a.onInit,a.onResize,
-a.onBeforeFrame,a.onFrameComplete)}catch(c){(a.onError||x)(b,c)}};const N=[-1,1,1,1,-1,-1,1,-1];
+a.onBeforeFrame,a.onAfterFrame)}catch(c){(a.onError||x)(b,c)}};const N=[-1,1,1,1,-1,-1,1,-1];
 function S(a,b){return a.l(a.g.getExtension(b),b+" extension is not supported")}
 class T{constructor(a,b){this.g=a;this.l=b}h(){}}
 class U extends T{constructor(a,b){super(a,b);this.i=S(this,"OES_texture_half_float");
@@ -457,8 +457,8 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
         drawCenterY = 0;
       },
       onBeforeFrame: (ctx) => {
-        stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
-        stMouseY = (2 * ctx.getCoordinateY(mouseY) - ctx.height) / minDimension;
+        stMouseX = (2 * ctx.toShaderX(mouseX) - ctx.width) / minDimension;
+        stMouseY = (2 * ctx.toShaderY(mouseY) - ctx.height) / minDimension;
         time = performance.now() / 1000;
         const scrollY = window.scrollY;
         const scrollYDelta = scrollY - oldScrollY;
@@ -513,7 +513,7 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
           }
         }
       },
-      onFrameComplete: () => {
+      onAfterFrame: () => {
         drawCenterY *= drawCenterShiftDownScale;
       },
       onError: (canvas, error) => {

@@ -78,15 +78,15 @@
         },
         onResize: (width, height, ctx) => {
           ctx.minDimension = Math.min(width, height);
-          ctx.shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / ctx.minDimension;
-          ctx.shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / ctx.minDimension;
+          ctx.shaderMouseX = (ctx.toShaderX(mouseX) * 2 - ctx.width) / ctx.minDimension;
+          ctx.shaderMouseY = (ctx.toShaderY(mouseY) * 2 - ctx.height) / ctx.minDimension;
         },
         onBeforeFrame: (ctx) => {
           ctx.time = performance.now() / 1000;
           // hover over blueish canvas to check how isOverShader works
           if (!useIsOverShader || ctx.isOverShader(mouseX, mouseY)) {
-            ctx.shaderMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / ctx.minDimension;
-            ctx.shaderMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / ctx.minDimension;
+            ctx.shaderMouseX = (ctx.toShaderX(mouseX) * 2 - ctx.width) / ctx.minDimension;
+            ctx.shaderMouseY = (ctx.toShaderY(mouseY) * 2 - ctx.height) / ctx.minDimension;
           }
         },
         shaders: {

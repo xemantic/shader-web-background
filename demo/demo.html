@@ -346,8 +346,8 @@
         drawCenterY = 0;
       },
       onBeforeFrame: (ctx) => {
-        stMouseX = (2 * ctx.getCoordinateX(mouseX) - ctx.width) / minDimension;
-        stMouseY = (2 * ctx.getCoordinateY(mouseY) - ctx.height) / minDimension;
+        stMouseX = (2 * ctx.toShaderX(mouseX) - ctx.width) / minDimension;
+        stMouseY = (2 * ctx.toShaderY(mouseY) - ctx.height) / minDimension;
         time = performance.now() / 1000;
         const scrollY = window.scrollY;
         const scrollYDelta = scrollY - oldScrollY;
@@ -402,7 +402,7 @@
           }
         }
       },
-      onFrameComplete: () => {
+      onAfterFrame: () => {
         drawCenterY *= drawCenterShiftDownScale;
       }
     });

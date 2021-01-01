@@ -320,8 +320,8 @@ shaderWebBackground.shade({
     ctx.iMinDimension = Math.min(width, height);
   },                 
   onBeforeFrame: (ctx) => {
-    ctx.shaderMouseX = ctx.getCoordinateX(mouseX);
-    ctx.shaderMouseY = ctx.getCoordinateY(mouseY);
+    ctx.shaderMouseX = ctx.toShaderX(mouseX);
+    ctx.shaderMouseY = ctx.toShaderY(mouseY);
   },
   shaders: {
     // the first buffer to be rendered in the pipeline
@@ -331,7 +331,7 @@ shaderWebBackground.shade({
         // uniform value calculated in place, you can ommit ctx arg if not needed
         iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
         iFrame: (gl, loc) => gl.uniform1i(loc, ctx.iFrame),
-        // uniform value taken from the context, see onResize below
+        // uniform value taken from the context, see onResize above
         iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iMinDimension),
         iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
         iMouse: (gl, loc, ctx) => gl.uniform2f(loc, ctx.shaderMouseX, ctx.shaderMouseY),        

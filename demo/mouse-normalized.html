@@ -79,8 +79,8 @@
 
         // What would happen in "mouse" example per pixel in GLSL, here
         // will happen once per frame
-        stMouseX = (ctx.getCoordinateX(mouseX) * 2 - ctx.width) / minDimension;
-        stMouseY = (ctx.getCoordinateY(mouseY) * 2 - ctx.height) / minDimension;
+        stMouseX = (ctx.toShaderX(mouseX) * 2 - ctx.width) / minDimension;
+        stMouseY = (ctx.toShaderY(mouseY) * 2 - ctx.height) / minDimension;
       },
       shaders: {
         image: {

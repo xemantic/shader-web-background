@@ -174,10 +174,10 @@ function initCanvas(canvas, contextAttrs) {
  * @param {function(Context)|undefined} onInit
  * @param {function(!number, !number, Context=)|undefined} onResize
  * @param {function(Context)|undefined} onBeforeFrame
- * @param {function(Context)|undefined} onFrameComplete
+ * @param {function(Context)|undefined} onAfterFrame
  * @return {Context}
  */
-function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComplete) {
+function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame) {
 
   // in the future it should be configurable as well
   const contextAttrs = {
@@ -223,11 +223,11 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
       therefore we are adjust our coordinates by half to make them match
      */
     /** @type {!function(!number): !number} */
-    getCoordinateX: (x) =>
+    toShaderX: (x) =>
       (x - canvas.getBoundingClientRect().left)
       * context.cssPixelRatio + .5,
     /** @type {!function(!number): !number} */
-    getCoordinateY: (y) =>
+    toShaderY: (y) =>
       (canvas.height - (y - canvas.getBoundingClientRect().top)
       * context.cssPixelRatio) - .5,
     /** @type {!function()} */
@@ -339,8 +339,8 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onFrameComple
       renderer.render();
     }
 
-    if (onFrameComplete) {
-      onFrameComplete(context);
+    if (onAfterFrame) {
+      onAfterFrame(context);
     }
 
     requestAnimationFrame(animate);
@@ -383,7 +383,7 @@ function shade(config) {
       config.onInit,
       config.onResize,
       config.onBeforeFrame,
-      config.onFrameComplete
+      config.onAfterFrame
     );
   } catch (/** @type {!Error} */ e) {
     (config.onError || DEFAULT_ON_ERROR)(canvas, e);

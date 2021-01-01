@@ -86,8 +86,8 @@
         // https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
         //
         // therefore we need to translate to shader coordinates through the context
-        shaderMouseX = ctx.getCoordinateX(mouseX);
-        shaderMouseY = ctx.getCoordinateY(mouseY);
+        shaderMouseX = ctx.toShaderX(mouseX);
+        shaderMouseY = ctx.toShaderY(mouseY);
       },
       shaders: {
         image: {
