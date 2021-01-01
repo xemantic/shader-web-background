@@ -517,7 +517,7 @@ this.l);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
         drawCenterY *= drawCenterShiftDownScale;
       },
       onError: (canvas, error) => {
-        canvas.remove();
+        canvas.parentNode.removeChild(canvas);
         document.documentElement.classList.add("fallback-background");
         if (error instanceof shaderWebBackground.GlError) {
           console.log("Could not shade, adding fallback CSS classes:", error);
