@@ -58,24 +58,25 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`- optional)                               | description                           |
-| -------------------------------------- | -------------------------------------------------- | ------------------------------------- |
-| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                   |
-| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run               |
-| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized     |
-| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame              |
-| [shaders](#config-shaders)             | Object (attribute=shader)                          | definition of shaders                 |
-| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete     |
-| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started |
+| attribute                              | type (`=`- optional)                               | description                                |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                        |
+| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run                    |
+| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized          |
+| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame                   |
+| [shaders](#config-shaders)             | Object of [Shader](#shader)s                       | definition of shaders (rendering pipeline) |
+| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete          |
+| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started      |
 
-All the attributes are optional except for the [shaders](#config-shaders). Their order is arbitrary,
-but here they are sorted by their "lifecycle" in rendering pipeline.
+All the attributes are optional except for the [shaders](#config-shaders) attribute. The order of
+attributes is arbitrary, but in this table they are sorted by a convenient order of
+their "lifecycle" in the rendering of each frame.
 
 
 ### Config: shaders
 
 The `shaders` is the only required attribute of the config object. It's value should
-be an object, where each attribute name represents one shader, therefore multiple
+be an object, where each attribute represents one shader definition, therefore multiple
 shaders can be defined in sequence. All together they will establish a rendering pipeline.
 
 Example:
@@ -90,14 +91,14 @@ shaderWebBackground.shade({
     },
     BufferB: {
       uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // the latest output of BufferA
         iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // previous frame of self
       }
     },
     Image: {
       uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // latest output
+        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // the latest output
+        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // the latest output
       }
     }
   }
@@ -105,11 +106,30 @@ shaderWebBackground.shade({
 ```
 
 :information_source: Note: shader names are arbitrary. The last shader will render to screen,
-the previous ones to offscreen buffers.
+the previous ones (if more than one) to offscreen buffers. See [Shader: uniforms](#shader-uniforms)
 
-#### Shader object
+#### Shader
+
+An object with the following attributes:
+
+| attribute                  | type (`=`- optional)                               | description                                |
+| -------------------------- | ------------------------------------------------------- | ------------------------------------------ |
+| [texture](#shader-texture) | function([WebGLRenderingContext], ![Context](#context)) |                                | canvas to render to                        |
+| [uniforms](#config-oninit) | Object of [Uniform setter](#uniformsetter)s                              | called before first run                    |
+
+The All the attributes are optional except for the [shaders](#config-shaders) attribute. The order of
+attributes is arbitrary, but in this table they are sorted by a convenient order of
+their "lifecycle" in the rendering of each frame.
 
 
+##### Shader: uniforms
+
+An object where an attribute name should match a shader uniform name, and an attribute value
+represents a uniform setter function. 
+
+function([WebGLRenderingContext], [WebGLUniformLocation], [Context](#context)=)
+
+###### Uniform setter
 
 
 processed in sequence called `Multipass` in Shadertoy
@@ -117,29 +137,6 @@ nomenclature. The last of defined shaders will render to screen. The output of p
 shaders, including feedback loop of the previous frame rendered by the same shader,
 can be easily passed to uniforms, here is an example using Shadertoy naming conventions:
 
-```javascript
-shaderWebBackground.shade({
-  shaders: {
-    BufferA: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)  // previous frame of self
-      }
-    },
-    BufferB: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // previous frame of self
-      }
-    },
-    Image: {
-      uniforms: {
-        iChannel0: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA), // latest output
-        iChannel1: (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferB)  // latest output
-      }
-    }
-  }
-});
-```
 
 The `iChannelN` uniforms are defined in GLSL as follows:
 
@@ -156,7 +153,7 @@ accessed through `ctx.buffers` object. Names of the attributes in this object wi
 match the names of attributes defined in `shaders` config attribute, except for the
 last shader which is not offscreen and cannot be accessed as a texture.
 
-##### Uniform setter
+
 
 The uniform setter function example:
 
@@ -185,6 +182,7 @@ location taken from compiled shader program.
 The optional `ctx` parameter represents internal context of the library and will have
 the following structure:
 
+
 ```javascript
 {
   buffers: {
@@ -203,6 +201,11 @@ generated output texture will be used.
 
 Another valid argument type to be passed to the `texture` function is an instance
 of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
+
+
+##### Shader: texture
+
+An optional attribute of a shader 
 
 
 ### Config: canvas
@@ -327,14 +330,16 @@ be handy for smaller canvases.
 
 ### Context: toShaderX
 
-Translates horizontal CSS coordinate to respective pixel coordinate of a given
-shader.
+Translates horizontal CSS coordinate (e.g. mouse pointer position) to corresponding pixel coordinate
+of this shader.
+
+See [Context: toShaderY](#context-toshadery)
 
 
 ### Context: toShaderY
 
-Translates horizontal CSS coordinate to respective pixel coordinate of a given
-shader.
+Translates vertical CSS coordinate (e.g. mouse pointer position) to corresponding pixel coordinate
+of this shader.
 
 :warning: Note: shader rectangle coordinate `(0, 0)` is located in the bottom-left
 corner, so the Y-axis is reversed. Actual coordinate passed to the shader
@@ -343,11 +348,20 @@ a background shader covering the whole browser window the bottom-left corner
 pixel will receive values `(.5, .5)`. The `getCoordinate[X|Y]` functions account
 for this as well.
 
+See [Context: toShaderX](#context-toshaderx)
+
 
 ### Context: buffers
 
 And object representing offscreen buffers of all the shaders except for the last
 one in the rendering pipeline. The attribute names match the shader names.
+
+
+#### Buffer object
+
+It's a placeholder object referencing the offscreen double buffer of a shader.
+
+See [Shader uniforms](#shader-uniforms) section to check how it is being used.
 
 
 ### Context: texture
@@ -380,7 +394,6 @@ shaderWebBackground.shade({
 });
 ```
 
-
 ## shaderWebBackground.Error
 
 A base class to indicate problems with the
@@ -406,7 +419,7 @@ due to lack of WebGL capabilities of the browser (might be a hardware limitation
 See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
 
 
-[HTMLCanvasElement]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
-[WebGLUniformLocation]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
-[WebGLTexture]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
-
+[HTMLCanvasElement]:     https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
+[WebGLRenderingContext]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
+[WebGLUniformLocation]:  https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
+[WebGLTexture]:          https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
