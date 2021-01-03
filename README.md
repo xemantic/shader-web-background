@@ -50,7 +50,7 @@ https://xemantic.com/
   - [Handling errors](#handling-errors)
 - [Shader GLSL version](#shader-glsl-version)
 - [Adding mouse support](#adding-mouse-support)
-- [Shadertoy compatibility](#shadertoy-compatibility)
+- [Shadertoy support](#shadertoy-support)
   - [What to do with Shadertoy "Common" tab?](#what-to-do-with-shadertoy-common-tab)
   - [What to do with `texture` function?](#what-to-do-with-texture-function)
   - [Handling Shadertoy texture parameters](#handling-shadertoy-texture-parameters)
