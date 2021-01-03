@@ -17,7 +17,7 @@ then you might want to learn a bit more about shaders first, for example from
 [The Book of Shaders](https://thebookofshaders.com/). I hope that examples presented
 in this documentation are self-explanatory. If you find it useful, then
 
-![:heart: Sponsor](https://github.com/sponsors/xemantic) or 
+[:heart: Sponsor xemantic on GitHub](https://github.com/sponsors/xemantic) or 
 
 ![Buy me a tea](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF)
 
@@ -25,6 +25,7 @@ https://www.buymeacoffee.com/kazik
 
 
 Kazik Pogoda
+
 https://xemantic.com/
 
 
