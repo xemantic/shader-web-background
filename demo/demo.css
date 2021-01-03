@@ -112,7 +112,3 @@ button:hover {
   color: red;
   content: " shader-web-background not supported"
 }
-
-#shader-web-background.fallback {
-  display: none;
-}
