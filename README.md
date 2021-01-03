@@ -696,7 +696,7 @@ Or [send me](https://xemantic.com/) a link with description.
 * WebGL for OpenGL based rendering
 * Google Closure Compiler for verifying JavaScript and minimizing it
 * highligh.js for presenting code in demo folder
-
+* browserstack for testing
 
 ## TODO
 
@@ -706,6 +706,6 @@ Or [send me](https://xemantic.com/) a link with description.
 
 [Shadertoy]: https://www.shadertoy.com/
 [performance.now()]: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-[minimal shadertoy demo](https://xemantic.github.io/shader-web-background/demo/shadertoy-default.html).
-[Warping - procedural 2 by Inigo Quilez](https://xemantic.github.io/shader-web-background/demo/shadertoy-warping-procedural-2.html)
-[Reaction Diffusion - 2 Pass by Shane](https://xemantic.github.io/shader-web-background/demo/shadertoy-reaction-diffusion-2-pass.html)
+[minimal shadertoy demo]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-default.html).
+[Warping - procedural 2 by Inigo Quilez]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-warping-procedural-2.html)
+[Reaction Diffusion - 2 Pass by Shane]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-reaction-diffusion-2-pass.html)
