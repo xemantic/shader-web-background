@@ -264,7 +264,7 @@ already quite concise. See
 [WebGLRenderingContext.uniform](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform)
 documentation.
 
-Let's assume you want to provide your shader with a time value measured
+Let's assume that you want to provide your shader with a time value measured
 in seconds since the moment the page was loaded. First define a uniform in the
 `image` shader:
 
