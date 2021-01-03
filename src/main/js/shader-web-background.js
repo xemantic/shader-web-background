@@ -347,6 +347,9 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
     if (onInit) {
       onInit(context);
     }
+    if (onResize) {
+      onResize(context.width, context.height, context);
+    }
     requestAnimationFrame(animate);
   });
 

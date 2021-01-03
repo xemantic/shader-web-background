@@ -44,34 +44,34 @@ y(b instanceof HTMLScriptElement&&"x-shader/x-fragment"===b.type,'Shader source 
 a+'" should be of type: '+B(a));return b.text}
 function E(a,b){"loading"!==document.readyState?b():window.addEventListener(a,b)}
 class F{constructor(a,b,c,d){this.g=c;const k=a.g;this.h=()=>{for(const f of d)f.v(k,
-f.location,b)};this.j=()=>{var f=c.A,g=a.g;g.bindBuffer(g.ARRAY_BUFFER,a.l);g.enableVertexAttribArray(f);
-g.vertexAttribPointer(f,2,g.FLOAT,!1,0,0);g.drawArrays(g.TRIANGLE_STRIP,0,4);g.disableVertexAttribArray(f);
-g.bindBuffer(g.ARRAY_BUFFER,null);f=a.g;for(g=0;g<a.h;g++)f.activeTexture(f.TEXTURE0+
-g),f.bindTexture(f.TEXTURE_2D,null);a.h=0}}}
+f.location,b)};this.j=()=>{var f=c.A,h=a.g;h.bindBuffer(h.ARRAY_BUFFER,a.l);h.enableVertexAttribArray(f);
+h.vertexAttribPointer(f,2,h.FLOAT,!1,0,0);h.drawArrays(h.TRIANGLE_STRIP,0,4);h.disableVertexAttribArray(f);
+h.bindBuffer(h.ARRAY_BUFFER,null);f=a.g;for(h=0;h<a.h;h++)f.activeTexture(f.TEXTURE0+
+h),f.bindTexture(f.TEXTURE_2D,null);a.h=0}}}
 function G(a){var b={antialias:!1,depth:!1,alpha:!1};try{return new H(a,b)}catch(c){throw new shaderWebBackground.GlError(c.message);
 }}
-function I(a,b,c,d,k,f){function g(e,m){try{{var n=q;const p=n.g,v=J(n,e,p.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}"),
+function I(a,b,c,d,k,f){function h(e,m){try{{var n=q;const p=n.g,v=J(n,e,p.VERTEX_SHADER,"attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}"),
 O=J(n,e,p.FRAGMENT_SHADER,m),u=p.createProgram();p.attachShader(u,v);p.attachShader(u,
 O);p.linkProgram(u);var l=u}return l}catch(p){throw new shaderWebBackground.ConfigError(p.message);
-}}const q=G(a),P=q.g,w=[],h={canvas:a,width:0,height:0,cssPixelRatio:0,cssWidth:0,
+}}const q=G(a),P=q.g,w=[],g={canvas:a,width:0,height:0,cssPixelRatio:0,cssWidth:0,
 cssHeight:0,isOverShader:(e,m)=>{const n=a.getBoundingClientRect();return e>=n.left&&
 e<=n.right&&m>=n.top&&m<=n.bottom},toShaderX:e=>(e-a.getBoundingClientRect().left)*
-h.cssPixelRatio+.5,toShaderY:e=>a.height-(e-a.getBoundingClientRect().top)*h.cssPixelRatio-
-.5,u:()=>h.cssWidth!==a.clientWidth||h.cssHeight!==a.clientHeight?(h.resize(),!0):
+g.cssPixelRatio+.5,toShaderY:e=>a.height-(e-a.getBoundingClientRect().top)*g.cssPixelRatio-
+.5,u:()=>g.cssWidth!==a.clientWidth||g.cssHeight!==a.clientHeight?(g.resize(),!0):
 !1,resize:()=>{const e=window.devicePixelRatio||1,m=a.clientWidth,n=a.clientHeight,
-l=Math.floor(m*e),p=Math.floor(n*e);a.width=l;a.height=p;h.width=l;h.height=p;h.cssPixelRatio=
-e;h.cssWidth=m;h.cssHeight=n;q.g.viewport(0,0,q.canvas.width,q.canvas.height);for(const v of w)v.g.m(l,
+l=Math.floor(m*e),p=Math.floor(n*e);a.width=l;a.height=p;g.width=l;g.height=p;g.cssPixelRatio=
+e;g.cssWidth=m;g.cssHeight=n;q.g.viewport(0,0,q.canvas.width,q.canvas.height);for(const v of w)v.g.m(l,
 p)},texture:(e,m)=>{{var n=q;const l=n.g;m=m instanceof K?m.g:m;l.activeTexture(l.TEXTURE0+
 n.h);l.bindTexture(l.TEXTURE_2D,m);l.uniform1i(e,n.h++)}},buffers:{},initHalfFloatRGBATexture:(e,
 m)=>{q.i.h(e,m)}},Q=Object.keys(b).length-1;let R=0;for(const e in b){if(R++<Q){const l=
-b[e].texture||r;h.buffers[e]=L(q,()=>{l(P,h)})}const m=M(q,g(e,D(e)),h.buffers[e]),
+b[e].texture||r;g.buffers[e]=L(q,()=>{l(P,g)})}const m=M(q,h(e,D(e)),g.buffers[e]),
 n=b[e].uniforms||{};var t=Object.keys(n);for(const l of m.o)y(n[l.name],'No configuration for uniform "'+
 l.name+'" defined in shader "'+e+'"'),t=t.filter(p=>p!==l.name);0!==t.length&&console.warn('Extra uniforms configured for shader "'+
 e+'", which are not present in the shader code - might have been removed by GLSL compiler if not used: '+
-t.join(", "));t=m.o.map(l=>({location:l.location,v:n[l.name]}));w.push(new F(q,h,
-m,t))}const C=()=>{h.u()&&d&&d(h.width,h.height,h);k&&k(h);for(const e of w)e.g.j(e.h,
-e.j);f&&f(h);requestAnimationFrame(C)};E("load",()=>{h.resize();c&&c(h);requestAnimationFrame(C)});
-return h}
+t.join(", "));t=m.o.map(l=>({location:l.location,v:n[l.name]}));w.push(new F(q,g,
+m,t))}const C=()=>{g.u()&&d&&d(g.width,g.height,g);k&&k(g);for(const e of w)e.g.j(e.h,
+e.j);f&&f(g);requestAnimationFrame(C)};E("load",()=>{g.resize();c&&c(g);d&&d(g.width,
+g.height,g);requestAnimationFrame(C)});return g}
 shaderWebBackground.Error=class extends Error{constructor(a){super(a);this.name="shaderWebBackground.Error"}};
 shaderWebBackground.ConfigError=class extends shaderWebBackground.Error{constructor(a){super(a);
 this.name="shaderWebBackground.ConfigError"}};
@@ -90,9 +90,9 @@ class V extends T{constructor(a,b){super(a,b);S(this,"EXT_color_buffer_float");t
 b){const c=this.g;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.HALF_FLOAT,
 null)}}function L(a,b){return new K(a.g,()=>{b(a.g)})}
 function M(a,b,c){const d=a.g;a=[];const k=d.getProgramParameter(b,d.ACTIVE_UNIFORMS);
-for(let f=0;f<k;f++){const g=d.getActiveUniform(b,f);a.push({name:g.name,location:d.getUniformLocation(b,
-g.name)})}return{A:d.getAttribLocation(b,"V"),o:a,m:c?(f,g)=>c.m(f,g):()=>{},j:(f,
-g)=>{d.useProgram(b);f();c?(f=c.g,c.g=c.h,c.h=f,c.j(g)):g()}}}
+for(let f=0;f<k;f++){const h=d.getActiveUniform(b,f);a.push({name:h.name,location:d.getUniformLocation(b,
+h.name)})}return{A:d.getAttribLocation(b,"V"),o:a,m:c?(f,h)=>c.m(f,h):()=>{},j:(f,
+h)=>{d.useProgram(b);f();c?(f=c.g,c.g=c.h,c.h=f,c.j(h)):h()}}}
 function W(a){a=a.split(/r?n/);const b=a.length.toString().length,c=[];a.forEach((d,
 k)=>{var f=c.push;k=""+(k+1);k=k.length>=b?k:" ".repeat(b-k.length)+k;f.call(c,k+
 ":");c.push(d);c.push("n")});return c.join("")}

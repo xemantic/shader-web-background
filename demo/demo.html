@@ -328,6 +328,13 @@
       .then(maybeAddActions);
 
     shaderWebBackground.shade({
+      onInit: (ctx) => {
+        mouseX = ctx.cssWidth / 2.;
+        mouseY = ctx.cssHeight / 2.;
+        oldScrollY = window.scrollY;
+        drawCenterX = 0;
+        drawCenterY = 0;
+      },
       onResize: (width, height) => {
         minDimension = Math.min(width, height);
         if (width >= height) {
@@ -337,13 +344,6 @@
           screenRatioHalfX = .5;
           screenRatioHalfY = width / height * .5;
         }
-      },
-      onInit: (ctx) => {
-        mouseX = ctx.cssWidth / 2.;
-        mouseY = ctx.cssHeight / 2.;
-        oldScrollY = window.scrollY;
-        drawCenterX = 0;
-        drawCenterY = 0;
       },
       onBeforeFrame: (ctx) => {
         stMouseX = (2 * ctx.toShaderX(mouseX) - ctx.width) / minDimension;
