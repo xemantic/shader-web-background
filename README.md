@@ -152,7 +152,7 @@ https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.
 and put it as `<script>` in the `<head>` of your HTML file.
 
 See [minimal demo](demo/minimal.html) for reference
-([live version of minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html)). 
+([live version](https://xemantic.github.io/shader-web-background/demo/minimal.html)). 
 
 
 #### Option B - Reference the minified library
