@@ -72,13 +72,14 @@ https://xemantic.com/
 * **speed**: designed to be embedded in HTML and start rendering before other page resources
   are downloaded.
 * **extensibility**: adding own interaction and controls is trivial.
-* **convenience**: straightforward API, specific errors will inform you about mistakes which are
-  otherwise hard to debug.
+* **convenience**: straightforward [API](API.md), specific errors will inform you about mistakes
+  which are otherwise hard to debug.
 * **minimal footprint**: transpiled from JavaScript to JavaScript with
   [Google Closure Compiler](https://github.com/google/closure-compiler).
 * **pixel feedback loops**: preserving movement in time on offscreen buffers with floating–point precision.
-* **shadertoy support**: including multipass shaders
-* **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2, on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
+* **[Shadertoy support](#shadertoy-support)**: including multipass shaders
+* **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2,
+  on Linux, Windows, Mac, iPhone or Samsung phone — it will use optimal strategy to squeeze out what's possible from the browser and the hardware.
 
 ## Adding shader-web-background to your projects
 
@@ -497,14 +498,13 @@ API reference:
  * [Context: toShaderX](API.md#context-toshaderx)
  * [Context: toShaderY](API.md#context-toshadery)
 
-
 Demos:
 
  * [mouse](https://xemantic.github.io/shader-web-background/demo/mouse.html)
  * [mouse normalized](https://xemantic.github.io/shader-web-background/demo/mouse-normalized.html)
 
 
-## Shadertoy compatibility
+## Shadertoy support
 
 This library can utilize [Shadertoy] code with minimal effort - a simple shader wrapping:
 
@@ -566,10 +566,14 @@ In [Shadertoy] textures are accessed with the `texture` function while in WebGL 
 #define texture texture2D
 ```
 
+
 ### Handling Shadertoy texture parameters
 
-In Shadertoy each texture binding can have seperate sw
-If the texture is supposed to be repeated, then something like this might be more suitable:
+In [Shadertoy] each texture binding can have separate sampler parameters like interpolation
+or wrapping. This functionality cannot be easily ported to WebGL 1, but most shaders
+relaying on these features can be adjusted with code-based workarounds. For example if the
+texture is supposed to be repeated, then something like this might be a functional
+replacement of the `texture` function in a given shader:
 
 ```glsl
 vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
@@ -577,10 +581,9 @@ vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
 }
 ```
 
-TODO check API where it overlaps
+:warn: Mipmaps are not supported.
 
-:warning: Note: the texture itself can be defined as `REPEATABLE` but it's for the cost of loosing
-compatibility with the older iOS devices.
+See also [API - Shader: texture](API.md#shader-texture).
 
 
 ### How to handle "Multipass" Shadertoy shaders?
