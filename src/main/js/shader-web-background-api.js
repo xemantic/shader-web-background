@@ -53,7 +53,7 @@ var Context;
 
 /**
  * @typedef {
- *   function(!WebGLRenderingContext, !Context=)
+ *   function(!WebGLRenderingContext, !Context)
  * }
  */
 var TextureInitializer;

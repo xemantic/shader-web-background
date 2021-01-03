@@ -22,7 +22,7 @@
 const
   SHADER_SCRIPT_TYPE = "x-shader/x-fragment",
   CANVAS_ELEMENT_ID = "shader-web-background",
-  FALLBACK_CLASS = "fallback",
+  FALLBACK_CLASS = "shader-web-background-fallback",
   VERTEX_ATTRIBUTE = "V",
   VERTEX_SHADER = "attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}",
   /** @type {!TextureInitializer} */
@@ -36,7 +36,7 @@ const
   /** @type {!ErrorHandler} */
   DEFAULT_ON_ERROR = (canvas, error) => {
     console.warn("shader-web-background cannot shade, adding fallback CSS classes");
-    document.documentElement.classList.add(CANVAS_ELEMENT_ID + "-" + FALLBACK_CLASS);
+    document.documentElement.classList.add(FALLBACK_CLASS);
     canvas.classList.add(FALLBACK_CLASS);
     if (error instanceof shaderWebBackground.GlError) {
       console.warn("Not sufficient WebGL support:", error);
@@ -230,13 +230,15 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
     toShaderY: (y) =>
       (canvas.height - (y - canvas.getBoundingClientRect().top)
       * context.cssPixelRatio) - .5,
-    /** @type {!function()} */
+    /** @type {!function(): boolean} */
     maybeResize: () => {
       if ((context.cssWidth !== canvas.clientWidth)
         || (context.cssHeight !== canvas.clientHeight)
       ) {
         context.resize();
+        return true;
       }
+      return false;
     },
     /** @type {!function()} */
     resize: () => {
@@ -260,10 +262,6 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
 
       for (const renderer of renderers) {
         renderer.program.init(width, height);
-      }
-
-      if (onResize) {
-        onResize(width, height, context);
       }
     },
     /** @type {!TextureBinder} */
@@ -328,21 +326,18 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
   }
 
   const animate = () => {
-
-    context.maybeResize();
-
+    if (context.maybeResize() && onResize) {
+      onResize(context.width, context.height, context);
+    }
     if (onBeforeFrame) {
       onBeforeFrame(context);
     }
-
     for (const renderer of renderers) {
       renderer.render();
     }
-
     if (onAfterFrame) {
       onAfterFrame(context);
     }
-
     requestAnimationFrame(animate);
   }
 
@@ -374,10 +369,7 @@ function shade(config) {
   check(config.shaders, "No shaders specified in config");
 
   try {
-    if (!config.canvas) {
-      doOrWaitFor("DOMContentLoaded", () => document.body.appendChild(canvas));
-    }
-    return doShade(
+    const ctx = doShade(
       canvas,
       config.shaders,
       config.onInit,
@@ -385,6 +377,12 @@ function shade(config) {
       config.onBeforeFrame,
       config.onAfterFrame
     );
+    if (!config.canvas) {
+      doOrWaitFor("DOMContentLoaded", () => {
+        document.body.appendChild(canvas);
+      });
+    }
+    return ctx;
   } catch (/** @type {!Error} */ e) {
     (config.onError || DEFAULT_ON_ERROR)(canvas, e);
   }
