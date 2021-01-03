@@ -18,7 +18,7 @@ then you might want to learn a bit more about shaders first, for example from
 in this documentation are self-explanatory. If you find it useful, then
 
 [:heart: Sponsor xemantic on GitHub](https://github.com/sponsors/xemantic) or
-![Buy me a tea](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF)
+![Buy me a tea](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20tea&emoji=🍵&slug=kazik&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)
 https://www.buymeacoffee.com/kazik
 
 
