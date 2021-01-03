@@ -22,7 +22,7 @@ in this documentation are self-explanatory. If you find it useful, then
 https://www.buymeacoffee.com/kazik
 
 
-_Kazik Pogoda_
+_Kazik (morisil) Pogoda_
 
 https://xemantic.com/
 
