@@ -698,7 +698,7 @@ Or [send me](https://xemantic.com/) a link with description.
    folder
  * [screenfull.js](https://github.com/sindresorhus/screenfull.js/) for cross-browser fullscreen
    support in library demo
-   [NoSleep.js](https://richtr.github.io/NoSleep.js/) for preventing sleep and screen dimming
+ * [NoSleep.js](https://richtr.github.io/NoSleep.js/) for preventing sleep and screen dimming
    in fullscreen mode demo
  * [BrowserStack](https://www.browserstack.com/) for testing the library on variety of
    physical mobile and tablet devices
