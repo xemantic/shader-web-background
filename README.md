@@ -167,7 +167,7 @@ Add this code to the `<head>` of your HTML:
 #### Option C - Download distribution
 
 In the future I will publish `shader-web-background` to npm. For now you can just
-download the latest minified distribution together with source map.
+download the latest minified distribution together with source map and sources.
 
 
 ### Step 2 - Add your fragment shaders
@@ -257,19 +257,23 @@ are compiled immediately.
 
 ### Adding shader uniforms
 
-Uniforms can be used in shaders to provide some input from the "outside world".
-Usually specified once per every frame. Describing this mechanism is out of the
-scope of this documentation, however the way they are set here is using WebGL
-directly, so you can refer to official uniform documentation.
+Uniforms provide shaders with the input from the world outside GPU.
+Describing this mechanism is out of scope of this documentation.
+I decided not to build abstraction over this part of WebGL, because it is
+already quite concise. See
+[WebGLRenderingContext.uniform](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform)
+documentation.
 
-Most likely you want to pass more information to your shaders. For example if
-you defined a uniform in the `image` shader:
+Let's assume you want to provide your shader with a time value measured
+in seconds since the moment the page was loaded. First define a uniform in the
+`image` shader:
 
 ```glsl
 uniform float iTime;
 ```
 
-then you also need to provide corresponding configuration:
+The `iTime` name is arbitrary, but it should match with what you
+specify in the configuration:
 
 ```javascript
 shaderWebBackground.shade({
@@ -284,10 +288,18 @@ shaderWebBackground.shade({
 ```
 
 The `(gl, loc) => gl.uniform1f(loc, performance.now() / 1000)` function will
-be invoked before rendering each shader frame.
+be invoked before rendering each shader frame. If you are not familiar with
+[JavaScript arrow functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions),
+it's an equivalent of:
+
+```javascript
+function(gl, loc) {
+  gl.uniform1f(loc, performance.now() / 1000)
+}
+```
 
 :information_source: Check documentation of the standard JavaScript [performance.now()]
-function which returns the number of milliseconds since the page started.
+function which returns the number of milliseconds since the page was loaded.
 Dividing it by `1000` will result in floating-point value measured in seconds.
 
 :warning: During development check the console often. If you will forget to configure
@@ -297,6 +309,15 @@ test case). Also if you configure a uniform which does not exist in the shader,
 then a warning will pop up on console (see
 [error-unnecessary-uniform-configured](src/test/html/errors/error-unnecessary-uniform-configured.html) 
 test case).
+
+Summary: you can use this mechanism to adapt any API as an input of your shaders.
+Check project [demos](https://xemantic.github.io/shader-web-background/#demo) for
+examples how to integrate input like:
+
+* mouse (fullscreen augmentation of the pointer)
+* scrolling position (parallax scrolling effect)
+* device orientation (fullscreen reaction to device tilting)
+* externally computed coefficients controlling the animation
 
 
 ### Initializing shader texture
