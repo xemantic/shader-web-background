@@ -433,7 +433,7 @@ folder contains all the error test cases which can be also checked on
 the
 [live demo of error handling](https://xemantic.github.io/shader-web-background/src/test/html/errors/).
 
-All the errors and warnings should be visible on the console.
+All the errors and warnings will be visible on console.
 
 See:
 
@@ -452,36 +452,55 @@ WebGL 2 whenever it is supported in runtime, the shader code should be still com
 ## Adding mouse support
 
 ```javascript
-var mouseX = window.innerWidth / 2 + .5;
-var mouseY = window.innerHeight / 2 + .5;
+// mouse coordinates taken from from the mousemove event
+var mouseX;
+var mouseY;
 
-document.addEventListener("mousemove", (e) => {
-   mouseX = e.offsetX - .5;
-   mouseY = window.innerHeight - e.offsetY - .5;
+document.addEventListener("mousemove", (event) => {
+   mouseX = event.clientX;
+   mouseY = event.clientY;
 });
 
-shaderWebBackground.shadeOnLoad({
+// mouse coordinates relative to the shader, you can also store them on the context
+var shaderMouseX;
+var shaderMouseY;
+
+shaderWebBackground.shade({
+  onInit: (ctx) => {
+    mouseX = ctx.cssWidth / 2.;
+    mouseY = ctx.cssHeight / 2.;
+  },
+  onBeforeFrame: (ctx) => {
+    shaderMouseX = ctx.toShaderX(mouseX);
+    shaderMouseY = ctx.toShaderY(mouseY);
+  },
   shaders: {
-    imageShader: {
+    image: {
       uniforms: {
-        iMouse: (gl, loc) => gl.uniform2f(loc, mouseX, mouseY)
+        iMouse: (gl, loc) => gl.uniform2f(loc, shaderMouseX, shaderMouseY)
       }
     }
   }
 });
 ```
 
-A bit of context:
+:information_source: Note: initial mouse coordinates are provided in `onInit` function
+because the first `mousemove` event can happen long after the shader is started. Shader
+coordinates start at bottom-left corner of the canvas and are aligned with the middle
+of the pixel - `(0.5, 0.5)`.
 
- * The window dimensions are divided by `2` to provide initial mouse coordinates.
- * We need to fix `mousemove` coordinates shader `gl_FragCoord` point to the middle
-   of each pixel: `(0.5, 0.5) (1.5, 0.5)`, etc., therefore we need to "fix" mouse event
-   coordinates.  
-   // so we need to accommodate for that by removing half.
-   // also vertical coordinate needs to be flipped. 
+API reference:
 
-Note: providing mouse coordinates to multiple shaders will require separate `iMouse` entry
-for each of them.
+ * [Context: cssWidth](API.md#context-csswidth)
+ * [Context: cssWeight](API.md#context-cssheight)
+ * [Context: toShaderX](API.md#context-toshaderx)
+ * [Context: toShaderY](API.md#context-toshadery)
+
+
+Demos:
+
+ * [mouse](https://xemantic.github.io/shader-web-background/demo/mouse.html)
+ * [mouse normalized](https://xemantic.github.io/shader-web-background/demo/mouse-normalized.html)
 
 
 ## Shadertoy compatibility
