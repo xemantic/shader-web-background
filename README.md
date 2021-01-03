@@ -340,7 +340,7 @@ but keep in mind that the naming is arbitrary and might be adjusted to the needs
 of your project.
 
 ```javascript
-// mouse coordinates taken from from the mousemove event
+// mouse coordinates taken from from the mousemove event expressed in "CSS pixels"
 var mouseX;
 var mouseY;
 
@@ -353,16 +353,15 @@ shaderWebBackground.shade({
   // supplied canvas to use for shading
   canvas: document.getElementById("my-canvas"),
   // called only once before the first run
-  // although it is called after first onResize to already operate on proper sizing
   onInit: (ctx) => {
-    // so we can get access to actual dimensions and center the mouse
-    // representation even before any "mousemove" event occurs
-    mouseX = ctx.cssWidth / 2.
-    mouseY = ctx.cssHeight / 2.
+    // we can center the mouse even before any "mousemove" event occurs
+    // note, we are 
+    mouseX = ctx.cssWidth / 2;
+    mouseY = ctx.cssHeight / 2;
+    // for convenience you can store your attributes on context
     ctx.iFrame = 0;
   },
   onResize: (width, height, ctx) => {
-    // for convenience you can store your attributes on context
     ctx.iMinDimension = Math.min(width, height);
   },                 
   onBeforeFrame: (ctx) => {
@@ -374,10 +373,10 @@ shaderWebBackground.shade({
     BufferA: {
       // uniform setters, attribute names should match with those defined in the shader
       uniforms: {
-        // uniform value calculated in place, you can ommit ctx arg if not needed
+        // uniform value calculated in place
         iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
+        // uniform values taken from context
         iFrame: (gl, loc) => gl.uniform1i(loc, ctx.iFrame),
-        // uniform value taken from the context, see onResize above
         iMinDimension: (gl, loc, ctx) => gl.uniform1f(loc, ctx.iMinDimension),
         iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
         iMouse: (gl, loc, ctx) => gl.uniform2f(loc, ctx.shaderMouseX, ctx.shaderMouseY),        
@@ -414,6 +413,7 @@ shaderWebBackground.shade({
   onAfterFrame: (ctx) => {
     ctx.iFrame++;
   },
+  // custom error handler
   onError: (canvas, error) => {
     canvas.remove();
     console.error(error);
@@ -422,8 +422,7 @@ shaderWebBackground.shade({
 });
 ```
 
-The API is intended to be self explanatory, check [API specification](API.md)
-for details.
+The API is intended to be self explanatory. Check [API specification](API.md) for details.
 
 
 ### Handling errors
