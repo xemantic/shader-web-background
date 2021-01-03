@@ -124,9 +124,6 @@ https://xemantic.com/
       background-position: center;
       background-size: cover;
     }
-    #shader-web-background.fallback {
-      display: none;
-    }
   </style>
 </head>
 <body>
