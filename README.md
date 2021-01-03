@@ -47,7 +47,7 @@ https://xemantic.com/
   - [Adding shader uniforms](#adding-shader-uniforms)
   - [Initializing shader texture](#initializing-shader-texture)
   - [Complex config example](#complex-config-example)
-    - [Handling errors](#handling-errors)
+  - [Handling errors](#handling-errors)
 - [Shader GLSL version](#shader-glsl-version)
 - [Adding mouse support](#adding-mouse-support)
 - [Shadertoy compatibility](#shadertoy-compatibility)
