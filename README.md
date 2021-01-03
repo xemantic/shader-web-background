@@ -6,14 +6,26 @@ Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 
 **Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :fireworks:
 
-I ([xemantic](https://xemantic.com/)) designed this library to use complex
-fragment shaders as part of my web design and development process. This is the tool
-which finally lets me embrace the web browser as a creative coding environment. If you
-are familiar with GLSL, then it might help you publish your work on the web.
-If you are coming from a web development background, then you might want to
-learn a bit more about shaders first, for example from
-[The Book of Shaders](https://thebookofshaders.com/). The simple code examples of this
-documentation should be self-explanatory.
+
+![shader-web-background logo](https://xemantic.github.io/shader-web-background/media/shader-web-backgroung.jpg)
+
+I designed this library to use complex fragment shaders as part of my web design and development
+process. This is the tool which finally lets me embrace the web browser as a creative coding
+environment. If you are familiar with GLSL, then it might help you publish your work on
+web as well. If you are coming from a web development background,
+then you might want to learn a bit more about shaders first, for example from
+[The Book of Shaders](https://thebookofshaders.com/). I hope that examples presented
+in this documentation are self-explanatory. If you find it useful, then
+
+![:heart: Sponsor](https://github.com/sponsors/xemantic) or 
+
+![Buy me a tea](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20tea&emoji=🍵&slug=kazik&button_colour=FF00FFC0&font_colour=FFFFFF)
+
+https://www.buymeacoffee.com/kazik
+
+
+Kazik Pogoda
+https://xemantic.com/
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -213,23 +225,19 @@ Define fallback CSS style, for example a static screenshot of your shader frame:
     background-position: center;
     background-size: cover;
   }
-  #shader-web-background.fallback {
-    display: none;
-  }
 </style>
 ```
-The `.shader-web-background-fallback` CSS class is applied to HTML document root.
+The `shader-web-background-fallback` CSS class is applied to HTML document root and
+the canvas.
 
-The `.fallback` CSS is applied to the canvas rendering the shader.
-The default shader attached as the whole page background canvas will
-have id `shader-web-background` therefore `#shader-web-background.fallback` CSS
-selector will match it. 
+:warning: Note that in case of any errors the default canvas will not be attached
+to HTML document at all. In case of shading a canvas which is already attached
+to HTML, it might be tempting to provide a fallback canvas background based on the
+`shader-web-background-fallback` CSS class, however it might not work on some browsers.
+Custom error handler might be needed for cross compatibility.
 
-:information_source: On some of the browser it is enough to provide a fallback
-background for the canvas element. However fot the sake of compatibility it's
-better to apply fallback style to the HTML document root, while hiding the created
-canvas. It is also possible to alter the default error handler, see
-[Handling errors](#handling-errors) section for details.
+See [Handling errors](#handling-errors) section for details.
+
 
 ## shader-web-background API
 
@@ -252,6 +260,11 @@ are compiled immediately.
 
 
 ### Adding shader uniforms
+
+Uniforms can be used in shaders to provide some input from the "outside world".
+Usually specified once per every frame. Describing this mechanism is out of the
+scope of this documentation, however the way they are set here is using WebGL
+directly, so you can refer to official uniform documentation.
 
 Most likely you want to pass more information to your shaders. For example if
 you defined a uniform in the `image` shader:
@@ -277,10 +290,9 @@ shaderWebBackground.shade({
 The `(gl, loc) => gl.uniform1f(loc, performance.now() / 1000)` function will
 be invoked before rendering each shader frame.
 
-:information_source: Check documentation of the
-[performance.now()](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now)
-which returns number of milliseconds since the page started. Dividing it by `1000` will
-result in floating point value measured in seconds.
+:information_source: Check documentation of the standard JavaScript [performance.now()]
+function which returns the number of milliseconds since the page started.
+Dividing it by `1000` will result in floating point value measured in seconds.
 
 :warning: During development check the console often. If you will forget to configure
 a uniform declared in the shader, then exception will be thrown (See
@@ -291,6 +303,18 @@ then a warning will pop up on console (see
 test case).
 
 
+### Initializing shader texture
+
+All the shaders, except for the last one in the pipeline, will have associated textures to
+render to. By default these textures are initialized as RGBA `HALF_FLOAT` (16bit) floating
+point with linear interpolation and are clamped to the edge. The texture initialization can be
+customized. See [API - Shader: texture](API.md#shader-texture) documentation for details. 
+
+:warning: Note: the default settings will work on all the platforms while customization
+can easily break the compatibility, especially on older iOS devices. Consult the API
+for remedies.
+
+
 ### Complex config example
 
 Here is a comprehensive example of a [configuration object](API.md#config) with
@@ -299,7 +323,6 @@ but keep in mind that the naming is arbitrary and might be adjusted to the needs
 of your project.
 
 ```javascript
-
 // mouse coordinates taken from from the mousemove event
 var mouseX;
 var mouseY;
@@ -313,7 +336,7 @@ shaderWebBackground.shade({
   // supplied canvas to use for shading
   canvas: document.getElementById("my-canvas"),
   // called only once before the first run
-  // although it is called after first onResize
+  // although it is called after first onResize to already operate on proper sizing
   onInit: (ctx) => {
     // so we can get access to actual dimensions and center the mouse
     // representation even before any "mousemove" event occurs
@@ -382,43 +405,35 @@ shaderWebBackground.shade({
 });
 ```
 
-The API is intended to be self explanatory, in case of any 
-doubts please check the next API chapter.
-
+The API is intended to be self explanatory, check [API specification](API.md)
+for details.
 
 
 #### Handling errors
 
 Several validations are being performed on supplied configuration to avoid common problems
-which are usually hard to debug otherwise. The
-[src/test/html/errors/](src/test/html/errors) folder contains all the error test cases.
-These test cases can be also accessed directly on project GitHub page:
+which are usually hard to debug otherwise. The [src/test/html/errors/](src/test/html/errors)
+folder contains all the error test cases which can be also checked on
+the
+[live demo of error handling](https://xemantic.github.io/shader-web-background/src/test/html/errors/).
 
-https://xemantic.github.io/shader-web-background/src/test/html/errors/
+All the errors and warnings should be visible on the console.
+
+See:
+
+ * [API - Config: onError](API.md#config-onerror)
+ * [API - shaderWebBackground.ConfigError](API.md#shaderwebbackgroundconfigerror)
+ * [API - shaderWebBackground.GlError](API.md#shaderwebbackgroundglerror)
 
 
-## Setting uniforms
+## Shader GLSL version
 
-### Custom uniforms
+:warning: This library relays on WebGL 1 as a common denominator, therefore even if it will use
+WebGL 2 whenever it is supported in runtime, the shader code should be still compatible with
+[GLSL ES 1.00](https://www.khronos.org/registry/OpenGL/specs/es/2.0/GLSL_ES_Specification_1.00.pdf)
 
-Uniforms can be used in shaders to provide some input from the "outside world".
-Usually specified once per every frame. Describing this mechanism is out of the
-scope of this documentation, however the way they are set here is using WebGL
-directly, so you can refer to official uniform documentation.
 
-#### 1. Specify uniform in your shader
-
-For example to add mouse support, add this to your shader:
-
-```glsl
-// ...
-uniform vec2 iMouse;
-// ... 
-```
-
-#### 2. Provide uniform value in JavaScript
-
-For example providing mouse coordinates can look like this:
+## Adding mouse support
 
 ```javascript
 var mouseX = window.innerWidth / 2 + .5;
@@ -452,18 +467,19 @@ A bit of context:
 Note: providing mouse coordinates to multiple shaders will require separate `iMouse` entry
 for each of them.
 
+
 ## Shadertoy compatibility
 
-The library is designed to utilize Shadertoy code with minimal effort. General wrapping of
-the Shadertoy code looks as follows:
+This library is designed to utilize [Shadertoy] code with minimal effort - a wrapping:
 
 ```html
 <script type="x-shader/x-fragment" id="Image">
   precision highp float;
-    
+
   uniform vec2  iResolution;
   uniform float iTime;
-    
+  // ... other needed uniforms
+ 
   // -- Paste your Shadertoy code here:
   // ...
   // -- End of Shadertoy code
@@ -475,49 +491,49 @@ the Shadertoy code looks as follows:
 </script>
 ```
 
-The `id` attribute of the `<script>` is set to reflect Shadertoy tab called `Image`.
+The `id` attribute of the `<script>` is set to reflect [Shadertoy] tab called `Image`.
 Most shaders will use at least these 2 uniforms, so we have to provide them as well in the
 configuration:
 
 ```javascript
-var canvasWidth;
-var canvasHeight;
-var time;
-
 shaderWebBackground.shade({
-  onResize: (width, height) => {
-    canvasWidth = width;
-    canvasHeight = height;
-  },
-  onBeforeFrame: () => {
-    time = performance.now() / 1000;
-  },
   shaders: {
     Image: {
       uniforms: {
-        iResolution: (gl, loc) => gl.uniform2f(loc, canvasWidth, canvasHeight),
-        iTime:       (gl, loc) => gl.uniform1f(loc, time),
+        iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+        iTime:       (gl, loc) => gl.uniform1f(loc, performance.now() / 1000),
       }
     }
   }
 });
 ```
 
+Examples:
+
+* [minimal shadertoy demo]
+* [Warping - procedural 2 by Inigo Quilez]
+* [Reaction Diffusion - 2 Pass by Shane]
+
+
 ### What to do with Shadertoy "Common" tab?
 
-There is no automated solution for that. You will have to copy the `Common` part of the shader
-multiple times, possibly just above the other Shadertoy code.
+There is no automated solution for that. You will have to copy the `Common` part directly
+into your shaders, just above the other [Shadertoy] code.
 
-### What to do with texture function?
 
-Something like:
+### What to do with `texture` function?
+
+In [Shadertoy] textures are accessed with the `texture` function while in WebGL 1 it is 
+`texture2D`. Here is a simple workaround to be added before the original code:
 
 ```glsl
 #define texture texture2D
 ```
 
-Should do the trick. If the texture is supposed to be repeated, then something like this
-might be more suitable:
+### Handling Shadertoy texture parameters
+
+In Shadertoy each texture binding can have seperate sw
+If the texture is supposed to be repeated, then something like this might be more suitable:
 
 ```glsl
 vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
@@ -525,12 +541,15 @@ vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
 }
 ```
 
-Note: we cannot set the texture repeatable itself due to iOS compatibility issues.
+TODO check API where it overlaps
+
+:warning: Note: the texture itself can be defined as `REPEATABLE` but it's for the cost of loosing
+compatibility with the older iOS devices.
 
 
-### How can I handle "Multipass" Shadertoy shaders?
+### How to handle "Multipass" Shadertoy shaders?
 
-You can name your shaders according to Shadertoy buffer names:
+You can name your shaders according to [Shadertoy] buffer names:
 
 * `BufferA`
 * `BufferB`
@@ -557,7 +576,7 @@ And then wire them together:
     
     uniform sampler2D iChannel0;
 
-    // ... the code of BufferA tab with the uniforms and wrapping as above
+    // ... the code of Image tab with the uniforms and wrapping as above
   </script>
   <script>
     // ... your prefer method of loading shader-web-background as described above
@@ -584,6 +603,8 @@ And then wire them together:
 </html>
 ```
 
+### How to set texture parameters?
+
 The `<shader>` element id's are arbitrary, but you might want to name them after names of
 Shadertoy tabs. They must match the names configured `shaders`.
 
@@ -591,14 +612,14 @@ Shadertoy is binding textures under
 `iChannel`*n* uniforms. In the example above additional specified `uniform sampler2D iChannel0`
 code needs texture uniform binding.
 
-## Tips
+## General tips
 
 * set the html background color to the dominant color of your shader to avoid flickering
   on page load
 
 ## Building
 
-```shell script
+```console
 $ git clone https://github.com/xemantic/shader-web-background.git
 $ cd shader-web-background
 $ ./gradlew compileJs
@@ -621,6 +642,7 @@ Originally this project was developed using
 plugin enabled. The most noticeable element of this style are 2 spaces
 instead of 4 for rendering tabs. 
 
+
 ### Adding your project to the list of project using this library
 
 Either:
@@ -629,7 +651,8 @@ Either:
  * add your project to the list
  * create pull-request
 
-Or send me a link with description.
+Or [send me](https://xemantic.com/) a link with description.
+
 
 ## Tools and dependencies
 
@@ -638,12 +661,15 @@ Or send me a link with description.
 * Google Closure Compiler for verifying JavaScript and minimizing it
 * highligh.js for presenting code in demo folder
 
+
 ## TODO
 
  * remove h1 on iphone as an alternative to real fullscreen
- * provide example with multiple canvases
- * parallax scrolling demo
  * implement fullscreen according to: https://developers.google.com/web/fundamentals/native-hardware/fullscreen
  * add support for DeviceOrientationEvent.alpha - heading
 
 [Shadertoy]: https://www.shadertoy.com/
+[performance.now()]: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+[minimal shadertoy demo](https://xemantic.github.io/shader-web-background/demo/shadertoy-default.html).
+[Warping - procedural 2 by Inigo Quilez](https://xemantic.github.io/shader-web-background/demo/shadertoy-warping-procedural-2.html)
+[Reaction Diffusion - 2 Pass by Shane](https://xemantic.github.io/shader-web-background/demo/shadertoy-reaction-diffusion-2-pass.html)
