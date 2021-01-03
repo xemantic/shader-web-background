@@ -546,9 +546,9 @@ shaderWebBackground.shade({
 
 Shadertoy demos:
 
-* [minimal shadertoy demo]
-* [Warping - procedural 2 by Inigo Quilez]
-* [Reaction Diffusion - 2 Pass by Shane]
+ * [minimal shadertoy demo](https://xemantic.github.io/shader-web-background/demo/shadertoy-default.html).
+ * [Warping - procedural 2 by Inigo Quilez](https://xemantic.github.io/shader-web-background/demo/shadertoy-warping-procedural-2.html)
+ * [Reaction Diffusion - 2 Pass by Shane](https://xemantic.github.io/shader-web-background/demo/shadertoy-reaction-diffusion-2-pass.html)
 
 
 ### What to do with Shadertoy "Common" tab?
@@ -706,6 +706,3 @@ Or [send me](https://xemantic.com/) a link with description.
 
 [Shadertoy]: https://www.shadertoy.com/
 [performance.now()]: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-[minimal shadertoy demo]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-default.html).
-[Warping - procedural 2 by Inigo Quilez]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-warping-procedural-2.html)
-[Reaction Diffusion - 2 Pass by Shane]: (https://xemantic.github.io/shader-web-background/demo/shadertoy-reaction-diffusion-2-pass.html)
