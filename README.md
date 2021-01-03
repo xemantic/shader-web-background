@@ -55,7 +55,6 @@ https://xemantic.com/
   - [What to do with `texture` function?](#what-to-do-with-texture-function)
   - [Handling Shadertoy texture parameters](#handling-shadertoy-texture-parameters)
   - [How to handle "Multipass" Shadertoy shaders?](#how-to-handle-multipass-shadertoy-shaders)
-  - [How to set texture parameters?](#how-to-set-texture-parameters)
 - [General tips](#general-tips)
 - [Building](#building)
 - [Contributing](#contributing)
