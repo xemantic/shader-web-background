@@ -411,7 +411,7 @@ The API is intended to be self explanatory, check [API specification](API.md)
 for details.
 
 
-#### Handling errors
+### Handling errors
 
 Several validations are being performed on supplied configuration to avoid common problems
 which are usually hard to debug otherwise. The [src/test/html/errors/](src/test/html/errors)
