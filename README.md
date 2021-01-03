@@ -75,7 +75,7 @@ https://xemantic.com/
 * **convenience**: straightforward [API](API.md), specific errors will inform you about mistakes
   which are otherwise hard to debug.
 * **minimal footprint**: transpiled from JavaScript to JavaScript with
-  [Google Closure Compiler](https://github.com/google/closure-compiler).
+  [Google Closure Compiler].
 * **pixel feedback loops**: preserving movement in time on offscreen buffers with floating–point precision.
 * **[Shadertoy support](#shadertoy-support)**: including multipass shaders
 * **cross browser / cross device**: on Chrome, Safari, Firefox or Edge, either with WebGL 1 or 2,
@@ -569,11 +569,11 @@ In [Shadertoy] textures are accessed with the `texture` function while in WebGL 
 
 ### Handling Shadertoy texture parameters
 
-In [Shadertoy] each texture binding can have separate sampler parameters like interpolation
-or wrapping. This functionality cannot be easily ported to WebGL 1, but most shaders
-relaying on these features can be adjusted with code-based workarounds. For example if the
-texture is supposed to be repeated, then something like this might be a functional
-replacement of the `texture` function in a given shader:
+In [Shadertoy] each "Channel" binding a texture can have separate sampler parameters
+like interpolation or wrapping. This functionality cannot be easily ported to WebGL 1,
+but most shaders relaying on these features can be adjusted with code-based workarounds.
+For example if the texture is supposed to be repeated, then something like this might be
+a functional replacement of the `texture` function in a given shader:
 
 ```glsl
 vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
@@ -581,7 +581,7 @@ vec4 repeatedTexture(in sampler2D channel, in vec2 uv) {
 }
 ```
 
-:warn: Mipmaps are not supported.
+:warning: Mipmaps are not supported.
 
 See also [API - Shader: texture](API.md#shader-texture).
 
@@ -642,26 +642,19 @@ And then wire them together:
 </html>
 ```
 
-### How to set texture parameters?
-
-The `<shader>` element id's are arbitrary, but you might want to name them after names of
-Shadertoy tabs. They must match the names configured `shaders`.
-
-Shadertoy is binding textures under
-`iChannel`*n* uniforms. In the example above additional specified `uniform sampler2D iChannel0`
-code needs texture uniform binding.
 
 ## General tips
 
 * set the html background color to the dominant color of your shader to avoid flickering
   on page load
 
+
 ## Building
 
 ```console
-$ git clone https://github.com/xemantic/shader-web-background.git
-$ cd shader-web-background
-$ ./gradlew compileJs
+git clone https://github.com/xemantic/shader-web-background.git
+cd shader-web-background
+./gradlew compileJs
 ```
 
 It will trigger Google Closure Compiler which will check sources using type information
@@ -675,7 +668,7 @@ and transpile them into minified JavaScript files:
 
 ### Code conventions
 
-Originally this project was developed using
+This project has been developed using
 [IntelliJ IDEA](https://www.jetbrains.com/idea/) with
 [google-java-format](https://plugins.jetbrains.com/plugin/8527-google-java-format)
 plugin enabled. The most noticeable element of this style are 2 spaces
@@ -685,6 +678,7 @@ instead of 4 for rendering tabs.
 ### Adding your project to the list of project using this library
 
 Either:
+
  * fork this repo
  * open [index.html](index.html) and scroll to `<section id="projects-using-shader-web-background">`
  * add your project to the list
@@ -695,17 +689,27 @@ Or [send me](https://xemantic.com/) a link with description.
 
 ## Tools and dependencies
 
-* gradle as a build system
-* WebGL for OpenGL based rendering
-* Google Closure Compiler for verifying JavaScript and minimizing it
-* highligh.js for presenting code in demo folder
-* browserstack for testing
+ * [gradle](https://gradle.org/) as a build system
+ * [Kotlin](https://kotlinlang.org/) for scripting the build
+ * [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API)
+   for [OpenGL](https://www.opengl.org/) based rendering
+ * [Google Closure Compiler] for verifying JavaScript and minimizing it
+ * [highlight.js](https://highlightjs.org/) (minimal modification - 
+   [GLSL in HTML script support](lib/highlight/LOCAL_CHANGES.md)) for presenting the code in demo
+   folder
+ * [screenfull.js](https://github.com/sindresorhus/screenfull.js/) for cross-browser fullscreen
+   support in library demo
+   [NoSleep.js](https://richtr.github.io/NoSleep.js/) for preventing sleep and screen dimming
+   in fullscreen mode demo
+ * [BrowserStack](https://www.browserstack.com/) for testing the library on variety of
+   physical mobile and tablet devices
+
 
 ## TODO
 
  * remove h1 on iphone as an alternative to real fullscreen
- * implement fullscreen according to: https://developers.google.com/web/fundamentals/native-hardware/fullscreen
- * add support for DeviceOrientationEvent.alpha - heading
+
 
 [Shadertoy]: https://www.shadertoy.com/
 [performance.now()]: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+[Google Closure Compiler]: https://github.com/google/closure-compiler
