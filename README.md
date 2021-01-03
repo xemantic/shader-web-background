@@ -467,8 +467,9 @@ var shaderMouseY;
 
 shaderWebBackground.shade({
   onInit: (ctx) => {
-    mouseX = ctx.cssWidth / 2.;
-    mouseY = ctx.cssHeight / 2.;
+    // screen center
+    mouseX = ctx.cssWidth / 2;
+    mouseY = ctx.cssHeight / 2;
   },
   onBeforeFrame: (ctx) => {
     shaderMouseX = ctx.toShaderX(mouseX);
