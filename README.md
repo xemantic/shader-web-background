@@ -145,17 +145,14 @@ There are several ways of adjusting this library to your needs:
 #### Option A - Embedded minified library directly in HTML
 
 If you want your shaders to start rendering before any other resources are loaded,
-then go for this method. Just take the contents of
+then go for this method. Just take the contents of:
 
 https://xemantic.github.io/shader-web-background/dist/shader-web-background.min.js
 
 and put it as `<script>` in the `<head>` of your HTML file.
 
-See also this example, you can use it as a template:
-
-https://xemantic.github.io/shader-web-background/demo/minimal.html
-
-See [minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html) for reference. 
+See [minimal demo](demo/minimal.html) for reference
+([live version of minimal demo](https://xemantic.github.io/shader-web-background/demo/minimal.html)). 
 
 
 #### Option B - Reference the minified library
