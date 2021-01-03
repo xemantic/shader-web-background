@@ -487,13 +487,13 @@ shaderWebBackground.shade({
 
 :information_source: Note: initial mouse coordinates are provided in `onInit` function
 because the first `mousemove` event can happen long after the shader is started. Shader
-coordinates start at bottom-left corner of the canvas and are aligned with the middle
+coordinates start at the bottom-left corner of the canvas and are aligned with the middle
 of the pixel - `(0.5, 0.5)`.
 
 API reference:
 
  * [Context: cssWidth](API.md#context-csswidth)
- * [Context: cssWeight](API.md#context-cssheight)
+ * [Context: cssHeight](API.md#context-cssheight)
  * [Context: toShaderX](API.md#context-toshaderx)
  * [Context: toShaderY](API.md#context-toshadery)
 
@@ -506,7 +506,7 @@ Demos:
 
 ## Shadertoy compatibility
 
-This library is designed to utilize [Shadertoy] code with minimal effort - a wrapping:
+This library can utilize [Shadertoy] code with minimal effort - a simple shader wrapping:
 
 ```html
 <script type="x-shader/x-fragment" id="Image">
@@ -528,8 +528,8 @@ This library is designed to utilize [Shadertoy] code with minimal effort - a wra
 ```
 
 The `id` attribute of the `<script>` is set to reflect [Shadertoy] tab called `Image`.
-Most shaders will use at least these 2 uniforms, so we have to provide them as well in the
-configuration:
+Most shaders will use at least these 2 uniforms, and it's easy to provide their
+values in the configuration:
 
 ```javascript
 shaderWebBackground.shade({
@@ -544,7 +544,7 @@ shaderWebBackground.shade({
 });
 ```
 
-Examples:
+Shadertoy demos:
 
 * [minimal shadertoy demo]
 * [Warping - procedural 2 by Inigo Quilez]
