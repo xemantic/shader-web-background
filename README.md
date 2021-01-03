@@ -1,7 +1,7 @@
 # shader-web-background
 
 _Displays GLSL fragment shaders as a website background. Supports Shadertoy shaders,
-multipass - ping-pong offscreen buffers, feedback loops, floating point textures.
+multipass - ping-pong offscreen buffers, feedback loops, floating-point textures.
 Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 
 **Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :fireworks:
@@ -294,7 +294,7 @@ be invoked before rendering each shader frame.
 
 :information_source: Check documentation of the standard JavaScript [performance.now()]
 function which returns the number of milliseconds since the page started.
-Dividing it by `1000` will result in floating point value measured in seconds.
+Dividing it by `1000` will result in floating-point value measured in seconds.
 
 :warning: During development check the console often. If you will forget to configure
 a uniform declared in the shader, then exception will be thrown (See
@@ -308,8 +308,8 @@ test case).
 ### Initializing shader texture
 
 All the shaders, except for the last one in the pipeline, will have associated textures to
-render to. By default these textures are initialized as RGBA `HALF_FLOAT` (16bit) floating
-point with linear interpolation and are clamped to the edge. The texture initialization can be
+render to. By default these textures are initialized as RGBA `HALF_FLOAT` (16bit) floating-point
+with linear interpolation and are clamped to the edge. The texture initialization can be
 customized. See [API - Shader: texture](API.md#shader-texture) documentation for details. 
 
 :warning: Note: the default settings will work on all the platforms while customization
@@ -375,7 +375,7 @@ shaderWebBackground.shade({
     BufferD: {
       // optional custom initializer of buffer's texture                   
       texture: (gl, ctx) => {
-        // initializing floating point texture in custom way for WebGL 1 and 2        
+        // initializing floating-point texture in custom way for WebGL 1 and 2        
         ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
         // standard WebGL texture parameters
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
