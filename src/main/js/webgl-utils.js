@@ -108,7 +108,7 @@ class WebGl2Strategy extends WebGlStrategy {
   constructor(gl, check) {
     super(gl, check);
     this.getExtension("EXT_color_buffer_float");
-    // the next one we are tyring to get, but don't fail if it's missing.
+    // the next one we are trying to get, but don't fail if it's missing.
     // According to WebGL2 spec it is required to do linear filtering, but
     // it seems that some devices do it anyway while not really officially
     // supporting this extension
