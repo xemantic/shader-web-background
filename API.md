@@ -61,7 +61,7 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`- optional)                               | description                                |
+| attribute                              | type (`=`: optional argument)                      | description                                |
 | -------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
 | [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                        |
 | [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run                    |
@@ -71,7 +71,7 @@ An object with the following attributes:
 | [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete          |
 | [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started      |
 
-All the attributes are optional except for the [shaders](#config-shaders) attribute. The order of
+Only [shaders](#config-shaders) attribute is required. The order of
 attributes is arbitrary, but in this table they are sorted by a convenient order of
 their "lifecycle" in the rendering of each frame.
 
@@ -115,14 +115,42 @@ the previous ones (if more than one) to offscreen buffers. See [Shader: uniforms
 
 An object with the following attributes:
 
-| attribute                  | type (`=`- optional)                               | description                                |
-| -------------------------- | ------------------------------------------------------- | ------------------------------------------ |
-| [texture](#shader-texture) | function([WebGLRenderingContext], ![Context](#context)) |                                | canvas to render to                        |
-| [uniforms](#config-oninit) | Object of [Uniform setter](#uniformsetter)s                              | called before first run                    |
+| attribute                    | type                                                   | description         |
+| ---------------------------- | ------------------------------------------------------ | ------------------- |
+| [texture](#shader-texture)   | function([WebGLRenderingContext], [Context](#context)) | texture initializer |
+| [uniforms](#shader-uniforms) | Object of [Uniform setter](#uniform-setter)s           | uniform setters     |
 
-The All the attributes are optional except for the [shaders](#config-shaders) attribute. The order of
-attributes is arbitrary, but in this table they are sorted by a convenient order of
-their "lifecycle" in the rendering of each frame.
+Only [uniforms](#shader-uniforms) attribute is required.
+
+
+##### Shader: texture
+
+Optional texture initializer called with [WebGLRenderingContext] and [Context](#context) 
+arguments. Here is the default initializer:
+
+```javascript
+(gl, ctx) => {
+  ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+}
+```
+
+:warning: Note: certain combinations of texture parameters might be not supported on some platforms.
+In particular repeated textures are not rendered on some iOS devices unless their size is a power
+of 2. Here is a recommended workaround:
+
+```glsl
+vec4 repeatedTexture(in sampler2D sampler, in vec2 uv) {
+  return texture2D(sampler, mod(uv, 1.));
+}
+// or
+#define repeatedTexture(sampler, uv) texture2D(sampler, mod(uv, 1.))
+```
+
+See [WebGLTexture], [Context: initHalfFloatRGBATexture](#context-inithalffloatrgbatexture)
 
 
 ##### Shader: uniforms
@@ -206,11 +234,6 @@ Another valid argument type to be passed to the `texture` function is an instanc
 of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
 
 
-##### Shader: texture
-
-An optional attribute of a shader 
-
-
 ### Config: canvas
 
 If `canvas` attribute is not specified, the default one covering the whole viewport behind other
@@ -222,7 +245,9 @@ DOM elements will be created.
 
 The `onResize` function is invoked with `with` and `height` parameters indicating actual
 screen dimensions of the canvas after browser window is resized. It will be also
-called when the shading is started with the `shaderWebBackground.shade(config)` call.
+called when the shading is started with the `shaderWebBackground.shade(config)` call
+just after [Config: onInit](#config-oninit).
+
 
 ### Config: onBeforeFrame
 
@@ -252,7 +277,7 @@ An object with the following attributes:
 | [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
 | [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
 | [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
-| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating point RGBA texture of given size |            |    
+| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating-point RGBA texture of given size |            |    
 
 :information_source: Note: the `context` object is passed as an argument to many functions and it is
 also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
@@ -375,7 +400,7 @@ A function to bind uniforms of type `sampler2D`.
 ### Context: initHalfFloatRGBATexture
 
 A function to initialize a texture where each pixel RGBA values have
-floating point precision. It takes `width` and `height` as parameters.
+floating-point precision. It takes `width` and `height` as parameters.
 
 
 Example usage:
