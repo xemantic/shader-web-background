@@ -259,12 +259,12 @@ are compiled immediately.
 
 ### Adding shader uniforms
 
+#### About uniforms
+
 Uniforms provide shaders with the input from the world outside GPU.
 Describing this mechanism is out of scope of this documentation.
 I decided not to build abstraction over this part of WebGL, because it is
-already quite concise. See
-[WebGLRenderingContext.uniform](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform)
-documentation.
+already quite concise. See [WebGLRenderingContext.uniform] documentation.
 
 Let's assume that you want to provide your shader with a time value measured
 in seconds since the moment the page was loaded. First define a uniform in the
@@ -320,6 +320,44 @@ examples how to integrate input like:
 * scrolling position (parallax scrolling effect)
 * device orientation (fullscreen reaction to device tilting)
 * externally computed coefficients controlling the animation
+
+#### Textures as uniforms
+
+The declaration of "texture" uniform uses `sampler2D` type:
+
+```glsl
+uniform sampler2D iWebCam;
+```
+
+:information_source: The uniform name is arbitrary. For example [Shadertoy] is
+binding textures under name `iChannel0`, `iChannel1`, etc. and this is the convention
+used mostly in this documentation.
+
+Such a uniform can be set with:
+
+```javascript
+shaderWebBackground.shade({
+  onInit: (ctx) => {
+    ctx.iWebCam = initializeTexture(ctx.gl);
+  },
+  shaders: {
+    image: {
+      uniforms: {
+        iWebCam: (gl, loc, ctx) => ctx.texture(loc, ctx.iWebCam);
+      }
+    }
+  }
+});
+```
+
+:warning: initializing textures is still not documented, but standard WebGL
+rules should apply.
+
+:information_source: the _texture_ passed as a second argument
+to [ctx.texture](API.md#context-texture) can be either an instance of [WebGLTexture] or
+a reference to the buffer of another shader in the pipeline. Check 
+[Complex config example](#complex-config-example) section and
+[API - Context: buffers](API.md#context-buffers).
 
 
 ### Initializing shader texture
@@ -425,6 +463,10 @@ shaderWebBackground.shade({
 ```
 
 The API is intended to be self explanatory. Check [API specification](API.md) for details.
+There are several shaders defined in the example above. They will be processed in sequence
+called `Multipass` in [Shadertoy] nomenclature. The last of defined shaders will render to screen.
+The output of previous shaders, including feedback loop of the previous frame rendered by the same
+shader, can be easily passed to uniforms.
 
 
 ### Handling errors
@@ -712,6 +754,8 @@ Or [send me](https://xemantic.com/) a link with description.
  * add an option to install as a home app on android and iOS
 
 
-[Shadertoy]: https://www.shadertoy.com/
-[performance.now()]: https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-[Google Closure Compiler]: https://github.com/google/closure-compiler
+[Shadertoy]:                     https://www.shadertoy.com/
+[performance.now()]:             https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
+[Google Closure Compiler]:       https://github.com/google/closure-compiler
+[WebGLTexture]:                  https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
+[WebGLRenderingContext.uniform]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform

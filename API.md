@@ -46,7 +46,7 @@ as
 ## shaderWebBackground.shade(config)
 
 Shading starts with the `shaderWebBackground.shade(config)` call which requires
-providing a [configuration](#config) object and returns a [Context] object.
+providing a [Config] object and returns a [Context] object.
 
 The processing of configuration and shader compilation will start immediately,
 however the animation frames will be requested only when the page is loaded.
@@ -61,13 +61,13 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`: optional argument)          | description                                |
+| attribute (* - required)               | type (`=`: optional argument)          | description                                |
 | -------------------------------------- | -------------------------------------- | ------------------------------------------ |
 | [canvas](#config-canvas)               | [HTMLCanvasElement]                    | canvas to render to                        |
 | [onInit](#config-oninit)               | function([Context]=)                   | called before first run                    |
 | [onResize](#config-onresize)           | function(number, number, [Context]=)   | called when the canvas is resized          |
 | [onBeforeFrame](#config-onbeforeframe) | function([Context]=)                   | called before each frame                   |
-| [shaders](#config-shaders)             | Object of [Shader](#shader)s           | definition of shaders (rendering pipeline) |
+| [shaders](#config-shaders) *           | Object of [Shader](#shader)s           | definition of shaders (rendering pipeline) |
 | [onAfterFrame](#config-onafterframe)   | function([Context])                    | called when the frame is complete          |
 | [onError](#config-onerror)             | function([Error], [HTMLCanvasElement]) | called when shading cannot be started      |
 
@@ -100,13 +100,15 @@ just after [Config: onInit](#config-oninit).
 
 ### Config: onBeforeFrame
 
-The `onBeforeFrame` function is called the [C]before rendering each frame and 
+The `onBeforeFrame` function is called with the [Context] before rendering each frame.
+
 
 ### Config: shaders
 
-The `shaders` is the only required attribute of the config object. It's value should
-be an object, where each attribute represents one shader definition, therefore multiple
-shaders can be defined in sequence. All together they will establish a rendering pipeline.
+The `shaders` is the only required attribute of the [Config] object. It's an object where
+each attribute represents one [shader](#shader) definition, therefore multiple
+shaders can be defined in sequence. All together they will establish a rendering pipeline
+where the output of each shader can be wired as an input of another.
 
 Example:
 
@@ -137,16 +139,15 @@ shaderWebBackground.shade({
 :information_source: Note: shader names are arbitrary. The last shader will render to screen,
 the previous ones (if more than one) to offscreen buffers. See [Shader: uniforms](#shader-uniforms)
 
+
 #### Shader
 
 An object with the following attributes:
 
-| attribute                    | type                                         | description         |
-| ---------------------------- | -------------------------------------------- | ------------------- |
-| [texture](#shader-texture)   | function([WebGLRenderingContext], [Context]) | texture initializer |
-| [uniforms](#shader-uniforms) | Object of [Uniform setter](#uniform-setter)s | uniform setters     |
-
-Only [uniforms](#shader-uniforms) attribute is required.
+| attribute (* - required)         | type                                       | description         |
+| ------------------------------ | -------------------------------------------- | ------------------- |
+| [texture](#shader-texture)     | function([WebGLRenderingContext], [Context]) | texture initializer |
+| [uniforms](#shader-uniforms) * | Object of [Uniform setter](#uniform-setter)s | uniform setters     |
 
 
 ##### Shader: texture
@@ -182,114 +183,92 @@ See [WebGLTexture], [Context: initHalfFloatRGBATexture](#context-inithalffloatrg
 ##### Shader: uniforms
 
 An object where an attribute name should match a shader uniform name, and an attribute value
-represents a uniform setter function. 
+represents a [uniform setter](#uniform-setter) function. 
 
-function([WebGLRenderingContext], [WebGLUniformLocation], [Context](#context)=)
 
 ###### Uniform setter
 
+A function called with [WebGLRenderingContext], [WebGLUniformLocation] of the uniform
+it belongs to and [Context]. It is intended to use all the provided arguments
+to effectively set uniform value.
 
-processed in sequence called `Multipass` in Shadertoy
-nomenclature. The last of defined shaders will render to screen. The output of previous
-shaders, including feedback loop of the previous frame rendered by the same shader,
-can be easily passed to uniforms, here is an example using Shadertoy naming conventions:
-
-
-The `iChannelN` uniforms are defined in GLSL as follows:
-
-```glsl
-uniform sampler2D iChannelN;
-```
-
-The uniform setter function `(gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferX)`
-is the same as the one used for providing other uniforms, but in this case optional
-3rd parameter `ctx` is provided. The `ctx.texture()` call can take either `WebGLTexture`
-instance or the instance of `shader-web-background` internal context from which proper
-input or output texture of a buffer will be selected. The buffers can be
-accessed through `ctx.buffers` object. Names of the attributes in this object will
-match the names of attributes defined in `shaders` config attribute, except for the
-last shader which is not offscreen and cannot be accessed as a texture.
-
-
-
-The uniform setter function example:
-
-```
-(
-  gl,     // the WebGLContext instance
-  loc,    // the WebGLUniformLocation instace assigned with this uniform 
-  ctx     // the context object
-) => {}
-```
-
-The `gl` and the `loc` parameters are WebGL specific which allows performing low level
-operation. In most cases it will be very simple uniform setting which can be
-used idiomatically:
+**Example 1** - setting floating-point value kept in JavaScript `time` variable:
 
 ```javascript
-(gl, loc) => gl.uniform1f(loc, uniformValue)
+(gl, loc) => gl.uniform1f(loc, time)
 ```
 
-See the full specification here:
-https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform
+:information_source: Note: the last argument of type [Context] is often not used and can be
+omitted in declaration, like in the example above.
 
-The `loc` `WebGLUniformLocation` instance is provided according to the uniform
-location taken from compiled shader program.
 
-The optional `ctx` parameter represents internal context of the library and will have
-the following structure:
-
+**Example 2** - setting resolution:
 
 ```javascript
-{
-  buffers: {
-    BufferA: buffer_a,
-    // ...
-    BufferN: buffer_n,
-  },
-  texture: (loc, textureOrBuffer) => {}
-}
+(gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height)
 ```
 
-The `buffer_n` instances are used just as references to be possibly passed to the
-`texture` function. If we are injecting a buffer to the shader of the same buffer,
-the previous texture generated by this shader will be used. Otherwise the most recent
-generated output texture will be used.
+See [WebGLRenderingContext.uniform] specification for details.
 
-Another valid argument type to be passed to the `texture` function is an instance
-of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
 
+**Example 3** - setting other shader's output as input texture:
+
+```javascript
+(gl, loc, ctx) => ctx.texture(loc, ctx.buffers.BufferA)
+```
+
+See [Context: buffers](#context-buffers)
+
+
+**Example 4** - setting texture:
+
+```javascript
+(gl, loc, ctx) => gl.texture(loc, webCamTexture)
+```
+
+Where `webCamTexture` is an instance of [WebGLTexture].
 
 
 ### Config: onAfterFrame
 
-The `onAfterFrame` function is invoked when scheduling of the rendering of the whole
-animation frame is finished. It can be used to increment frame counters, etc.
+The `onAfterFrame` function is called after processing all the shaders.
+
 
 ### Config: onError
+
+The `onError` function is called in case of any [Error] which occurs while handling
+the [shadeWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call. It
+be called with the [Error] and the [canvas][HTMLCanvasElement] as arguments.
 
 
 ## Context
 
 An object with the following attributes:
 
-| attribute                                                     | type                                                       | description                               | 
-| ------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- | 
-| [canvas](#context-canvas)                                     | [HTMLCanvasElement]                                        | the canvas being shaded | 
-| [width](#context-width)                                       | number                                                     | device pixel width            | 
-| [height](#context-height)                                     | number                                                     | device pixel height            | 
-| [cssPixelRatio](#context-csspixelratio)                       | number                                                     | device pixel / CSS pixel            |    
-| [cssWidth](#context-csswidth)                                 | number                                                     | width in CSS pixels            |    
-| [cssHeight](#context-cssheight)                               | number                                                     | height in CSS pixels            |    
-| [isOverShader](#context-isovershader)                         | function(number, number): boolean                          | checks if             |    
-| [toShaderX](#context-toshaderx)                               | function(number): number                                   | CSS x coordinate to shader x .            |    
-| [toShaderY](#context-toshadery)                               | function(number): number                                   | CSS y coordinate to shader y             |    
-| [buffers](#context-buffers)                                   | Object                                                     | buffers of offscreen shaders            |    
-| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|Buffer)) |             |    
-| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                   | init floating-point RGBA texture of given size |            |    
+| attribute                                                     | type                                                         | description                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
+| [gl](#context-gl)                                             | [WebGLRenderingContext]                                      | handle for WebGL calls           |
+| [canvas](#context-canvas)                                     | [HTMLCanvasElement]                                          | the canvas being shaded          |
+| [width](#context-width)                                       | number                                                       | device pixel width               |
+| [height](#context-height)                                     | number                                                       | device pixel height              |
+| [cssPixelRatio](#context-csspixelratio)                       | number                                                       | device pixel / CSS pixel         |
+| [cssWidth](#context-csswidth)                                 | number                                                       | width in CSS pixels              |
+| [cssHeight](#context-cssheight)                               | number                                                       | height in CSS pixels             |
+| [isOverShader](#context-isovershader)                         | function(number, number): boolean                            | checks if mouse is over shader   |
+| [toShaderX](#context-toshaderx)                               | function(number): number                                     | CSS x coordinate to shader x .   |
+| [toShaderY](#context-toshadery)                               | function(number): number                                     | CSS y coordinate to shader y     |
+| [buffers](#context-buffers)                                   | Object                                                       | buffers of offscreen shaders     |
+| [texture](#context-texture)                                   | function([WebGLUniformLocation], ([WebGLTexture]\|[Buffer])) | binds texture as a uniform       |
+| [initHalfFloatRGBATexture](#context-inithalffloatrgbatexture) | function(number, number)                                     | init floating-point RGBA texture |
 
-:information_source: Note: the `context` object is passed as an argument to many functions and it is
+:information_source: Note: this object is passed as an argument to many functions and it is
 also returned by the [shaderWebBackground.shade(config)](#shaderwebbackgroundshadeconfig) call.
+
+
+### Context: gl
+
+The [WebGLRenderingContext].
+
 
 ### Context: canvas
 
@@ -390,8 +369,9 @@ See [Context: toShaderX](#context-toshaderx)
 
 ### Context: buffers
 
-And object representing offscreen buffers of all the shaders except for the last
-one in the rendering pipeline. The attribute names match the shader names.
+An object representing offscreen buffers of all the shaders except for the last
+one in the rendering pipeline. The attribute names match the shader names, except
+for the last shader which is rendering to screen not to a buffer.
 
 
 #### Buffer object
@@ -455,11 +435,13 @@ due to lack of WebGL capabilities of the browser (might be a hardware limitation
 
 See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
 
-
+[Config]:  #config
 [Context]: #context
+[Buffer]:  #buffer-object
 
-[Error]:                 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
-[HTMLCanvasElement]:     https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
-[WebGLRenderingContext]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
-[WebGLUniformLocation]:  https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
-[WebGLTexture]:          https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
+[Error]:                         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+[HTMLCanvasElement]:             https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
+[WebGLRenderingContext]:         https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
+[WebGLUniformLocation]:          https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
+[WebGLTexture]:                  https://developer.mozilla.org/en-US/docs/Web/API/WebGLTexture
+[WebGLRenderingContext.uniform]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/uniform
