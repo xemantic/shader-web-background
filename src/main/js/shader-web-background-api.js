@@ -35,6 +35,7 @@ var TextureBinder;
 
 /**
  * @typedef {{
+ *   gl:                       !WebGLRenderingContext,
  *   canvas:                   !HTMLCanvasElement,
  *   width:                    !number,
  *   height:                   !number,

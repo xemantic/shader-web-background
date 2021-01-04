@@ -186,7 +186,6 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
     alpha: false
   };
   const glWrapper = initCanvas(canvas, contextAttrs);
-  const gl = glWrapper.gl;
 
   /**
    * @param {!string} id
@@ -207,6 +206,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
 
   /** @type {Context} */
   const context = {
+    gl: glWrapper.gl,
     canvas: canvas,
     width: 0,
     height: 0,
@@ -280,7 +280,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
     if (index++ < imageShaderIndex) {
       const textureInitializer = shaders[id].texture || DEFAULT_TEXTURE_INITIALIZER;
       context.buffers[id] = glWrapper.newDoubleBuffer(() => {
-        textureInitializer(gl, context);
+        textureInitializer(glWrapper.gl, context);
       });
     }
 
