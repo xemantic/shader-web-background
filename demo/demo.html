@@ -404,6 +404,18 @@
       },
       onAfterFrame: () => {
         drawCenterY *= drawCenterShiftDownScale;
+      },
+      onError: (canvas, error) => {
+        document.documentElement.classList.add("fallback-background");
+        if (error instanceof shaderWebBackground.GlError) {
+          console.log("Could not shade, adding fallback CSS classes:", error);
+          // in regular web design we would just silently switch to fallback style
+          window.alert(
+            "The shader-web-background does not support your device/browser, therefore "
+              + "you cannot experience what is described here, try with another device");
+        } else {
+          throw error;
+        }
       }
     });
   </script>
