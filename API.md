@@ -46,7 +46,7 @@ as
 ## shaderWebBackground.shade(config)
 
 Shading starts with the `shaderWebBackground.shade(config)` call which requires
-providing a [configuration](#config) object and returns a [context](#context) object.
+providing a [configuration](#config) object and returns a [Context] object.
 
 The processing of configuration and shader compilation will start immediately,
 however the animation frames will be requested only when the page is loaded.
@@ -61,15 +61,15 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`: optional argument)                  | description                                |
-| -------------------------------------- | ----------------------------------------------- | ------------------------------------------ |
-| [canvas](#config-canvas)               | [HTMLCanvasElement]                            | canvas to render to                        |
-| [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run                    |
-| [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized          |
-| [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame                   |
-| [shaders](#config-shaders)             | Object of [Shader](#shader)s                       | definition of shaders (rendering pipeline) |
-| [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete          |
-| [onError](#config-onerror)             | function([Error], [HTMLCanvasElement])             | called when shading cannot be started      |
+| attribute                              | type (`=`: optional argument)          | description                                |
+| -------------------------------------- | -------------------------------------- | ------------------------------------------ |
+| [canvas](#config-canvas)               | [HTMLCanvasElement]                    | canvas to render to                        |
+| [onInit](#config-oninit)               | function([Context]=)                   | called before first run                    |
+| [onResize](#config-onresize)           | function(number, number, [Context]=)   | called when the canvas is resized          |
+| [onBeforeFrame](#config-onbeforeframe) | function([Context]=)                   | called before each frame                   |
+| [shaders](#config-shaders)             | Object of [Shader](#shader)s           | definition of shaders (rendering pipeline) |
+| [onAfterFrame](#config-onafterframe)   | function([Context])                    | called when the frame is complete          |
+| [onError](#config-onerror)             | function([Error], [HTMLCanvasElement]) | called when shading cannot be started      |
 
 Only [shaders](#config-shaders) attribute is required. The order of
 attributes is arbitrary, but in this table they are sorted by a convenient order of
@@ -86,19 +86,21 @@ DOM elements (`z-index: -9999`).
 ### Config: onInit
 
 The `onInit` function is called when the shader is loaded for the first time, before
-any rendering starts. The [Context](#context) is passed as an argument.
+any rendering starts. The [Context] is passed as an argument.
 
 
 ### Config: onResize
 
-The `onResize` function is invoked with `with` and `height` parameters indicating actual
-screen dimensions of the canvas after browser window is resized. It will be also
-called when the shading is started with the `shaderWebBackground.shade(config)` call
+The `onResize` function is called with `width`, `height` and [Context]
+parameters when the browser window is resized.
+
+:information_source: Note: `onResize` will be also called before the first frame
 just after [Config: onInit](#config-oninit).
 
 
 ### Config: onBeforeFrame
 
+The `onBeforeFrame` function is called the [C]before rendering each frame and 
 
 ### Config: shaders
 
@@ -139,17 +141,17 @@ the previous ones (if more than one) to offscreen buffers. See [Shader: uniforms
 
 An object with the following attributes:
 
-| attribute                    | type                                                   | description         |
-| ---------------------------- | ------------------------------------------------------ | ------------------- |
-| [texture](#shader-texture)   | function([WebGLRenderingContext], [Context](#context)) | texture initializer |
-| [uniforms](#shader-uniforms) | Object of [Uniform setter](#uniform-setter)s           | uniform setters     |
+| attribute                    | type                                         | description         |
+| ---------------------------- | -------------------------------------------- | ------------------- |
+| [texture](#shader-texture)   | function([WebGLRenderingContext], [Context]) | texture initializer |
+| [uniforms](#shader-uniforms) | Object of [Uniform setter](#uniform-setter)s | uniform setters     |
 
 Only [uniforms](#shader-uniforms) attribute is required.
 
 
 ##### Shader: texture
 
-Optional texture initializer called with [WebGLRenderingContext] and [Context](#context) 
+Optional texture initializer called with [WebGLRenderingContext] and [Context] 
 arguments. Here is the default initializer:
 
 ```javascript
@@ -453,6 +455,8 @@ due to lack of WebGL capabilities of the browser (might be a hardware limitation
 
 See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
 
+
+[Context]: #context
 
 [Error]:                 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
 [HTMLCanvasElement]:     https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
