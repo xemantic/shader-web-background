@@ -18,6 +18,7 @@
   - [Config: onAfterFrame](#config-onafterframe)
   - [Config: onError](#config-onerror)
 - [Context](#context)
+  - [Context: gl](#context-gl)
   - [Context: canvas](#context-canvas)
   - [Context: width](#context-width)
   - [Context: height](#context-height)

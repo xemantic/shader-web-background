@@ -45,6 +45,8 @@ https://xemantic.com/
 - [shader-web-background API](#shader-web-background-api)
 - [Configuring shading](#configuring-shading)
   - [Adding shader uniforms](#adding-shader-uniforms)
+    - [About uniforms](#about-uniforms)
+    - [Textures as uniforms](#textures-as-uniforms)
   - [Initializing shader texture](#initializing-shader-texture)
   - [Complex config example](#complex-config-example)
   - [Handling errors](#handling-errors)
