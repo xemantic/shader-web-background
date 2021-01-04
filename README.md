@@ -416,7 +416,7 @@ shaderWebBackground.shade({
     ctx.iFrame++;
   },
   // custom error handler
-  onError: (canvas, error) => {
+  onError: (error, canvas) => {
     canvas.remove();
     console.error(error);
     document.documentElement.classList.add("my-fallback");

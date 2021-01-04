@@ -61,15 +61,15 @@ This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)
 
 An object with the following attributes:
 
-| attribute                              | type (`=`: optional argument)                      | description                                |
-| -------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
-| [canvas](#config-canvas)               | [HTMLCanvasElement]                                | canvas to render to                        |
+| attribute                              | type (`=`: optional argument)                  | description                                |
+| -------------------------------------- | ----------------------------------------------- | ------------------------------------------ |
+| [canvas](#config-canvas)               | [HTMLCanvasElement]                            | canvas to render to                        |
 | [onInit](#config-oninit)               | function([Context](#context)=)                     | called before first run                    |
 | [onResize](#config-onresize)           | function(number, number, [Context](#context)=)     | called when the canvas is resized          |
 | [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame                   |
 | [shaders](#config-shaders)             | Object of [Shader](#shader)s                       | definition of shaders (rendering pipeline) |
 | [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete          |
-| [onError](#config-onerror)             | function([Error], [HTMLCanvasElement], [Context](#context)) | called when shading cannot be started      |
+| [onError](#config-onerror)             | function([Error], [HTMLCanvasElement])             | called when shading cannot be started      |
 
 Only [shaders](#config-shaders) attribute is required. The order of
 attributes is arbitrary, but in this table they are sorted by a convenient order of

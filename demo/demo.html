@@ -405,7 +405,7 @@
       onAfterFrame: () => {
         drawCenterY *= drawCenterShiftDownScale;
       },
-      onError: (canvas, error) => {
+      onError: (error, canvas) => {
         document.documentElement.classList.add("fallback-background");
         if (error instanceof shaderWebBackground.GlError) {
           console.log("Could not shade, adding fallback CSS classes:", error);

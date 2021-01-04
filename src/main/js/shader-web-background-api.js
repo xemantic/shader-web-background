@@ -82,7 +82,7 @@ var Shader;
 
 /**
  * @typedef {
- *   function(!HTMLCanvasElement, !Error)
+ *   function(!Error, !HTMLCanvasElement)
  * }
  */
 var ErrorHandler;

@@ -34,7 +34,7 @@ const
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   },
   /** @type {!ErrorHandler} */
-  DEFAULT_ON_ERROR = (canvas, error) => {
+  DEFAULT_ON_ERROR = (error, canvas) => {
     console.warn("shader-web-background cannot shade, adding fallback CSS classes");
     document.documentElement.classList.add(FALLBACK_CLASS);
     canvas.classList.add(FALLBACK_CLASS);
@@ -386,8 +386,8 @@ function shade(config) {
       });
     }
     return ctx;
-  } catch (/** @type {!Error} */ e) {
-    (config.onError || DEFAULT_ON_ERROR)(canvas, e);
+  } catch (/** @type {!Error} */ error) {
+    (config.onError || DEFAULT_ON_ERROR)(error, canvas);
   }
 }
 
