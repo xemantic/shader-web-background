@@ -709,6 +709,7 @@ Or [send me](https://xemantic.com/) a link with description.
 ## TODO
 
  * remove h1 on iphone as an alternative to real fullscreen
+ * add an option to install as a home app on android and iOS
 
 
 [Shadertoy]: https://www.shadertoy.com/

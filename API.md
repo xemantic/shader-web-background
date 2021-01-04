@@ -53,8 +53,8 @@ however the animation frames will be requested only when the page is loaded.
 
 This function might throw [shaderWebBackground.Error](#shaderwebbackgrounderror)s of type:
 
-* [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror)
-* [shaderWebBackground.GlError](#shaderwebbackgroundglerror)
+* [shaderWebBackground.ConfigError](#shaderwebbackgroundconfigerror) - on misconfiguration
+* [shaderWebBackground.GlError](#shaderwebbackgroundglerror) - on lack of required WebGL capabilities
 
 
 ## Config
@@ -69,11 +69,35 @@ An object with the following attributes:
 | [onBeforeFrame](#config-onbeforeframe) | function([Context](#context)=)                     | called before each frame                   |
 | [shaders](#config-shaders)             | Object of [Shader](#shader)s                       | definition of shaders (rendering pipeline) |
 | [onAfterFrame](#config-onafterframe)   | function([Context](#context))                      | called when the frame is complete          |
-| [onError](#config-onerror)             | function([HTMLCanvasElement], [Context](#context)) | called when shading cannot be started      |
+| [onError](#config-onerror)             | function([Error], [HTMLCanvasElement], [Context](#context)) | called when shading cannot be started      |
 
 Only [shaders](#config-shaders) attribute is required. The order of
 attributes is arbitrary, but in this table they are sorted by a convenient order of
 their "lifecycle" in the rendering of each frame.
+
+
+### Config: canvas
+
+If `canvas` attribute is not specified, the default one will be created, with
+fixed position expending over the whole viewport and located behind other
+DOM elements (`z-index: -9999`).
+
+
+### Config: onInit
+
+The `onInit` function is called when the shader is loaded for the first time, before
+any rendering starts. The [Context](#context) is passed as an argument.
+
+
+### Config: onResize
+
+The `onResize` function is invoked with `with` and `height` parameters indicating actual
+screen dimensions of the canvas after browser window is resized. It will be also
+called when the shading is started with the `shaderWebBackground.shade(config)` call
+just after [Config: onInit](#config-oninit).
+
+
+### Config: onBeforeFrame
 
 
 ### Config: shaders
@@ -234,22 +258,6 @@ Another valid argument type to be passed to the `texture` function is an instanc
 of `WebGLTexture`. It can represent for example a frame taken from the webcam input.
 
 
-### Config: canvas
-
-If `canvas` attribute is not specified, the default one covering the whole viewport behind other
-DOM elements will be created.
-
-### Config: onInit
-
-### Config: onResize
-
-The `onResize` function is invoked with `with` and `height` parameters indicating actual
-screen dimensions of the canvas after browser window is resized. It will be also
-called when the shading is started with the `shaderWebBackground.shade(config)` call
-just after [Config: onInit](#config-oninit).
-
-
-### Config: onBeforeFrame
 
 ### Config: onAfterFrame
 
@@ -257,7 +265,6 @@ The `onAfterFrame` function is invoked when scheduling of the rendering of the w
 animation frame is finished. It can be used to increment frame counters, etc.
 
 ### Config: onError
-
 
 
 ## Context
@@ -447,6 +454,7 @@ due to lack of WebGL capabilities of the browser (might be a hardware limitation
 See [Config: onError](#config-onerror) and [README: Handling errors](README.md#handling-errors).
 
 
+[Error]:                 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
 [HTMLCanvasElement]:     https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement
 [WebGLRenderingContext]: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
 [WebGLUniformLocation]:  https://developer.mozilla.org/en-US/docs/Web/API/WebGLUniformLocation
