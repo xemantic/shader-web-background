@@ -123,6 +123,7 @@ https://xemantic.com/
       background: url("https://placekitten.com/666/666");
       background-position: center;
       background-size: cover;
+      background-attachment: fixed;
     }
   </style>
 </head>
@@ -220,6 +221,7 @@ Define fallback CSS style, for example a static screenshot of your shader frame:
     background: url("https://placekitten.com/666/666");
     background-position: center;
     background-size: cover;
+    background-attachment: fixed;    
   }
 </style>
 ```
