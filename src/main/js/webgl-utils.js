@@ -139,6 +139,22 @@ const padLineNumber = (str, targetLength) =>
     : " ".repeat(targetLength - str.length) + str;
 
 /**
+ * @param {!string} source
+ * @return {!string} line numbered source
+ */
+function getLineNumberedSource(source) {
+    const lines = source.split(/\r?\n/);
+    const maxDigits = lines.length.toString().length;
+    var buffer = [];
+    lines.forEach((line, index) => {
+      const lineNumber = padLineNumber((index + 1).toString(), maxDigits);
+      buffer.push(lineNumber + ": " + line + "\n");
+    });
+    return buffer.join("");
+}
+
+
+/**
  * @template T
  */
 class GlWrapper {
@@ -188,22 +204,6 @@ class GlWrapper {
   }
 
   /**
-   * @param {!string} source
-   * @return {!string} numbered source
-   */
-  getLineNumberedSource(source) {
-    const lines = source.split(/\r?\n/);
-    const maxDigits = lines.length.toString().length;
-    const buffer = [];
-    lines.forEach((line, index) => {
-      buffer.push(padLineNumber("" + (index + 1), maxDigits) + ":");
-      buffer.push(line);
-      buffer.push("\n");
-    });
-    return buffer.join("");
-  }
-
-  /**
    * @param {!string} id
    * @param {!number} type
    * @param {!string} source
@@ -219,7 +219,7 @@ class GlWrapper {
       gl.deleteShader(shader);
       const message = "Cannot compile shader - " + id + ": " + info;
       console.log(message);
-      console.log(this.getLineNumberedSource(source));
+      console.log(getLineNumberedSource(source));
       throw new Error(message);
     }
     return shader;

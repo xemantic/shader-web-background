@@ -93,9 +93,6 @@ function M(a,b,c){const d=a.gl;a=[];const k=d.getProgramParameter(b,d.ACTIVE_UNI
 for(let f=0;f<k;f++){const h=d.getActiveUniform(b,f);a.push({name:h.name,location:d.getUniformLocation(b,
 h.name)})}return{v:d.getAttribLocation(b,"V"),m:a,l:c?(f,h)=>c.l(f,h):()=>{},i:(f,
 h)=>{d.useProgram(b);f();c?(f=c.g,c.g=c.h,c.h=f,c.i(h)):h()}}}
-function V(a){a=a.split(/r?n/);const b=a.length.toString().length,c=[];a.forEach((d,
-k)=>{var f=c.push;k=""+(k+1);k=k.length>=b?k:" ".repeat(b-k.length)+k;f.call(c,k+
-":");c.push(d);c.push("n")});return c.join("")}
 function J(a,b,c,d){a=a.gl;c=a.createShader(c);a.shaderSource(c,d);a.compileShader(c);
 if(!a.getShaderParameter(c,a.COMPILE_STATUS)){const k=String(a.getShaderInfoLog(c));
 a.deleteShader(c);b="Cannot compile shader - "+b+": "+k;console.log(b);console.log(V(d));
