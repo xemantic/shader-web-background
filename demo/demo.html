@@ -124,8 +124,9 @@
 
       vec3 drawColor = vec3(0);
 
-      float radius = 1. + colorShift.r + colorShift.g + colorShift.b;
-      radius *= .7;
+      float radius =
+        1.
+        + (colorShift.r + colorShift.g + colorShift.b) * iColorShiftOfRadius;
       drawColor +=
         pow(
           drawBlob(st, iDrawCenter, radius * iBlob1Radius, iBlobEdgeSmoothing),
@@ -392,6 +393,7 @@
             iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, .4),
             iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 36.),
             iBlob2Color:               (gl, loc) => gl.uniform3f(loc, blob2Color[0], blob2Color[1], blob2Color[2]),
+            iColorShiftOfRadius:       (gl, loc) => gl.uniform1f(loc, .5),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
           }
         },
