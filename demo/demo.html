@@ -81,6 +81,7 @@
     uniform float     iBlob2Radius;
     uniform float     iBlob2PowFactor;
     uniform vec3      iBlob2Color;
+    uniform float     iColorShiftOfRadius;
 
     /*
       Normally it would be provided by texture parameters, but on iOS the texture REPEAT works only
@@ -190,8 +191,8 @@
     const feedbackMouseShiftFactor = .003;
     const feedbackTiltShiftFactor = .0002;
     const backgroundParallaxScrollingFactor = .5;
-    const blob1ColorPulseSpeed = .07;
-    const blob2ColorPulseSpeed = .07;
+    const blob1ColorPulseSpeed = .04;
+    const blob2ColorPulseSpeed = .04;
     const blob2ColorPulseShift = .5;
     const drawCenterShiftDownScale = .99;
 
@@ -381,17 +382,17 @@
             iFeedbackZoomCenter:       (gl, loc) => gl.uniform2f(loc, 0, 0),
             iFeedbackZoomRate:         (gl, loc) => gl.uniform1f(loc, .001),
             iFeedbackShiftVector:      (gl, loc) => gl.uniform2f(loc, feedbackShiftVectorX, feedbackShiftVectorY),
-            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .9989),
+            iFeedbackFadeRate:         (gl, loc) => gl.uniform1f(loc, .999),
             iFeedbackColorShiftZoom:   (gl, loc) => gl.uniform1f(loc, .2),
-            iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .005),
+            iFeedbackColorShiftImpact: (gl, loc) => gl.uniform1f(loc, .004),
             iDrawCenter:               (gl, loc) => gl.uniform2f(loc, drawCenterX, drawCenterY),
-            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .23),
+            iDrawIntensity:            (gl, loc) => gl.uniform1f(loc, .35),
             iBlobEdgeSmoothing:        (gl, loc) => gl.uniform1f(loc, .04),
-            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, .6),
-            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 36.),
+            iBlob1Radius:              (gl, loc) => gl.uniform1f(loc, .3),
+            iBlob1PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
             iBlob1Color:               (gl, loc) => gl.uniform3f(loc, blob1Color[0], blob1Color[1], blob1Color[2]),
             iBlob2Radius:              (gl, loc) => gl.uniform1f(loc, .4),
-            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 36.),
+            iBlob2PowFactor:           (gl, loc) => gl.uniform1f(loc, 40.),
             iBlob2Color:               (gl, loc) => gl.uniform3f(loc, blob2Color[0], blob2Color[1], blob2Color[2]),
             iColorShiftOfRadius:       (gl, loc) => gl.uniform1f(loc, .5),
             iChannel0:                 (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
