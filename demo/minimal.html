@@ -88,7 +88,10 @@ R(this,"OES_texture_half_float_linear")}g(a,b){const c=this.gl;c.texImage2D(c.TE
 0,c.RGBA,a,b,0,c.RGBA,this.h.HALF_FLOAT_OES,null)}}
 class U extends S{constructor(a,b){super(a,b);R(this,"EXT_color_buffer_float");this.gl.getExtension("OES_texture_float_linear")}g(a,
 b){const c=this.gl;c.texImage2D(c.TEXTURE_2D,0,c.RGBA16F,a,b,0,c.RGBA,c.HALF_FLOAT,
-null)}}function L(a,b){return new K(a.gl,()=>{b(a.gl)})}
+null)}}
+function V(a){a=a.split(/\r?\n/);const b=a.length.toString().length;var c=[];a.forEach((d,
+k)=>{k=(k+1).toString();k=k.length>=b?k:" ".repeat(b-k.length)+k;c.push(k+": "+d+
+"\n")});return c.join("")}function L(a,b){return new K(a.gl,()=>{b(a.gl)})}
 function M(a,b,c){const d=a.gl;a=[];const k=d.getProgramParameter(b,d.ACTIVE_UNIFORMS);
 for(let f=0;f<k;f++){const h=d.getActiveUniform(b,f);a.push({name:h.name,location:d.getUniformLocation(b,
 h.name)})}return{v:d.getAttribLocation(b,"V"),m:a,l:c?(f,h)=>c.l(f,h):()=>{},i:(f,
