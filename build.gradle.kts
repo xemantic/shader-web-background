@@ -17,7 +17,7 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-val closureCompilerVersion = "v20201207"
+val closureCompilerVersion = "v20210106"
 
 plugins {
   kotlin("jvm") version "1.4.21"
@@ -31,8 +31,6 @@ repositories {
   jcenter()
 }
 
-val charset = Charsets.UTF_8
-
 fun getMapJsBackPath(path: String) =
     path.count { char -> char == '/' }
         .let { count -> "../".repeat(count) }
@@ -45,16 +43,15 @@ fun updateEmbeddedLib(
     path: String
 ) = File(path).let { file ->
   file.writeText(
-      file.readText(charset)
-          .replaceFirst(
-              libOccurrence,
-              code.replaceFirst(
-                  mapJsPath,
-                  "${getMapJsBackPath(path)}$distDir/$mapJsPath"
-              )
-          )
-      ,
-      charset
+    file.readText().replaceFirst(
+      libOccurrence,
+      code
+        .replaceFirst(
+          mapJsPath,
+          "${getMapJsBackPath(path)}$distDir/$mapJsPath"
+        )
+        .replace("\\", "\\\\")
+    )
   )
 }
 
@@ -64,7 +61,7 @@ fun updateEmbeddedLibs(
     distJs: String,
     mapJsPath: String,
     vararg paths: String
-) = File(distDir, distJs).readText(charset).let { code ->
+) = File(distDir, distJs).readText().let { code ->
   paths.forEach { path ->
     updateEmbeddedLib(
         libOccurrence,
