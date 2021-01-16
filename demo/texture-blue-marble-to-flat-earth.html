@@ -1,0 +1,101 @@
+<!--
+  ~ Copyright 2021  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>texture: Blue Marble to Flat Earth mapping</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="demo.css"/>
+  <script src="../src/test/js/show-demo-source.js"></script>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
+  <script type="x-shader/x-fragment" id="image">
+    precision highp float;
+
+    uniform vec2  iResolution;
+    uniform float iMinDimension;
+    uniform float iTime;
+    uniform float iRotationSpeed;
+    uniform sampler2D iBlueMarble;
+
+    const float EDGE_SMOOTHING = .02;
+    const float PI = 3.14159265359;
+
+    void main() {
+      vec2 st = (2. * gl_FragCoord.xy - iResolution) / iMinDimension;
+      float angle = atan(st.x, st.y);
+      float distance = length(st);
+      vec2 earthUv = vec2(
+        mod(
+          ((angle + PI) / PI / 2.)
+            + (iTime * iRotationSpeed),
+          1.
+        ),
+        distance
+      );
+      vec4 earthColor = texture2D(iBlueMarble, earthUv);
+      gl_FragColor = earthColor * smoothstep(1., 1. - EDGE_SMOOTHING, distance);
+    }
+  </script>
+  <script>
+    shaderWebBackground.shade({
+      onInit: (ctx) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.src = "../media/nasa-blue-marble.jpg";
+        image.onload = () => {
+          const gl = ctx.gl;
+          const texture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+          gl.bindTexture(gl.TEXTURE_2D, null);
+          ctx.iBlueMarble = texture;
+        }
+      },
+      onResize: (width, height, ctx) => {
+        ctx.minDimension = Math.min(width, height);
+      },
+      shaders: {
+        image: {
+          uniforms: {
+            iResolution:    (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iTime:          (gl, loc, ctx) => gl.uniform1f(loc, performance.now() / 1000),
+            iMinDimension:  (gl, loc, ctx) => gl.uniform1f(loc, ctx.minDimension),
+            iRotationSpeed: (gl, loc, ctx) => gl.uniform1f(loc, .1)
+            iBlueMarble:    (gl, loc, ctx) => ctx.texture(loc, ctx.iBlueMarble)
+          }
+        }
+      }
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1><a href="#source">texture: Blue Marble to Flat Earth mapping</a></h1>
+  </header>
+</body>
+</html>
