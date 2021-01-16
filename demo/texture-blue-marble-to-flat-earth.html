@@ -85,7 +85,7 @@
             iResolution:    (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
             iTime:          (gl, loc, ctx) => gl.uniform1f(loc, performance.now() / 1000),
             iMinDimension:  (gl, loc, ctx) => gl.uniform1f(loc, ctx.minDimension),
-            iRotationSpeed: (gl, loc, ctx) => gl.uniform1f(loc, .1)
+            iRotationSpeed: (gl, loc, ctx) => gl.uniform1f(loc, .1),
             iBlueMarble:    (gl, loc, ctx) => ctx.texture(loc, ctx.iBlueMarble)
           }
         }
