@@ -150,7 +150,8 @@ this.j);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
 0);a();b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,null,
 0);b.bindFramebuffer(b.FRAMEBUFFER,null)}};})()
 //# sourceMappingURL=dist/shader-web-background.min.js.map
-
+  </script>
+  <script>
     // spectral_zucconi6 by Alan Zucconi rewritten from GLSL to JS by Kazik Pogoda
     // GLSL: https://www.shadertoy.com/view/ls2Bz1
 
@@ -217,9 +218,7 @@ this.j);b.framebufferTexture2D(b.FRAMEBUFFER,b.COLOR_ATTACHMENT0,b.TEXTURE_2D,th
       vec2 uv = gl_FragCoord.xy / iResolution;
       vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
 
-      vec2  drawDelta = st - iDrawCenter;
-      float drawAngle = atan(drawDelta.x, drawDelta.y);
-      float drawDist = length(drawDelta);
+      float drawDist = length(st - iDrawCenter);
 
       vec3 colorShift = repeatedTexture(
         iChannel0,

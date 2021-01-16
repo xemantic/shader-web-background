@@ -105,9 +105,7 @@
       vec2 uv = gl_FragCoord.xy / iResolution;
       vec2 st = (gl_FragCoord.xy * 2. - iResolution) / iMinDimension;
 
-      vec2  drawDelta = st - iDrawCenter;
-      float drawAngle = atan(drawDelta.x, drawDelta.y);
-      float drawDist = length(drawDelta);
+      float drawDist = length(st - iDrawCenter);
 
       vec3 colorShift = repeatedTexture(
         iChannel0,
