@@ -555,7 +555,7 @@ Demos:
 prevent them from being loaded from a different domain
 ([explanation](https://webglfundamentals.org/webgl/lessons/webgl-cors-permission.html)). For
 local testing you might want to start local HTTP server. E.g.: `python -m http.server 8000` if
-it doesn't work on your latest ubuntu than run: ``
+it doesn't work on your latest ubuntu than run `sudo apt install python-is-python3` first.
 
 See [texture: Blue Marble to Flat Earth mapping](demo/texture-blue-marble-to-flat-earth.html) demo
 
