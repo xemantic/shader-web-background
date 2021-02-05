@@ -557,7 +557,8 @@ prevent them from being loaded from a different domain
 local testing you might want to start local HTTP server. E.g.: `python -m http.server 8000` if
 it doesn't work on your latest ubuntu than run `sudo apt install python-is-python3` first.
 
-See [texture: Blue Marble to Flat Earth mapping](demo/texture-blue-marble-to-flat-earth.html) demo
+See [texture: Blue Marble to Flat Earth mapping](https://xemantic.github.io/shader-web-background/demo/texture-blue-marble-to-flat-earth.html)
+demo
 
 Textures can be set in the same way buffers are set as uniforms, but first we need to load them.
 For example by defining custom Promise which can be reused:
