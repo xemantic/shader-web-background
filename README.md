@@ -565,8 +565,8 @@ For example by defining custom Promise which can be reused:
 ```javascript
 const loadImage = (src) => new Promise((resolve, reject) => {
   let img = new Image();
-  img.onload = e => resolve(img);
-  img.onerror = e => {
+  img.onload = () => resolve(img);
+  img.onerror = () => {
     reject(new Error("Failed to load image from: " + src));
   }
   img.src = src;
