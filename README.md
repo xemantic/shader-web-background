@@ -352,14 +352,14 @@ shaderWebBackground.shade({
 });
 ```
 
-:warning: initializing textures is still not documented, but standard WebGL
-rules should apply.
-
 :information_source: the _texture_ passed as a second argument
 to [ctx.texture](API.md#context-texture) can be either an instance of [WebGLTexture] or
 a reference to the buffer of another shader in the pipeline. Check 
 [Complex config example](#complex-config-example) section and
 [API - Context: buffers](API.md#context-buffers).
+
+See [Adding textures](#adding-textures) section for details on how to load a texture from
+an image.
 
 
 ### Initializing shader texture
@@ -547,6 +547,59 @@ Demos:
 
  * [mouse](https://xemantic.github.io/shader-web-background/demo/mouse.html)
  * [mouse normalized](https://xemantic.github.io/shader-web-background/demo/mouse-normalized.html)
+
+## Adding textures
+
+:warning: Working with textures locally will be limited by the same security mechanisms which
+prevent them from being loaded from a different domain
+([explanation](https://webglfundamentals.org/webgl/lessons/webgl-cors-permission.html)). For
+local testing you might want to start local HTTP server. E.g.: `python -m http.server 8000` if
+it doesn't work on your latest ubuntu than run: ``
+
+See [texture: Blue Marble to Flat Earth mapping](demo/texture-blue-marble-to-flat-earth.html) demo
+
+Textures can be set in the same way buffers are set as uniforms, but first we need to load them.
+For example by defining custom Promise which can be reused:
+
+```javascript
+const loadImage = (src) => new Promise((resolve, reject) => {
+  let img = new Image();
+  img.onload = e => resolve(img);
+  img.onerror = e => {
+    reject(new Error("Failed to load image from: " + src));
+  }
+  img.src = src;
+});
+```
+
+The `onInit` function is quite a convenient place for calling `loadPicture`:
+
+```javascript
+shaderWebBackground.shade({
+  onInit: (ctx) => {
+    loadImage("texture.jpg")
+      .then(image => {
+        const gl = ctx.gl;
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        ctx.iTexture = texture;
+      });
+  },
+  shaders: {
+    image: {
+      uniforms: {
+        iTexture:    (gl, loc, ctx) => ctx.texture(loc, ctx.iTexture)
+      }
+    }
+  }
+});
+```
 
 
 ## Shadertoy support
