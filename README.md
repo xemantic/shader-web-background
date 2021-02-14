@@ -58,6 +58,7 @@ https://xemantic.com/
   - [What to do with `texture` function?](#what-to-do-with-texture-function)
   - [Handling Shadertoy texture parameters](#handling-shadertoy-texture-parameters)
   - [How to handle "Multipass" Shadertoy shaders?](#how-to-handle-multipass-shadertoy-shaders)
+- [Own vertex shader](#own-vertex-shader)
 - [General tips](#general-tips)
 - [Building](#building)
 - [Contributing](#contributing)
