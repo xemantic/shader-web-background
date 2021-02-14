@@ -742,6 +742,34 @@ And then wire them together:
 </html>
 ```
 
+## Own vertex shader
+
+It's possible to alter default vertex shader for each fragment shader by providing
+the following script in the `<head>`:
+
+```javascript
+<script type="x-shader/x-vertex" id="shaderIdVertex">
+  attribute vec2 V;
+  varying vec2 uv;
+
+  void main(){
+    gl_Position=vec4(V,0,1);
+  }
+</script>
+<script type="x-shader/x-fragment" id="shaderId">
+  // ...
+  varying vec2 uv;
+  // ...
+</script>
+```
+
+:information_source: Note: the script `type` is set to `x-shader/x-vertex` and the
+`id` attribute is prepended with `Vertex` suffix. The vertex attribute should be named
+`V`.
+
+:information_source: Note: `varying vec2 uv` can be specified to be shared between vertex
+and fragment shaders (not added by default).
+
 
 ## General tips
 

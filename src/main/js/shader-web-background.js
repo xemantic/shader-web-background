@@ -20,11 +20,12 @@
 "use strict";
 
 const
-  SHADER_SCRIPT_TYPE = "x-shader/x-fragment",
+  VERTEX_SHADER_SCRIPT_TYPE = "x-shader/x-vertex",
+  FRAGMENT_SHADER_SCRIPT_TYPE = "x-shader/x-fragment",
   CANVAS_ELEMENT_ID = "shader-web-background",
   FALLBACK_CLASS = "shader-web-background-fallback",
   VERTEX_ATTRIBUTE = "V",
-  VERTEX_SHADER = "attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}",
+  DEFAULT_VERTEX_SHADER = "attribute vec2 V;void main(){gl_Position=vec4(V,0,1);}",
   /** @type {!TextureInitializer} */
   DEFAULT_TEXTURE_INITIALIZER = (gl, ctx) => {
     ctx.initHalfFloatRGBATexture(ctx.width, ctx.height);
@@ -81,26 +82,49 @@ function newBackgroundCanvas() {
 }
 
 /**
+ * @param {!string} type
  * @param {!string} id
  * @return {!string}
  */
-const scriptSpec = (id) =>
-  "<script type=\"" + SHADER_SCRIPT_TYPE + "\" id=\"" + id + "\">";
+const scriptSpec = (type, id) => "<script type=\"" + type + "\" id=\"" + id + "\">";
+
+/**
+ * @param {!Element} element
+ * @param {!string} type
+ * @param {!string} id
+ */
+function checkScript(element, type, id) {
+  check(
+    (element instanceof HTMLScriptElement)
+      && (element.type === type),
+    "Shader source element of id \"" + id + "\" "
+      + "should be of type: " + scriptSpec(type, id)
+  );
+}
 
 /**
  * @param {!string} id
  * @return {!string}
  */
-function getSource(id) {
+function getFragmentShaderSource(id) {
   const element = document.getElementById(id);
-  check(element, "Missing shader source: " + scriptSpec(id));
-  check(
-    (element instanceof HTMLScriptElement)
-      && (element.type === SHADER_SCRIPT_TYPE),
-    "Shader source element of id \"" + id + "\" "
-      + "should be of type: " + scriptSpec(id)
-  );
+  check(element, "Missing shader source: " + scriptSpec(FRAGMENT_SHADER_SCRIPT_TYPE, id));
+  checkScript(/** @type {!Element} */ (element), FRAGMENT_SHADER_SCRIPT_TYPE, id);
   return element.text;
+}
+
+/**
+ * @param {!string} id
+ * @return {!string}
+ */
+function getVertexShaderSource(id) {
+  const vertexShaderId = id + "Vertex";
+  const element = document.getElementById(vertexShaderId);
+  if (element) {
+    checkScript(element, VERTEX_SHADER_SCRIPT_TYPE, vertexShaderId);
+    return element.text;
+  }
+  return DEFAULT_VERTEX_SHADER;
 }
 
 /**
@@ -189,13 +213,14 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
 
   /**
    * @param {!string} id
-   * @param {!string} source
+   * @param {!string} vertexShaderSource
+   * @param {!string} fragmentShaderSource
    * @return {!WebGLProgram}
    * @throws {shaderWebBackground.ConfigError}
    */
-  function initProgram(id, source) {
+  function initProgram(id, vertexShaderSource, fragmentShaderSource) {
     try {
-      return glWrapper.initProgram(id, VERTEX_SHADER, source)
+      return glWrapper.initProgram(id, vertexShaderSource, fragmentShaderSource)
     } catch (/** @type {!Error} */ error) {
       throw new shaderWebBackground.ConfigError(error.message);
     }
@@ -286,7 +311,7 @@ function doShade(canvas, shaders, onInit, onResize, onBeforeFrame, onAfterFrame)
 
     const program = glWrapper.wrapProgram(
       id,
-      initProgram(id, getSource(id)),
+      initProgram(id, getVertexShaderSource(id), getFragmentShaderSource(id)),
       VERTEX_ATTRIBUTE,
       context.buffers[id]
     );
