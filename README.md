@@ -4,8 +4,9 @@ _Displays GLSL fragment shaders as a website background. Supports Shadertoy shad
 multipass - ping-pong offscreen buffers, feedback loops, floating-point textures.
 Either with WebGL 1 or 2, will try to run wherever it's technically possible._
 
-**Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :fireworks:
+**Website/Demo:** :fireworks: https://xemantic.github.io/shader-web-background :sparkler:
 
+:grey_question::rainbow::angel::construction_worker: To ask questions go to [xemantic discord server](https://discord.gg/vQktqqN2Vn) :coffee::tea::strawberry::space_invader:
 
 ![shader-web-background logo](https://xemantic.github.io/shader-web-background/media/shader-web-backgroung.jpg)
 
