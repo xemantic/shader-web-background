@@ -1,0 +1,218 @@
+<!--
+  ~ Copyright 2021  Kazimierz Pogoda
+  ~
+  ~ This file is part of shader-web-background.
+  ~
+  ~ shader-web-background is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ shader-web-background is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shadertoy audio: track 歌姬音频 by Xuan Liu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="demo.css"/>
+
+  <script src="../dist/shader-web-background.min.js"></script>
+
+  <script type="x-shader/x-fragment" id="feedback">
+    precision highp float;
+
+    uniform vec2      iResolution;
+    uniform float     iTime;
+    uniform sampler2D iChannel0;
+    uniform sampler2D iChannel1;
+
+    #define texture texture2D
+
+    // -- Paste your Shadertoy code here:
+
+    #define R iResolution
+
+    const float PI = 3.14159265359;
+
+    float getEdge(float dist) {
+      float edge = smoothstep(.3, .2, dist) * pow(dist / .3, 20.);
+      return edge;
+    }
+
+    void mainImage(out vec4 O, in vec2 I) {
+      vec2 uv = I / R.xy;
+      vec2 cartUv = (I - (R.xy / 2.)) / R.y;
+      float angle = atan(cartUv.x, cartUv.y);
+      float dist = length(cartUv);
+      float fft = texture(iChannel1, vec2(1. - (abs(angle) / PI), .25)).r;
+      float wave = texture(iChannel1, vec2(1. - (abs(angle) / PI), .75)).r;
+      vec3 color = vec3(
+        getEdge(dist),
+        getEdge(dist - 0.01),
+        getEdge(dist - 0.02)
+      );
+      vec3 prevColor = texture(iChannel0, uv - wave * .5 * sin(dist * 5. + iTime)).rgb;
+      prevColor = texture(
+      iChannel0,
+      uv
+      - vec2(cartUv * fft * .02)
+      - vec2(prevColor.r - .3, prevColor.b - .3) * 0.01 * dist
+      ).rgb;
+      prevColor *= .997;
+      color += prevColor;
+      color = clamp(color, 0., 1.);
+      O = vec4(color, 1.);
+    }
+
+
+    // -- End of Shadertoy code
+
+
+    void main() {
+      mainImage(gl_FragColor, gl_FragCoord.xy);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="image">
+    precision highp float;
+
+    uniform vec2 iResolution;
+    uniform sampler2D iChannel0;
+
+    void main(){
+      gl_FragColor = texture2D(iChannel0, gl_FragCoord.xy / iResolution);
+    }
+  </script>
+  <script>
+
+    const FREQUENCY_BIN_COUNT = 512;
+    const freqData = new Uint8Array(FREQUENCY_BIN_COUNT);
+    const waveData = new Uint8Array(FREQUENCY_BIN_COUNT);
+    const audioPixels = new Uint8Array(FREQUENCY_BIN_COUNT * 2 * 4);
+
+    let analyser;
+    let audioTexture;
+
+    function initAudio() {
+      const audio = document.getElementById("audio-track");
+      audio.addEventListener("play", (event) => {
+        if (!analyser) {
+          const context = new (window.AudioContext || window.webkitAudioContext)();
+          const source = context.createMediaElementSource(audio);
+          analyser = context.createAnalyser();
+          source.connect(analyser);
+          analyser.connect(context.destination);
+        }
+      });
+    }
+
+    function initAudioTexture(gl) {
+      audioTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, audioTexture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        FREQUENCY_BIN_COUNT,
+        2,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        audioPixels
+      );
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+
+    function setAudioTexture(yoffset, data) {
+      let offset = (yoffset * FREQUENCY_BIN_COUNT * 4);
+      for (let i = 0; i < FREQUENCY_BIN_COUNT; i++) {
+        const value = data[i];
+        for (let j = 0; j < 3; j++) {
+          audioPixels[offset++] = value;
+        }
+        audioPixels[offset++] = 255;
+      }
+    }
+
+    function updateAudioTexture(gl) {
+      if (!analyser) {
+        return;
+      }
+      analyser.getByteFrequencyData(freqData);
+      analyser.getByteTimeDomainData(waveData);
+      setAudioTexture(0, freqData);
+      setAudioTexture(1, waveData);
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, audioTexture);
+      gl.texSubImage2D(
+        gl.TEXTURE_2D, 0, 0, 0, FREQUENCY_BIN_COUNT, 2, gl.RGBA, gl.UNSIGNED_BYTE, audioPixels
+      );
+      gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+
+ //                                    gl.activeTexture(gl.TEXTURE0);
+//                                     gl.bindTexture(gl.TEXTURE_2D, audioTexture);
+                                     //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, tex.mVFlip );
+                                    //gl.texSubImage2D( mGL.TEXTURE_2D, 0, x0, y0, xres, yres, glFoTy.mGLExternal, glFoTy.mGLType, buffer );
+ //                                   gl.bindTexture( mGL.TEXTURE_2D, null );
+                                    //mGL.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    }
+
+    let time;
+    shaderWebBackground.shade({
+      onInit: (ctx) => {
+        initAudio();
+        initAudioTexture(ctx.gl);
+      },
+      onBeforeFrame: (ctx) => {
+        updateAudioTexture(ctx.gl);
+        time = performance.now() / 1000;
+      },
+      shaders: {
+        feedback: {
+          uniforms: {
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iTime:       (gl, loc) => gl.uniform1f(loc, time),
+            iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback),
+            iChannel1:   (gl, loc, ctx) => ctx.texture(loc, audioTexture)
+          }
+        },
+        image: {
+          uniforms: {
+            iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+            iChannel0:   (gl, loc, ctx) => ctx.texture(loc, ctx.buffers.feedback)
+          }
+        }
+      }
+    });
+  </script>
+  <style>
+    #audio-track {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="#audio-track">歌姬音频 by Xuan Liu</a></h1>
+  </header>
+  <audio id="audio-track" controls loop>
+    <source src="media/diva-audio.mp3" type="audio/mpeg">
+  </audio>
+</body>
+</html>
