@@ -1,5 +1,5 @@
 /*
- * Copyright 2020  Kazimierz Pogoda
+ * Copyright 2021  Kazimierz Pogoda
  *
  * This file is part of shader-web-background.
  *
@@ -17,10 +17,10 @@
  * along with shader-web-background.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-val closureCompilerVersion = "v20210106"
+val closureCompilerVersion = "v20211201"
 
 plugins {
-  kotlin("jvm") version "1.4.21"
+  kotlin("jvm") version "1.6.10"
 }
 
 dependencies {
@@ -28,7 +28,7 @@ dependencies {
 }
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 fun getMapJsBackPath(path: String) =
@@ -73,16 +73,16 @@ fun updateEmbeddedLibs(
   }
 }
 
-task("closureCompilerHelp", JavaExec::class) {
+task<JavaExec>("closureCompilerHelp") {
   group = "js"
-  main = "com.google.javascript.jscomp.CommandLineRunner"
+  mainClass.set("com.google.javascript.jscomp.CommandLineRunner")
   args = listOf("--help")
   classpath = sourceSets["main"].runtimeClasspath
 }
 
-task("compileJs", JavaExec::class) {
+task<JavaExec>("compileJs") {
   group = "js"
-  main = "com.xemantic.web.shader.background.ShaderWebBackgroundClosureCompilerKt"
+  mainClass.set("com.xemantic.web.shader.background.ShaderWebBackgroundClosureCompilerKt")
 
   val sourceDir = "src/main/js"
   val outputDir = "dist"
@@ -114,7 +114,6 @@ task("compileJs", JavaExec::class) {
     "--jscomp_warning=reportUnknownTypes",
     "--jscomp_warning=strictCheckTypes",
     "--jscomp_warning=typeInvalidation",
-    "--jscomp_warning=undefinedNames",
     "--jscomp_warning=unusedLocalVariables",
     "--jscomp_warning=unusedPrivateMembers",
     "--jscomp_warning=visibility",
